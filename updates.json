@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.2",
-    "notes": "Auto-update! Click UPDATE and the app updates itself automatically.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/v1.0.2/Game.Hub-1.0.2.dmg",
+    "version": "1.0.3",
+    "notes": "Clue Climb fix: words stay steady on screen, no more flashing",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/v1.0.3/Game.Hub-1.0.3.dmg",
     "date": "2026-04-15"
   }
 }
