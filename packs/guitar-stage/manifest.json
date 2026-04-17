@@ -7,10 +7,10 @@
   "betaOnly": true,
   "background": "background.png",
   "viewport": {
-    "x": 0.229,
-    "y": 0.241,
-    "width": 0.542,
-    "height": 0.519
+    "x": 0.1406,
+    "y": 0.1111,
+    "width": 0.7188,
+    "height": 0.7778
   },
   "colors": {
     "primary": "#00d4e8",
