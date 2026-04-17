@@ -456,18 +456,10 @@ function soundCCCatWon(){try{const c=ac(),n=c.currentTime;[[523,0],[659,.1],[784
 // Scoreboard is the master team list. All games pull team names from it.
 function getMasterTeams(){return SB.teams&&SB.teams.length?SB.teams:[{name:'TEAM 1',score:0,color:'#22d3ee'},{name:'TEAM 2',score:0,color:'#f59e0b'}];}
 
-// Reusable theme picker builder — works for any game
-function buildThemePicker(gameId, currentThemeId, accentColor){
-  const wrap=mk({});
-  const lab=mk({});lab.className='section-label';lab.style.color=accentColor||'var(--gold)';lab.textContent='Theme';wrap.appendChild(lab);
-  const bar=mk({});bar.className='theme-bar';
-  THEME_ORDER.forEach(tid=>{
-    const t=THEMES[tid],active=currentThemeId===tid;
-    const chip=el('button',{className:'theme-chip'+(active?' active':''),style:active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.1)':accentColor+'22'}:{},onClick:()=>setState(gameId,{themeId:tid})});
-    chip.textContent=t.e;bar.appendChild(chip);
-  });
-  // Append activated theme packs as additional chips
+// Append activated theme pack chips to an existing theme bar
+function appendPackChips(bar, gameId, currentThemeId, accentColor){
   try{
+    if(typeof THEME_PACKS==='undefined') return;
     const activated = THEME_PACKS.getActivatedPacks();
     activated.forEach(p=>{
       const tid = 'pack:'+p.id;
@@ -485,6 +477,19 @@ function buildThemePicker(gameId, currentThemeId, accentColor){
       bar.appendChild(chip);
     });
   }catch(e){}
+}
+
+// Reusable theme picker builder — works for any game
+function buildThemePicker(gameId, currentThemeId, accentColor){
+  const wrap=mk({});
+  const lab=mk({});lab.className='section-label';lab.style.color=accentColor||'var(--gold)';lab.textContent='Theme';wrap.appendChild(lab);
+  const bar=mk({});bar.className='theme-bar';
+  THEME_ORDER.forEach(tid=>{
+    const t=THEMES[tid],active=currentThemeId===tid;
+    const chip=el('button',{className:'theme-chip'+(active?' active':''),style:active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.1)':accentColor+'22'}:{},onClick:()=>setState(gameId,{themeId:tid})});
+    chip.textContent=t.e;bar.appendChild(chip);
+  });
+  appendPackChips(bar, gameId, currentThemeId, accentColor);
   wrap.appendChild(bar);
   return wrap;
 }
@@ -2986,6 +2991,108 @@ const LICENSE_HASHES = {
     "175a028384ae1863dfbf0171b4a478b835fac36274a2248c3c033899222b516d",
     "92cce352c002aa55e8bed22d4a4bbb28a0228eb9e6c6c23af540f09df60a1da4"
   ],
+  GTR: [
+    "eee338037d6b9b1bb39d4670cf21da1a793c972894d5b80035f2b8e006d08ee4",
+    "cadcb60fc4c4c8a9c2a30e1dab1c96bdafb9dacf979ecd4c8d6466bfa1793863",
+    "0d58f6ffeb9617c27e0edd73edbd3730054de786d7f0e69a4f741077f355fd39",
+    "e8965c388463f9d3f886b5cc6b264e2de0d2ed71841c92837f440169b9574da3",
+    "4e7ffc403ce203a4327edfff575c72f28958038687f6784f68377b2c21706315",
+    "59f4ab6d811d999658b3a38f1ef1b1db225f89f0f42167352031e6f5e4795576",
+    "18c3f4675e3afafcbb809a3a1dbf4fabe3561fc9a6312fe74ae97d9f74fd2fb3",
+    "0fd64b9e195f6a28423ea159ad603cdc054aade77a069fab17ce0d5e4bfec1df",
+    "c7763acbc0a2048b729c5c1c8870ef9313a9409357cddb396489425a3f579f79",
+    "4efcdf1b0eaa29462567cdde5a64e8d0bf466aff38a00cd485c59257ddb050ca",
+    "9a12dd979d2feefb5b3ff8450a74d5032b900cec2b36c7f2500aa44dfc1ea3b5",
+    "fa50e43751f0c64f9101d4e3bc64eb06bc71cc2a95c4a3bec009cce5bbeff1f4",
+    "baa63afc90e53c964ea03b9d5c78c4ab77ecfa5ae5af31891baa65c6a15ab3e0",
+    "ca18bfc4bf17a6c58b28c002f907deb47421c080d5f831d02ae1a7efaee52159",
+    "7bb077753e6c9883cd6e76b16e5b1039020412404f8057e9f3e3311c8e1c422e",
+    "075cde3e24a002aaee134825bc9f75ef249b0475d33a21b412ace44a3947e3e3",
+    "9734f435fb6b0f5dc547675a85ab6cfcbf6e42a92d038548529b14b5cf264ab2",
+    "533d0dba73f41961086efda31d0dfca8f8bee5df32dbf4d5b92f34cd522606cb",
+    "b5a5821dacb849ef24907db90087e58851a5648c814236e98fd2a18516521d0a",
+    "ae01eed1d97262e228437a7c157db4eddedd694480f44195ff48ce82e58e81c8",
+    "72e9963a025caf7e3e5b0fd5a45ae7a15c7246e5b7056b1e3184f88b27505600",
+    "3e458acf8901a4703087ebf8079ac44d6ed40fe050620d0f6fd4ed6891f46b73",
+    "6e3d4341cb9ccd344269ab3b8535fa79901a6c6176f738a7d5bcb4468962c09c",
+    "91857739812d6b6b7bf24653453fb2e3ce0d73540517f88de3ae776e08cb41cc",
+    "1af7542bd8ccab6a35f58667656c808d1ed9b632f49d0b6f07cedcaeaf027eec",
+    "be9331a05a5918d1518d2d340ddf7b1cd5ed2f0279f8a51262c2d13afa9e8b94",
+    "f536236ce4c33c787a92e1c4e862dab52e0ca04de98fbb56f94c4e4b02f814e0",
+    "7476f405d0231bcfc81d62c1e9c88e21c9d51460012ac21fb482976edc81360f",
+    "4784fac96521c1c744000ae45973eb3acd754672030a657017a6f1c6a8b7eb5e",
+    "abe4ec0a863f6ebc13f403692c1774cd71c0b47b6b0e6e5afd956bcbea3692a9",
+    "7403fc14925f95539999bf161e8faac4885b19efa6f2e3be92ef35cf938442d8",
+    "854891de8b3810ef22e51b1f391559a468553da3e2ab45acae8b77d332d4c036",
+    "c94ae613035d50a7628fcc5b2548018f8cace05b88468473aba17d6d9e0b1db0",
+    "a43d0cc96eddaca1bc21b04b46ea45e63a94a07a21a2639acb3883967b1a1252",
+    "c7eedd6612def02e9563f1cf7e49ee147dbf093e566510c87ba5e2af1faf4856",
+    "cdb2331a220183f3390511ebee831892c77a377d297ac4d88dff878512c31348",
+    "d60b9d4ffea34aa3d3c6e29381144976bc8ce26cc0b671825e50585174710bba",
+    "9af508e081a48e461d4f72fd60986981cec69c5af24790f52ca85de0dd5fd473",
+    "724c565efdda58111042c09ee7b9e09649cacb3cfcb1835d7b9863de47fadd08",
+    "7aef77a602b1ed1c31160e54cafd40b4e7a0b9759a9bb5c0918ef0a0975bedff",
+    "a1a3621afb8363e7dc0fcba9f4280728df74dbb09727af0a1c860ddb3914d4e2",
+    "134269bc135a8da364ace44d2c03790203226de90e6fbc3de3605b8bb89dd523",
+    "20cadacc70a5078caaa08b52cca4f582620ccbc5955748d0df5c8398a5ad2b11",
+    "367e0d6115c38b446d5023a143143330c3bf3fee4dcd43d36b1e08200e0b9f67",
+    "032d17e17b42817e715ac899213a443a45299a1129b48d8674a6ab30f8c602e0",
+    "f43bc98a90a1e58af9f9b8c6c14f005da7602433a0a8ca7c5ead935d155316ac",
+    "86215d463bc6181934ece0b38ce33ff28e39dedaf5e1c84895d38baa483dd69b",
+    "13d85a0ff95db29f677c3b926313bc2bc42c1e627219497ec0befe12f867fd54",
+    "314b9eb171117213920d53c415b309f820a6901cc356301ee28a633f251f514f",
+    "0fa3f4f7d49caa4ed48502d764b68b1fb0c73b98309b211bafc0e229a99d34ed",
+    "b03c673fe706ac987835a0625f6d8dac128d8080797fdec1094df2e430bbe8db",
+    "c6e6a5aa1b1588f185ee3c5e4b647d9723915ecfd9c035949bca607979779ad3",
+    "0b2dc47c79c0326012bd077f7bf637dad389f12cc41e0b56e4da91082c7f0cd9",
+    "b80c38fe898c3ba618819e0f7d9286f261b18456e2a207326992d92e9ec54f2c",
+    "c6f74a67505356694dffcb863c0f3d0b5f03234a8fb3d90add0dad532924ff0b",
+    "f69ba2ab69019aa7decc2365c5a63f4045f00313b487001868fad301027b69aa",
+    "a2d0ad1039e95cc8311e70339410142f462c3b44d5558621ba8b71415c333e7d",
+    "277425d551402edd48dc71f603aac17706b269f526899432f139f30869ebce7c",
+    "764bb4c493d42cc5e742cd4ec6004400999b97a762639dd967835ebf76b69b9f",
+    "8e371cfd294cd87a3d594f2f6cf906371193a420377cc32a2407b34b085da607",
+    "6119312d6f0c927849462917319b99e51b9a8fc4b637b619ad2142cba990fba0",
+    "2180a889307e118958387b00e169e720d2e0311c0985dd8a06ff14b9e0d28dcc",
+    "ac6b76eb074c35a9c3d9b59fdcddb3f24dea21ca71742c13593fe9ae629f9bb5",
+    "bc87179ddf8ccf5e305cbcbed76f0bf1cb2e406e1a612c6b003f84b1d77813b9",
+    "bc0e92c073c0989b5162dd5208025800f21fbe5636655b33badf5b2fd93e4e3a",
+    "5dd57b3096176e937c4f4fdf6e58778af06d649c963ff98d7add3b119b3b536c",
+    "ecf251184b7502675d23df764342abbfd8d4eff9779a95fc87bdef6d3c4167b0",
+    "d2cb5b40d5c6ebfe872a6735b12c4efe01469e240a3609c8c26f41669389ca88",
+    "02b10db821fdc45d820a58aba28fa3dd428dbb5483d7b4b54b5faebdf1650edd",
+    "5f192f2d3f271ca535bf87ab9d3094d3a9193de0aed40ee2bd7848bcb9a8ac40",
+    "cbbd31d9bd7596983080860fed2560a2bf55befc415abf5cee5d08214f0aebd9",
+    "be5fa18cc0adf2da201a238cae6491eefa7b53a03d121160dd3385184d0806cd",
+    "72c4c1af39ceef68a4574125ec94301242e0c2be72bc37305325d6d6a03c52f5",
+    "a198c519feb034ab933c13ecb4da84803ffa14a9593f92533406c0a22aa86c02",
+    "f9b90cdda99542caa4f42d0bc96ebb3f394a95fc295136fcc79b995603c2f4ee",
+    "638b6b9abb797023b37cd293207cd4dad503e6a897dd99b1ec25dc4841c68d37",
+    "1f270d0233df3bc0a28dc4c5838e59cce8bd141fe76398429611c946c5c8617b",
+    "d48f7ad1d2608ccff6750daf4f5ed35488b9fa2330901dbd50ad496eea2d726c",
+    "89a13dd8d5880cd04c0db73c4fd7b96e90c72a1737455f1582aaf7fe331714e2",
+    "f6ba5cf52222636fe881a320182e35e44482b83f451bb3ed7c879380623a171b",
+    "3a1ad4339c533395921fb15bca0480f3b945368e415eafd0cc111d655776d93a",
+    "459c20ff576af9f64a87e1f946326bbea6539a5d2da3465db21b92b2f5b0b452",
+    "996b1934651b8ac9a0913b521100471c9c90d2a6e8800b426e02a38295b70ca8",
+    "5b8dc3c2410f60ba5e1bda211a0452794068d0eebba6f360bf2470401a5b75a1",
+    "6fbf96f9b74eb3683f24e7332ca56b8d893d5c0085cfe542ec72866d1143aa43",
+    "b77b5c00baa5dfab7def93f7090c452b6735f7983ee2510236afb7e992c17e3e",
+    "9c72b4058bd84bf6f654ebba472599a4e3061b6f49649179104d3dbde3feb38e",
+    "f207188ad23a0c2826a779ec6a2a2d947f2e89de13d78b5c055980a95a9ff28d",
+    "05b43e8eba4122d8ff240e6253a5fab633c9c270c29e1376ada1a9639d3121a9",
+    "df40f26db379321a6f517036fafb9a25287a21507b1f17fb8eea14c19dbcd65b",
+    "5f6c29bc7821b803984882394359d0f1652d21cc49cd26f0f181b2b060e73f87",
+    "caf81302ff6ca51130352dcff38409c3ed3c635686dd91153e5034e7fc780522",
+    "852245b7567fdd7f4319248067315fd821a9ca46a48d07bf1c7c9570f9657313",
+    "61c31e5ff28c7f6f3ed1d4da7011dccb8b02a96ba94860b1467a3e719debbc8f",
+    "27c30c9903f0a430bad52bd768ba933fbe5025ee5ff6bf89ee1476fe79f93c0d",
+    "4fafb2ff615487660438b26e37cde6be84e5d699f21846137c18db5fb8201454",
+    "6e0cb7b31f9373614d2c4b8ea7f9022fd0ca8159ff4570af4569722f2d2ac03e",
+    "5b18ef514074b3b2b88ceb6f24076f6e7a188efa03bef565b62a4077cf1ae363",
+    "5b6bd08f3f9e692deff6532fc4bc3372682187447e36274235bdb943df0d1bd0",
+    "39926ae56d2d913774a2117c4282a1c634bb2404dc692123004a89164210e23c"
+  ],
 };
 
 const LICENSE_DIR = (function(){
@@ -3103,11 +3210,13 @@ const THEME_PACKS = (function(){
     { id:'galaxy-quest', name:'Galaxy Quest',  keyPrefix:'GALAXY', type:'visual'  },
     { id:'christmas',    name:'Christmas',     keyPrefix:'XMAS',   type:'topical' },
     { id:'easter',       name:'Easter',        keyPrefix:'EASTER', type:'topical' },
-    { id:'vbs-jungle',   name:'VBS Jungle',    keyPrefix:'JUNGLE', type:'topical' }
+    { id:'vbs-jungle',   name:'VBS Jungle',    keyPrefix:'JUNGLE', type:'topical' },
+    { id:'guitar-stage', name:'Guitar Stage',  keyPrefix:'GTR',    type:'visual', betaOnly:true }
   ];
   const PACK_ICON = {
     'neon-nights':'🌆','retro-arcade':'🕹️','galaxy-quest':'🌌',
-    'christmas':'🎄','easter':'🐣','vbs-jungle':'🌴'
+    'christmas':'🎄','easter':'🐣','vbs-jungle':'🌴',
+    'guitar-stage':'🎸'
   };
 
   const baseDir = (typeof LICENSE_DIR !== 'undefined') ? LICENSE_DIR : null;
@@ -3123,7 +3232,14 @@ const THEME_PACKS = (function(){
     if(!LICENSE_HASHES[prefix]) return false;
     return LICENSE.activated.some(h => LICENSE_HASHES[prefix].includes(h));
   }
-  function getActivatedPacks(){ return KNOWN.filter(isPackActivated); }
+  function getActivatedPacks(){
+    // Beta-only packs are hidden unless beta mode is active
+    const betaOn = (typeof isBetaModeActive==='function') && isBetaModeActive();
+    return KNOWN.filter(p => {
+      if (p.betaOnly && !betaOn) return false;
+      return isPackActivated(p);
+    });
+  }
 
   function packDir(id){
     if(!cacheDir) return null;
@@ -3378,7 +3494,7 @@ function buildPF_Op(){
     addW.appendChild(pi);addW.appendChild(hi);addW.appendChild(ab);scroll.appendChild(addW);
     // Theme
     const tl=mk({});tl.className='section-label pf-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(PF.themeId===tid?' active':''),style:PF.themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(PF.themeId===tid?' active':''),style:PF.themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'pf',PF.themeId,'var(--gold)');scroll.appendChild(tb);
     const sb=el('button',{className:'start-btn',style:{background:'linear-gradient(135deg,var(--gold),#d97706)'},onClick:()=>{
       if(!pf_edit.length){alert('Add at least one phrase.');return;}
       saveJSON(PF_DIR,'phrases.json',pf_edit);
@@ -3427,7 +3543,7 @@ function buildPF_Op(){
     lb.textContent=letter;grid.appendChild(lb);}
   scroll.appendChild(grid);
   // Theme
-  const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(themeId===tid?' active':''),style:themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});scroll.appendChild(tb);
+  const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(themeId===tid?' active':''),style:themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'pf',themeId,'var(--gold)');scroll.appendChild(tb);
   frag.appendChild(scroll);return frag;
 }
 
@@ -3457,7 +3573,7 @@ function buildWD_Op(){
     }
     // Theme
     const tl=mk({});tl.className='section-label wd-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(WD.themeId===tid?' active':''),style:WD.themeId===tid?{borderColor:'var(--cyan)',background:'rgba(34,211,238,.1)'}:{},onClick:()=>setState('wd',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(WD.themeId===tid?' active':''),style:WD.themeId===tid?{borderColor:'var(--cyan)',background:'rgba(34,211,238,.1)'}:{},onClick:()=>setState('wd',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'wd',WD.themeId,'var(--cyan)');scroll.appendChild(tb);
     // Verses
     const vl=mk({});vl.className='section-label wd-label';vl.textContent=`Verses (${wd_edit.length})`;scroll.appendChild(vl);
     const list=mk({});list.className='verse-list';
@@ -3520,7 +3636,7 @@ function buildTTT_Op(){
   if(TTT.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
     const tl=mk({});tl.className='section-label ttt-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(TTT.themeId===tid?' active':''),style:TTT.themeId===tid?{borderColor:'var(--purple)',background:'rgba(168,85,247,.1)'}:{},onClick:()=>setState('ttt',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(TTT.themeId===tid?' active':''),style:TTT.themeId===tid?{borderColor:'var(--purple)',background:'rgba(168,85,247,.1)'}:{},onClick:()=>setState('ttt',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'ttt',TTT.themeId,'var(--purple)');scroll.appendChild(tb);
     const ql=mk({});ql.className='section-label ttt-label';ql.textContent=`Questions (${ttt_edit.length})`;scroll.appendChild(ql);
     const list=mk({});list.className='q-list';
     ttt_edit.forEach((q,i)=>{const row=mk({});row.className='q-row';const info=mk({});info.className='q-info';const qt=mk({});qt.className='q-text';qt.textContent=q.q;info.appendChild(qt);const qa=mk({});qa.className='q-answer';qa.textContent='Answer: '+q.a;info.appendChild(qa);const del=el('button',{className:'del-btn',onClick:()=>{ttt_edit.splice(i,1);saveJSON(TTT_DIR,'questions.json',ttt_edit);render();}});del.textContent='✕';row.appendChild(info);row.appendChild(del);list.appendChild(row);});
@@ -4137,6 +4253,10 @@ function subscribeIPC(){
   if(!ipc)return;
   ipc.on('hub-state',(event,s)=>{
     if(!s)return;
+    // Audience window: reload license file so newly-activated pack keys take effect
+    if(ROLE==='audience' && typeof loadLicense==='function'){
+      try{ LICENSE = loadLicense(); }catch(e){}
+    }
     const prevPF=copy(PF),prevWD=copy(WD),prevTTT=copy(TTT);
     activeGame=s.activeGame||activeGame;
     if(s.pf)PF=s.pf;if(s.wd)WD=s.wd;if(s.ttt)TTT=s.ttt;if(s.grid)GRID=s.grid;if(s.sb)SB=s.sb;
@@ -4158,7 +4278,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.8';
+const APP_VERSION='1.0.9';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';

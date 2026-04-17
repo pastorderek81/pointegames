@@ -7,6 +7,7 @@
     { "id": "galaxy-quest", "name": "Galaxy Quest", "keyPrefix": "GALAXY", "type": "visual", "price": 10 },
     { "id": "christmas", "name": "Christmas", "keyPrefix": "XMAS", "type": "topical", "price": 10 },
     { "id": "easter", "name": "Easter", "keyPrefix": "EASTER", "type": "topical", "price": 10 },
-    { "id": "vbs-jungle", "name": "VBS Jungle", "keyPrefix": "JUNGLE", "type": "topical", "price": 10 }
+    { "id": "vbs-jungle", "name": "VBS Jungle", "keyPrefix": "JUNGLE", "type": "topical", "price": 10 },
+    { "id": "guitar-stage", "name": "Guitar Stage", "keyPrefix": "GTR", "type": "visual", "betaOnly": true, "price": 10 }
   ]
 }

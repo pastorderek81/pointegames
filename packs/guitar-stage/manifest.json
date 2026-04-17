@@ -1,0 +1,17 @@
+{
+  "id": "guitar-stage",
+  "name": "Guitar Stage",
+  "keyPrefix": "GTR",
+  "description": "Modern electric rock guitar — your game sits inside the body, surrounded by chrome hardware and cyan LED accents. Beta exclusive.",
+  "type": "visual",
+  "betaOnly": true,
+  "background": "background.png",
+  "colors": {
+    "primary": "#00d4e8",
+    "secondary": "#4a5466",
+    "accent": "#ff2d8c",
+    "textLight": "#e0e4ea",
+    "textDark": "#0a0c14"
+  },
+  "fontStyle": "modern"
+}
