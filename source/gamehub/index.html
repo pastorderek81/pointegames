@@ -3358,14 +3358,19 @@ const THEME_PACKS = (function(){
     const manifestPath = _path.join(dir,'manifest.json');
     const bgPath = _path.join(dir,'background.png');
     const baseUrl = PACKS_BASE_URL + pack.id + '/';
+    // Always re-fetch manifest (small, cheap) so config changes propagate without a code push.
+    // Fall back to cached copy if the fetch fails (offline / no network).
     let manifest;
-    if(_fs.existsSync(manifestPath)){
-      try{ manifest = JSON.parse(_fs.readFileSync(manifestPath,'utf8')); }catch(e){}
-    }
-    if(!manifest){
+    try {
       const txt = await downloadTo(baseUrl+'manifest.json', manifestPath);
       manifest = JSON.parse(txt);
+    } catch(e) {
+      if(_fs.existsSync(manifestPath)){
+        try{ manifest = JSON.parse(_fs.readFileSync(manifestPath,'utf8')); }catch(e2){}
+      }
+      if(!manifest) throw e;
     }
+    // Background PNG can stay cached since it's large and rarely changes
     if(!_fs.existsSync(bgPath)){
       await downloadTo(baseUrl+'background.png', bgPath);
     }
@@ -3423,8 +3428,9 @@ const THEME_PACKS = (function(){
   };
 })();
 
-// Apply the current game's pack background (if any) as a CSS rule
-// that shows the background image through the #operator container
+// Apply the active pack's background to BOTH the operator and audience windows.
+// If the pack defines a `viewport` in its manifest, clip the game UI to fit inside
+// that rectangle (so the gameboard sits "inside" the guitar/frame/etc).
 function applyPackBackground(themeId){
   let styleEl = document.getElementById('pack-bg-style');
   if(!styleEl){
@@ -3433,15 +3439,37 @@ function applyPackBackground(themeId){
     document.head.appendChild(styleEl);
   }
   if(themeId && typeof themeId==='string' && themeId.indexOf('pack:')===0){
-    const meta = THEME_PACKS.getPackThemeMeta(themeId.slice(5));
+    const pid = themeId.slice(5);
+    const meta = THEME_PACKS.getPackThemeMeta(pid);
+    const pack = THEME_PACKS.getLoadedPack(pid);
     if(meta && meta.background){
-      // Use a linear-gradient overlay to dim the bg for readability,
-      // then apply the image beneath. Applied to #operator so it covers the bg var.
-      styleEl.textContent =
-        '#operator{background:'+
-          'linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),'+
-          'url("'+meta.background+'") center/cover no-repeat fixed !important;}';
-      document.body.setAttribute('data-pack', themeId.slice(5));
+      let css = '';
+      // Background image on body — shows in both operator and audience windows
+      css += 'body{background:url("'+meta.background+'") center/cover no-repeat fixed #000 !important;}';
+      // Game containers become transparent so the image shows through
+      css += '#operator,#audience{background:transparent !important;}';
+
+      // If the pack has a viewport, position the game container inside that rectangle.
+      // The viewport is expressed as 0-1 fractions of the image (x, y, width, height).
+      const vp = pack && pack.viewport;
+      if(vp && typeof vp.x==='number' && typeof vp.width==='number'){
+        const t=(vp.y*100).toFixed(3);
+        const l=(vp.x*100).toFixed(3);
+        const r=(100 - (vp.x + vp.width)*100).toFixed(3);
+        const b=(100 - (vp.y + vp.height)*100).toFixed(3);
+        css += '#operator,#audience{'+
+          'top:'+t+'% !important;'+
+          'left:'+l+'% !important;'+
+          'right:'+r+'% !important;'+
+          'bottom:'+b+'% !important;'+
+          'width:auto !important;'+
+          'height:auto !important;'+
+          'border-radius:18px;'+
+        '}';
+      }
+
+      styleEl.textContent = css;
+      document.body.setAttribute('data-pack', pid);
       return;
     }
   }
@@ -4368,7 +4396,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.10';
+const APP_VERSION='1.0.11';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';

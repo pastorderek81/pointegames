@@ -6,6 +6,12 @@
   "type": "visual",
   "betaOnly": true,
   "background": "background.png",
+  "viewport": {
+    "x": 0.229,
+    "y": 0.241,
+    "width": 0.542,
+    "height": 0.519
+  },
   "colors": {
     "primary": "#00d4e8",
     "secondary": "#4a5466",
