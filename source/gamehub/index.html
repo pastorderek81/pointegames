@@ -321,7 +321,14 @@ function rgba(h,a){h=h.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)}
 
 const THEMES={rocket:{e:'🚀',a:'#60a5fa',f:'#060e1a',t:'#3b82f6'},train:{e:'🚂',a:'#f59e0b',f:'#1a0e00',t:'#d97706'},trophy:{e:'🏆',a:'#fbbf24',f:'#1a1200',t:'#f59e0b'},arcade:{e:'🕹️',a:'#4ade80',f:'#021008',t:'#16a34a'},surf:{e:'🏄',a:'#22d3ee',f:'#001a1a',t:'#0891b2'},portal:{e:'🌌',a:'#a855f7',f:'#0e0718',t:'#7c3aed'},surge:{e:'⚡',a:'#eab308',f:'#100d00',t:'#ca8a04'},neon:{e:'🌃',a:'#e879f9',f:'#0d0014',t:'#c026d3'},guitar:{e:'🎸',a:'#f43f5e',f:'#1a000a',t:'#be123c'},gem:{e:'💎',a:'#38bdf8',f:'#001018',t:'#0284c7'}};
 const THEME_ORDER=Object.keys(THEMES);
-function themeMeta(tid){const th=THEMES[tid]||THEMES.rocket;return{accent:th.a,frame:th.f,tile:th.t,tileReveal:`linear-gradient(150deg,${lhex(th.t,60)},${th.t},${dhex(th.t,40)})`,tileText:(parseInt(th.t.replace('#','').slice(0,2),16)*.299+parseInt(th.t.replace('#','').slice(2,4),16)*.587+parseInt(th.t.replace('#','').slice(4,6),16)*.114)>140?'#000':'#fff',tileGlow:rgba(th.a,.75),confetti:[th.a,lhex(th.a,60),'#fff',th.t,lhex(th.t,80),dhex(th.a,30)]};}
+function themeMeta(tid){
+  // Pack themes use the prefix "pack:"
+  if(tid && typeof tid==='string' && tid.indexOf('pack:')===0){
+    const pm=(typeof THEME_PACKS!=='undefined')?THEME_PACKS.getPackThemeMeta(tid.slice(5)):null;
+    if(pm) return pm;
+  }
+  const th=THEMES[tid]||THEMES.rocket;return{accent:th.a,frame:th.f,tile:th.t,tileReveal:`linear-gradient(150deg,${lhex(th.t,60)},${th.t},${dhex(th.t,40)})`,tileText:(parseInt(th.t.replace('#','').slice(0,2),16)*.299+parseInt(th.t.replace('#','').slice(2,4),16)*.587+parseInt(th.t.replace('#','').slice(4,6),16)*.114)>140?'#000':'#fff',tileGlow:rgba(th.a,.75),confetti:[th.a,lhex(th.a,60),'#fff',th.t,lhex(th.t,80),dhex(th.a,30)]};
+}
 
 // ── SHARED SOUNDS ──
 let _ctx=null;
@@ -459,6 +466,25 @@ function buildThemePicker(gameId, currentThemeId, accentColor){
     const chip=el('button',{className:'theme-chip'+(active?' active':''),style:active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.1)':accentColor+'22'}:{},onClick:()=>setState(gameId,{themeId:tid})});
     chip.textContent=t.e;bar.appendChild(chip);
   });
+  // Append activated theme packs as additional chips
+  try{
+    const activated = THEME_PACKS.getActivatedPacks();
+    activated.forEach(p=>{
+      const tid = 'pack:'+p.id;
+      const active = currentThemeId===tid;
+      const chip = el('button',{
+        className:'theme-chip'+(active?' active':''),
+        title: p.name,
+        style: Object.assign(
+          {border:'1px solid #3a2a0a', background:'#1a1408'},
+          active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.15)':accentColor+'33'}:{}
+        ),
+        onClick:()=>setState(gameId,{themeId:tid})
+      });
+      chip.textContent = THEME_PACKS.PACK_ICON[p.id] || '🎨';
+      bar.appendChild(chip);
+    });
+  }catch(e){}
   wrap.appendChild(bar);
   return wrap;
 }
@@ -2049,6 +2075,158 @@ function buildLockScreen(gameId, gameName, color){
   return wrap;
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// THEME PACKS — downloadable add-on theme packs (loaded from GitHub)
+// ══════════════════════════════════════════════════════════════════════════════
+const THEME_PACKS = (function(){
+  const PACKS_BASE_URL = 'https://raw.githubusercontent.com/pastorderek81/pointegames/main/packs/';
+  // Static catalog — so app knows what prefixes to look for, even offline
+  const KNOWN = [
+    { id:'neon-nights',  name:'Neon Nights',   keyPrefix:'NEON',   type:'visual'  },
+    { id:'retro-arcade', name:'Retro Arcade',  keyPrefix:'RETRO',  type:'visual'  },
+    { id:'galaxy-quest', name:'Galaxy Quest',  keyPrefix:'GALAXY', type:'visual'  },
+    { id:'christmas',    name:'Christmas',     keyPrefix:'XMAS',   type:'topical' },
+    { id:'easter',       name:'Easter',        keyPrefix:'EASTER', type:'topical' },
+    { id:'vbs-jungle',   name:'VBS Jungle',    keyPrefix:'JUNGLE', type:'topical' }
+  ];
+  const PACK_ICON = {
+    'neon-nights':'🌆','retro-arcade':'🕹️','galaxy-quest':'🌌',
+    'christmas':'🎄','easter':'🐣','vbs-jungle':'🌴'
+  };
+
+  const baseDir = (typeof LICENSE_DIR !== 'undefined') ? LICENSE_DIR : null;
+  const cacheDir = (baseDir && _path) ? _path.join(baseDir, 'packs') : null;
+  if(cacheDir && _fs){ try{ _fs.mkdirSync(cacheDir,{recursive:true}); }catch(e){} }
+
+  // In-memory loaded manifests keyed by pack id (includes _bgUrl after download)
+  const loaded = {};
+
+  function isPackActivated(pack){
+    if(!LICENSE || !LICENSE.activated || !LICENSE.activated.length) return false;
+    const prefix = pack.keyPrefix;
+    if(!LICENSE_HASHES[prefix]) return false;
+    return LICENSE.activated.some(h => LICENSE_HASHES[prefix].includes(h));
+  }
+  function getActivatedPacks(){ return KNOWN.filter(isPackActivated); }
+
+  function packDir(id){
+    if(!cacheDir) return null;
+    const d = _path.join(cacheDir, id);
+    try{ _fs.mkdirSync(d,{recursive:true}); }catch(e){}
+    return d;
+  }
+
+  async function downloadTo(url, destPath){
+    const res = await fetch(url, { cache:'no-cache' });
+    if(!res.ok) throw new Error('HTTP '+res.status+' for '+url);
+    if(destPath.endsWith('.json')){
+      const txt = await res.text();
+      _fs.writeFileSync(destPath, txt);
+      return txt;
+    } else {
+      const buf = Buffer.from(await res.arrayBuffer());
+      _fs.writeFileSync(destPath, buf);
+      return buf;
+    }
+  }
+
+  async function ensureDownloaded(pack){
+    const dir = packDir(pack.id);
+    if(!dir) return null;
+    const manifestPath = _path.join(dir,'manifest.json');
+    const bgPath = _path.join(dir,'background.png');
+    const baseUrl = PACKS_BASE_URL + pack.id + '/';
+    let manifest;
+    if(_fs.existsSync(manifestPath)){
+      try{ manifest = JSON.parse(_fs.readFileSync(manifestPath,'utf8')); }catch(e){}
+    }
+    if(!manifest){
+      const txt = await downloadTo(baseUrl+'manifest.json', manifestPath);
+      manifest = JSON.parse(txt);
+    }
+    if(!_fs.existsSync(bgPath)){
+      await downloadTo(baseUrl+'background.png', bgPath);
+    }
+    manifest._bgPath = bgPath;
+    manifest._bgUrl = 'file://' + bgPath.replace(/ /g,'%20');
+    loaded[pack.id] = manifest;
+    return manifest;
+  }
+
+  async function refreshActivated(){
+    const packs = getActivatedPacks();
+    let any = false;
+    for(const p of packs){
+      try{
+        const before = !!loaded[p.id];
+        await ensureDownloaded(p);
+        if(!before) any = true;
+      }catch(e){ console.error('Pack download failed:', p.id, e.message); }
+    }
+    if(any && typeof render==='function') try{ render(); }catch(e){}
+    return packs;
+  }
+
+  function getLoadedPack(id){ return loaded[id]; }
+
+  function getPackThemeMeta(id){
+    const m = loaded[id];
+    if(!m) return null;
+    const c = m.colors || {};
+    const primary = c.primary || '#fff';
+    const secondary = c.secondary || primary;
+    const accent = c.accent || primary;
+    return {
+      accent: accent,
+      frame: c.textDark || '#0a0a0a',
+      tile: secondary,
+      tileReveal: `linear-gradient(150deg,${secondary},${primary},${accent})`,
+      tileText: c.textLight || '#fff',
+      tileGlow: primary+'cc',
+      confetti: [primary, secondary, accent, '#ffffff'].filter(Boolean),
+      background: m._bgUrl || null,
+      packName: m.name,
+      packId: id
+    };
+  }
+
+  // Kick off downloads on boot (non-blocking)
+  if(cacheDir) setTimeout(refreshActivated, 100);
+
+  return {
+    KNOWN, PACK_ICON,
+    isPackActivated, getActivatedPacks,
+    ensureDownloaded, refreshActivated,
+    getLoadedPack, getPackThemeMeta
+  };
+})();
+
+// Apply the current game's pack background (if any) as a CSS rule
+// that shows the background image through the #operator container
+function applyPackBackground(themeId){
+  let styleEl = document.getElementById('pack-bg-style');
+  if(!styleEl){
+    styleEl = document.createElement('style');
+    styleEl.id = 'pack-bg-style';
+    document.head.appendChild(styleEl);
+  }
+  if(themeId && typeof themeId==='string' && themeId.indexOf('pack:')===0){
+    const meta = THEME_PACKS.getPackThemeMeta(themeId.slice(5));
+    if(meta && meta.background){
+      // Use a linear-gradient overlay to dim the bg for readability,
+      // then apply the image beneath. Applied to #operator so it covers the bg var.
+      styleEl.textContent =
+        '#operator{background:'+
+          'linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),'+
+          'url("'+meta.background+'") center/cover no-repeat fixed !important;}';
+      document.body.setAttribute('data-pack', themeId.slice(5));
+      return;
+    }
+  }
+  styleEl.textContent = '';
+  document.body.removeAttribute('data-pack');
+}
+
 // ── IPC SYNC ──
 function pushState(){
   if(ipc)ipc.send('hub-state',{activeGame,pf:PF,wd:WD,ttt:TTT,grid:GRID,sb:SB,cd:CD,nw:NW,cc:CC});
@@ -2069,6 +2247,17 @@ function switchGame(g){activeGame=g;pushState();render();}
 // ── RENDER ──
 function render(){
   const app=document.getElementById('app');app.innerHTML='';
+  // Apply active game's pack background (if any)
+  try{
+    const gs={pf:PF,wd:WD,ttt:TTT,grid:GRID,sb:SB,cd:CD,nw:NW,cc:CC}[activeGame];
+    applyPackBackground(gs && gs.themeId);
+  }catch(e){}
+  // Trigger download for any newly-activated packs (async, re-renders when done)
+  try{
+    const activated = THEME_PACKS.getActivatedPacks();
+    const missing = activated.filter(p=>!THEME_PACKS.getLoadedPack(p.id));
+    if(missing.length) THEME_PACKS.refreshActivated();
+  }catch(e){}
   if(ROLE==='audience'){app.appendChild(buildAudience());return;}
   app.appendChild(buildOperator());
 }
@@ -2135,6 +2324,36 @@ function buildPF_Op(){
     const list=mk({});list.className='phrase-list';
     pf_edit.forEach((p,i)=>{const row=mk({});row.className='phrase-row';const info=mk({});info.className='phrase-info';const pt=mk({});pt.className='phrase-text';pt.textContent=p.phrase;info.appendChild(pt);if(p.hint){const ph=mk({});ph.className='phrase-hint';ph.textContent=p.hint;info.appendChild(ph);}const del=el('button',{className:'del-btn',onClick:()=>{pf_edit.splice(i,1);saveJSON(PF_DIR,'phrases.json',pf_edit);render();}});del.textContent='✕';row.appendChild(info);row.appendChild(del);list.appendChild(row);});
     scroll.appendChild(list);
+    // Import buttons for activated topical packs
+    try{
+      const topicalPacks = THEME_PACKS.getActivatedPacks().filter(p=>{
+        const m = THEME_PACKS.getLoadedPack(p.id);
+        return p.type==='topical' && m && m.content && Array.isArray(m.content.phrases) && m.content.phrases.length;
+      });
+      if(topicalPacks.length){
+        const importRow = mk({display:'flex',flexWrap:'wrap',gap:'8px',marginTop:'4px',marginBottom:'4px'});
+        topicalPacks.forEach(p=>{
+          const btn = el('button',{
+            style:{padding:'8px 12px',background:'#1a1408',border:'1px solid #3a2a0a',borderRadius:'8px',color:'var(--gold)',fontFamily:'"Barlow Condensed",sans-serif',fontSize:'13px',letterSpacing:'1px',cursor:'pointer'},
+            onClick:()=>{
+              const m = THEME_PACKS.getLoadedPack(p.id);
+              if(!m||!m.content||!m.content.phrases) return;
+              const existing = new Set(pf_edit.map(x=>(x.phrase||'').toUpperCase()));
+              let added = 0;
+              m.content.phrases.forEach(ph=>{
+                const up = (ph||'').toUpperCase();
+                if(up && !existing.has(up)){ pf_edit.push({phrase:up, hint:p.name}); added++; }
+              });
+              if(added) saveJSON(PF_DIR,'phrases.json',pf_edit);
+              render();
+            }
+          });
+          btn.textContent = '+ Import '+p.name+' phrases';
+          importRow.appendChild(btn);
+        });
+        scroll.appendChild(importRow);
+      }
+    }catch(e){}
     const addW=mk({display:'flex',flexDirection:'column',gap:'8px'});
     const pi=el('input',{className:'add-input',style:{color:'var(--gold)'},placeholder:'TYPE A NEW PHRASE...',type:'text',onInput:e=>{pf_inputP=e.target.value.toUpperCase();pi.value=pf_inputP;},onKeydown:e=>{if(e.key==='Enter')addPF();}});pi.value=pf_inputP;
     const hi=el('input',{className:'add-input',style:{color:'#888',fontSize:'14px'},placeholder:'Hint / category (optional)',type:'text',onInput:e=>{pf_inputH=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addPF();}});hi.value=pf_inputH;
@@ -2923,7 +3142,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.7';
+const APP_VERSION='1.0.8';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';
