@@ -1,0 +1,57 @@
+{
+  "id": "christmas",
+  "name": "Christmas",
+  "keyPrefix": "XMAS",
+  "description": "Cozy green and red with snow and twinkling stars — includes bonus Christmas phrases and Bible questions.",
+  "type": "topical",
+  "background": "background.png",
+  "colors": {
+    "primary": "#c8102e",
+    "secondary": "#2d8f3d",
+    "accent": "#ffd700",
+    "textLight": "#ffffff",
+    "textDark": "#0d2818"
+  },
+  "fontStyle": "festive",
+  "content": {
+    "phrases": [
+      "Manger",
+      "Shepherds",
+      "Wise Men",
+      "Star of Bethlehem",
+      "Angel Gabriel",
+      "Mary and Joseph",
+      "Away in a Manger",
+      "Silent Night",
+      "Little Drummer Boy",
+      "Jingle Bells",
+      "Christmas Tree",
+      "Stocking Stuffer",
+      "Gingerbread House",
+      "Candy Cane",
+      "Mistletoe",
+      "Frosty the Snowman",
+      "Rudolph",
+      "Santa's Sleigh",
+      "North Pole",
+      "Christmas Morning",
+      "Hot Cocoa",
+      "Elf on the Shelf",
+      "Nativity Scene",
+      "Christmas Eve",
+      "Twelve Days of Christmas"
+    ],
+    "triviaQuestions": [
+      { "q": "In what town was Jesus born?", "a": "Bethlehem" },
+      { "q": "Who was Jesus' earthly father?", "a": "Joseph" },
+      { "q": "What did the wise men follow to find Jesus?", "a": "A star" },
+      { "q": "How many wise men are traditionally in the nativity story?", "a": "Three" },
+      { "q": "Who told Mary she would have a baby?", "a": "The angel Gabriel" },
+      { "q": "Where did Mary lay baby Jesus?", "a": "In a manger" },
+      { "q": "What gifts did the wise men bring?", "a": "Gold, frankincense, and myrrh" },
+      { "q": "Who visited the baby Jesus first?", "a": "Shepherds" },
+      { "q": "What appeared to the shepherds in the field?", "a": "An angel" },
+      { "q": "What does 'Immanuel' mean?", "a": "God with us" }
+    ]
+  }
+}

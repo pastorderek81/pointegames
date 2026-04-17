@@ -1,0 +1,16 @@
+{
+  "id": "retro-arcade",
+  "name": "Retro Arcade",
+  "keyPrefix": "RETRO",
+  "description": "80s sunset, pixel sun, and synthwave grid — pure nostalgia fuel.",
+  "type": "visual",
+  "background": "background.png",
+  "colors": {
+    "primary": "#ff006e",
+    "secondary": "#ffdd00",
+    "accent": "#ff8500",
+    "textLight": "#ffffff",
+    "textDark": "#1a0b3d"
+  },
+  "fontStyle": "pixel"
+}

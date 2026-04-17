@@ -1,0 +1,59 @@
+{
+  "id": "vbs-jungle",
+  "name": "VBS Jungle",
+  "keyPrefix": "JUNGLE",
+  "description": "Tropical jungle vibes with leaves and dappled sunlight — perfect for jungle-themed Vacation Bible School. Includes bonus jungle phrases and kids' Bible trivia.",
+  "type": "topical",
+  "background": "background.png",
+  "colors": {
+    "primary": "#3d8b3d",
+    "secondary": "#ffd700",
+    "accent": "#ff8500",
+    "textLight": "#ffffff",
+    "textDark": "#0d3d0d"
+  },
+  "fontStyle": "adventure",
+  "content": {
+    "phrases": [
+      "Lion King of the Jungle",
+      "Swinging Monkey",
+      "Tall Giraffe",
+      "Slithering Snake",
+      "Colorful Parrot",
+      "Hungry Hippo",
+      "Sneaky Leopard",
+      "Tiny Tree Frog",
+      "Jungle Vines",
+      "Banana Tree",
+      "Waterfall",
+      "Elephant Trunk",
+      "Tiger Stripes",
+      "Crocodile Smile",
+      "Toucan Beak",
+      "Jungle Drums",
+      "Tree House",
+      "Tarzan Swing",
+      "Hidden Temple",
+      "Compass and Map",
+      "Explorer's Hat",
+      "Safari Jeep",
+      "Campfire Story",
+      "Bug Net",
+      "Treasure Chest"
+    ],
+    "triviaQuestions": [
+      { "q": "Who did God use to lead His people out of Egypt?", "a": "Moses" },
+      { "q": "Who was swallowed by a big fish?", "a": "Jonah" },
+      { "q": "How many days did it rain during Noah's flood?", "a": "40 days and 40 nights" },
+      { "q": "Who was thrown into the lion's den?", "a": "Daniel" },
+      { "q": "Who killed Goliath with a sling?", "a": "David" },
+      { "q": "What is the first book of the Bible?", "a": "Genesis" },
+      { "q": "How many disciples did Jesus choose?", "a": "Twelve" },
+      { "q": "Who built the ark?", "a": "Noah" },
+      { "q": "What did Jesus turn water into at a wedding?", "a": "Wine" },
+      { "q": "Who was the strongest man in the Bible?", "a": "Samson" },
+      { "q": "Name Jesus' mother.", "a": "Mary" },
+      { "q": "What wall fell down when the Israelites marched?", "a": "The walls of Jericho" }
+    ]
+  }
+}

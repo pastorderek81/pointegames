@@ -1,0 +1,16 @@
+{
+  "id": "neon-nights",
+  "name": "Neon Nights",
+  "keyPrefix": "NEON",
+  "description": "Electric cyberpunk vibes — purple, pink, and cyan neon lights for a club-feel night.",
+  "type": "visual",
+  "background": "background.png",
+  "colors": {
+    "primary": "#ff00aa",
+    "secondary": "#00ffff",
+    "accent": "#aa00ff",
+    "textLight": "#ffffff",
+    "textDark": "#0a0020"
+  },
+  "fontStyle": "bold"
+}

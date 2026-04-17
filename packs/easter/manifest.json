@@ -1,0 +1,57 @@
+{
+  "id": "easter",
+  "name": "Easter",
+  "keyPrefix": "EASTER",
+  "description": "Soft pastel spring with Easter eggs and sparkles — includes bonus Easter phrases and Resurrection trivia.",
+  "type": "topical",
+  "background": "background.png",
+  "colors": {
+    "primary": "#ff9ec7",
+    "secondary": "#9ec7ff",
+    "accent": "#c7ff9e",
+    "textLight": "#ffffff",
+    "textDark": "#4a2a3a"
+  },
+  "fontStyle": "soft",
+  "content": {
+    "phrases": [
+      "Empty Tomb",
+      "Resurrection",
+      "Garden of Gethsemane",
+      "Last Supper",
+      "Palm Sunday",
+      "Good Friday",
+      "Easter Sunday",
+      "Easter Egg Hunt",
+      "Jelly Beans",
+      "Chocolate Bunny",
+      "Peeps",
+      "Spring Flowers",
+      "Baby Chicks",
+      "Butterfly",
+      "Rolling Stone",
+      "Mary Magdalene",
+      "He Is Risen",
+      "Hot Cross Buns",
+      "Palm Branches",
+      "Crown of Thorns",
+      "The Upper Room",
+      "Doubting Thomas",
+      "Road to Emmaus",
+      "Easter Basket",
+      "Lily of the Valley"
+    ],
+    "triviaQuestions": [
+      { "q": "What day did Jesus rise from the dead?", "a": "Sunday (the third day)" },
+      { "q": "Who was the first to see the risen Jesus?", "a": "Mary Magdalene" },
+      { "q": "What was rolled away from the tomb?", "a": "A stone" },
+      { "q": "What city was Jesus crucified in?", "a": "Jerusalem" },
+      { "q": "How many days was Jesus in the tomb?", "a": "Three days" },
+      { "q": "What did the crowd wave when Jesus entered Jerusalem?", "a": "Palm branches" },
+      { "q": "Who betrayed Jesus?", "a": "Judas Iscariot" },
+      { "q": "What was placed on Jesus' head?", "a": "A crown of thorns" },
+      { "q": "Who carried the cross part of the way?", "a": "Simon of Cyrene" },
+      { "q": "What does 'Hallelujah' mean?", "a": "Praise the Lord" }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "galaxy-quest",
+  "name": "Galaxy Quest",
+  "keyPrefix": "GALAXY",
+  "description": "Deep space nebulae and stars — perfect for space-themed events.",
+  "type": "visual",
+  "background": "background.png",
+  "colors": {
+    "primary": "#6600ff",
+    "secondary": "#0066ff",
+    "accent": "#ff0088",
+    "textLight": "#ffffff",
+    "textDark": "#0a0a2a"
+  },
+  "fontStyle": "modern"
+}
