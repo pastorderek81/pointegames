@@ -3198,6 +3198,96 @@ function buildLockScreen(gameId, gameName, color){
   return wrap;
 }
 
+// Key-entry modal — shown when the 🔑 button is clicked in the top bar.
+// Replaces the old window.prompt() approach (Electron disables prompt() by default).
+function showKeyEntryModal(){
+  // Remove any existing modal first
+  const existing = document.getElementById('key-entry-modal');
+  if(existing) existing.remove();
+
+  const overlay = mk({
+    position:'fixed', inset:'0', background:'rgba(0,0,0,0.85)',
+    display:'flex', alignItems:'center', justifyContent:'center',
+    zIndex:'9999', padding:'20px'
+  });
+  overlay.id = 'key-entry-modal';
+
+  const box = mk({
+    maxWidth:'460px', width:'100%', padding:'36px 32px',
+    background:'#0a0a0c', border:'1px solid #2a2a2e', borderRadius:'16px',
+    boxShadow:'0 20px 60px rgba(0,0,0,0.7)', display:'flex', flexDirection:'column', gap:'16px'
+  });
+
+  const title = mk({fontFamily:'"Black Ops One",sans-serif', fontSize:'20px', letterSpacing:'3px', color:'var(--gold)', textAlign:'center'});
+  title.textContent = '🔑  ENTER KEY';
+
+  const sub = mk({fontSize:'13px', color:'#888', textAlign:'center', fontFamily:'"Barlow Condensed",sans-serif', letterSpacing:'1px'});
+  sub.textContent = 'Registration key, beta access, or theme pack key';
+
+  let _keyInput = '';
+  const inp = el('input',{
+    style:{width:'100%', padding:'14px 16px', background:'#050505', border:'1px solid #2a2a2e', borderRadius:'10px', color:'#fff', fontFamily:'"Barlow Condensed",sans-serif', fontSize:'18px', letterSpacing:'3px', textAlign:'center', textTransform:'uppercase', outline:'none'},
+    placeholder:'XXX-XXXX-XXXX-XXXX', type:'text', autofocus:true,
+    onInput: e => { _keyInput = e.target.value.toUpperCase(); e.target.value = _keyInput; },
+    onKeydown: e => {
+      if(e.key === 'Enter') tryActivate();
+      else if(e.key === 'Escape') close();
+    }
+  });
+
+  const err = mk({fontSize:'13px', color:'var(--red)', textAlign:'center', minHeight:'20px', letterSpacing:'1px', fontFamily:'"Barlow Condensed",sans-serif', fontWeight:'700'});
+
+  const btnRow = mk({display:'flex', gap:'10px'});
+  const cancel = el('button',{
+    style:{flex:'1', padding:'12px', background:'#1a1a1e', color:'#aaa', border:'1px solid #2a2a2e', borderRadius:'10px', fontFamily:'"Barlow Condensed",sans-serif', fontWeight:'700', letterSpacing:'2px', cursor:'pointer'},
+    onClick: close
+  });
+  cancel.textContent = 'CANCEL';
+
+  const unlock = el('button',{
+    style:{flex:'2', padding:'12px', background:'linear-gradient(135deg, var(--gold), #d97706)', color:'#000', border:'none', borderRadius:'10px', fontFamily:'"Black Ops One",sans-serif', fontSize:'14px', letterSpacing:'3px', cursor:'pointer'},
+    onClick: tryActivate
+  });
+  unlock.textContent = '🔓  UNLOCK';
+
+  btnRow.appendChild(cancel);
+  btnRow.appendChild(unlock);
+
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(inp);
+  box.appendChild(err);
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  // Click outside to close
+  overlay.addEventListener('click', e => { if(e.target === overlay) close(); });
+
+  // Focus the input
+  setTimeout(() => inp.focus(), 50);
+
+  function close(){
+    overlay.remove();
+  }
+
+  function tryActivate(){
+    const key = (_keyInput || '').trim();
+    if(!key){ err.textContent = 'Please enter a key'; return; }
+    const result = activateKey(key);
+    if(result.ok){
+      // Success — show brief confirmation, then close + re-render
+      err.style.color = 'var(--green)';
+      err.textContent = '✓ ' + result.msg;
+      inp.disabled = true;
+      setTimeout(() => { close(); render(); }, 700);
+    } else {
+      err.style.color = 'var(--red)';
+      err.textContent = '✗ ' + result.msg;
+    }
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // THEME PACKS — downloadable add-on theme packs (loaded from GitHub)
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3413,7 +3503,7 @@ function buildOperator(){
   const right=mk({});right.className='hub-right';
   if(updateInfo){const ub=el('button',{className:'hub-btn',style:{color:'var(--gold)',borderColor:'rgba(245,158,11,.3)',animation:'breathe 2s ease-in-out infinite'},onClick:()=>{if(confirm('Game Hub '+updateInfo.version+' is available!\n\n'+(updateInfo.notes||'')+'\n\nInstall now? The app will restart automatically.')){if(ipc)ipc.send('do-auto-update',updateInfo.downloadUrl);ub.textContent='⏳ UPDATING...';ub.disabled=true;}}});ub.textContent='⬆ UPDATE';right.appendChild(ub);}
   if(typeof _updateMsg==='string'&&_updateMsg){const um=mk({fontSize:'10px',color:'var(--gold)',letterSpacing:'1px',fontFamily:'"Barlow Condensed",sans-serif'});um.textContent=_updateMsg;right.appendChild(um);}
-  const lk=el('button',{className:'hub-btn',style:{color:'#666',borderColor:'#222'},onClick:()=>{const key=prompt('Enter registration key or beta access key:');if(!key)return;const r=activateKey(key.trim());if(r.ok){alert('✓ '+r.msg);render();}else{alert('✗ '+r.msg);}}});lk.textContent='🔑';lk.title='Enter License Key';right.appendChild(lk);
+  const lk=el('button',{className:'hub-btn',style:{color:'#666',borderColor:'#222'},onClick:showKeyEntryModal});lk.textContent='🔑';lk.title='Enter License Key';right.appendChild(lk);
   const g=el('button',{className:'hub-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}});g.textContent='🟢';right.appendChild(g);
   const r=el('button',{className:'hub-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}});r.textContent='🔴';right.appendChild(r);
   tabs.appendChild(right);wrap.appendChild(tabs);
@@ -4278,7 +4368,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.9';
+const APP_VERSION='1.0.10';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';
