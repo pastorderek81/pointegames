@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.6",
-    "notes": "Public release: 3 games + Scoreboard + Countdown. Beta access available via key.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.6/Game.Hub-1.0.6-arm64.dmg",
+    "version": "1.0.7",
+    "notes": "Theme pickers added to every game — pick from 10 color themes in setup for each game.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.7/Game.Hub-1.0.7-arm64.dmg",
     "date": "2026-04-17"
   }
 }

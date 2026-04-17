@@ -403,13 +403,13 @@ const SB_COLORS=['#22d3ee','#f59e0b','#a855f7','#4ade80'];
 const SB_INCREMENTS=[10,25,50,100,200,500];
 const sbSaved=loadJSON(SB_DIR,'teams.json');
 let sb_editTeams=sbSaved?copy(sbSaved):copy([{name:'TEAM 1',score:0,color:SB_COLORS[0]},{name:'TEAM 2',score:0,color:SB_COLORS[1]}]);
-let SB={screen:'setup',teams:copy(sb_editTeams).map((t,i)=>({...t,score:0,color:SB_COLORS[i%SB_COLORS.length]})),increment:100,lastChange:null};
+let SB={screen:'setup',teams:copy(sb_editTeams).map((t,i)=>({...t,score:0,color:SB_COLORS[i%SB_COLORS.length]})),increment:100,lastChange:null,themeId:'trophy'};
 function soundScoreAdd(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.1,.15,n+.03);tone(c,'sine',1100,n+.06,n+.15,.12,n+.08);}catch(e){}}
 function soundScoreSub(){try{const c=ac(),n=c.currentTime;tone(c,'sine',440,n,n+.1,.1,n+.03);tone(c,'sine',330,n+.06,n+.12,.08,n+.08);}catch(e){}}
 
 // ── COUNTDOWN STATE ──
 const CD_PRESETS=[{sec:10,label:'10 SEC'},{sec:15,label:'15 SEC'},{sec:30,label:'30 SEC'},{sec:45,label:'45 SEC'},{sec:60,label:'1 MIN'},{sec:90,label:'90 SEC'},{sec:120,label:'2 MIN'},{sec:180,label:'3 MIN'}];
-let CD={screen:'idle',totalSec:30,timerEnd:null,running:false,result:null};
+let CD={screen:'idle',totalSec:30,timerEnd:null,running:false,result:null,themeId:'neon'};
 let cd_selectedPreset=30;
 function fmtTime(s){const m=Math.floor(s/60),sec=s%60;return m>0?(m+':'+String(sec).padStart(2,'0')):String(sec);}
 function soundCDTick(rem){try{const c=ac(),n=c.currentTime;if(rem<=3){tone(c,'square',800+(3-rem)*200,n,n+.15,.3,n+.02);const o2=c.createOscillator(),g2=c.createGain();o2.connect(g2);g2.connect(c.destination);o2.type='sine';o2.frequency.setValueAtTime(80,n);g2.gain.setValueAtTime(.4,n);g2.gain.exponentialRampToValueAtTime(.001,n+.3);o2.start(n);o2.stop(n+.35);}else if(rem<=5){tone(c,'square',600+((5-rem)*100),n,n+.08,.2,n+.02);tone(c,'square',(600+((5-rem)*100))*1.25,n+.1,n+.18,.2,n+.12);}else if(rem<=10){tone(c,'sine',500+((10-rem)*40),n,n+.1,.08+((10-rem)*.02),n+.03);}else{tone(c,'sine',800,n,n+.04,.06,n+.01);}}catch(e){}}
@@ -424,7 +424,7 @@ const nwSaved=loadJSON(NW_DIR,'data.json');
 let nw_editSq=nwSaved?.squares?copy(nwSaved.squares):copy(NW_DEFAULT_SQ);
 let nw_editPlayers=nwSaved?.players?copy(nwSaved.players):[{name:'TEAM 1'},{name:'TEAM 2'}];
 let nw_addText='';
-let NW={screen:'setup',squares:copy(nw_editSq),players:nw_editPlayers.map((p,i)=>({name:p.name,score:0,color:NW_COLORS[i%NW_COLORS.length]})),currentPlayer:0,spinning:false,litIndex:null,landed:null,showResult:false,columns:5};
+let NW={screen:'setup',squares:copy(nw_editSq),players:nw_editPlayers.map((p,i)=>({name:p.name,score:0,color:NW_COLORS[i%NW_COLORS.length]})),currentPlayer:0,spinning:false,litIndex:null,landed:null,showResult:false,columns:5,themeId:'rocket'};
 let nwSpinInt=null;
 function soundNWTick(){try{const c=ac(),n=c.currentTime;tone(c,'sine',1200,n,n+.04,.08,n+.01);}catch(e){}}
 function soundNWStop(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.15,.2,n+.03);tone(c,'sine',1100,n+.08,n+.2,.15,n+.1);}catch(e){}}
@@ -439,7 +439,7 @@ const CC_DEFAULT=[{name:'ANIMALS',words:['DOG','CAT','ELEPHANT','LION','EAGLE']}
 const ccSaved=loadJSON(CC_DIR,'data.json');
 let cc_editCats=ccSaved?copy(ccSaved):copy(CC_DEFAULT);
 let cc_wordInputs=['','','','','',''];
-let CC={screen:'setup',categories:copy(cc_editCats),catDone:[false,false,false,false,false,false],catWinner:[null,null,null,null,null,null],currentTeam:0,activeCat:null,wordIndex:0,wordsGotten:0,timerEnd:null,timerRunning:false,timerTotal:30,roundOver:false,scores:[0,0],gameOver:false};
+let CC={screen:'setup',categories:copy(cc_editCats),catDone:[false,false,false,false,false,false],catWinner:[null,null,null,null,null,null],currentTeam:0,activeCat:null,wordIndex:0,wordsGotten:0,timerEnd:null,timerRunning:false,timerTotal:30,roundOver:false,scores:[0,0],gameOver:false,themeId:'gem'};
 let cc_settingTimer=30;
 function soundCCCorrect(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.1,.15,n+.03);tone(c,'sine',1100,n+.06,n+.15,.12,n+.08);}catch(e){}}
 function soundCCPass(){try{const c=ac(),n=c.currentTime;tone(c,'sine',300,n,n+.1,.1,n+.03);}catch(e){}}
@@ -448,6 +448,20 @@ function soundCCCatWon(){try{const c=ac(),n=c.currentTime;[[523,0],[659,.1],[784
 // ── MASTER TEAM SYSTEM ──
 // Scoreboard is the master team list. All games pull team names from it.
 function getMasterTeams(){return SB.teams&&SB.teams.length?SB.teams:[{name:'TEAM 1',score:0,color:'#22d3ee'},{name:'TEAM 2',score:0,color:'#f59e0b'}];}
+
+// Reusable theme picker builder — works for any game
+function buildThemePicker(gameId, currentThemeId, accentColor){
+  const wrap=mk({});
+  const lab=mk({});lab.className='section-label';lab.style.color=accentColor||'var(--gold)';lab.textContent='Theme';wrap.appendChild(lab);
+  const bar=mk({});bar.className='theme-bar';
+  THEME_ORDER.forEach(tid=>{
+    const t=THEMES[tid],active=currentThemeId===tid;
+    const chip=el('button',{className:'theme-chip'+(active?' active':''),style:active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.1)':accentColor+'22'}:{},onClick:()=>setState(gameId,{themeId:tid})});
+    chip.textContent=t.e;bar.appendChild(chip);
+  });
+  wrap.appendChild(bar);
+  return wrap;
+}
 function getTeamName(idx){const t=getMasterTeams();return t[idx%t.length]?.name||'TEAM '+(idx+1);}
 function getTeamColor(idx){const t=getMasterTeams();return t[idx%t.length]?.color||SB_COLORS[idx%SB_COLORS.length];}
 function addToScoreboard(teamIdx,points){
@@ -2429,6 +2443,7 @@ function buildGRID_Op(){
   const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
   if(GRID.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
+    scroll.appendChild(buildThemePicker('grid',GRID.themeId,'var(--green)'));
     const gnc=grid_editCats.length;
     for(let c=0;c<gnc;c++){
       const sec=mk({});sec.className='cat-setup';
@@ -2515,6 +2530,7 @@ function buildSB_Op(){
   const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
   if(SB.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
+    scroll.appendChild(buildThemePicker('sb',SB.themeId,'var(--gold)'));
     const lab=mk({});lab.className='section-label sb-label';lab.textContent='Teams';scroll.appendChild(lab);
     sb_editTeams.forEach((t,i)=>{
       const row=mk({});row.className='setup-team';
@@ -2555,8 +2571,9 @@ function buildSB_Op(){
 }
 
 function buildSB_Aud(wrap){
-  if(SB.screen!=='game'||!SB.teams||!SB.teams.length){const w=mk({});w.className='waiting';const t=mk({});t.className='waiting-title';t.style.color='var(--gold)';t.textContent='SCOREBOARD';const s=mk({});s.className='waiting-label';s.textContent='Waiting...';w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;}
-  const title=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(28px,5vw,56px)',letterSpacing:'8px',color:'var(--gold)',textAlign:'center',marginBottom:'clamp(20px,3vw,40px)',textShadow:'0 0 40px rgba(245,158,11,.5)'});
+  const sbTheme=themeMeta(SB.themeId||'trophy');
+  if(SB.screen!=='game'||!SB.teams||!SB.teams.length){const w=mk({});w.className='waiting';const t=mk({});t.className='waiting-title';t.style.color=sbTheme.accent;t.style.textShadow=`0 0 40px ${rgba(sbTheme.accent,.5)}`;t.textContent='SCOREBOARD';const s=mk({});s.className='waiting-label';s.textContent='Waiting...';w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;}
+  const title=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(28px,5vw,56px)',letterSpacing:'8px',color:sbTheme.accent,textAlign:'center',marginBottom:'clamp(20px,3vw,40px)',textShadow:`0 0 40px ${rgba(sbTheme.accent,.5)}`});
   title.textContent='SCOREBOARD';wrap.appendChild(title);
   const sorted=[...SB.teams.map((t,i)=>({...t,origIdx:i}))].sort((a,b)=>b.score-a.score);
   const maxScore=Math.max(...sorted.map(t=>t.score),1);
@@ -2581,6 +2598,7 @@ function buildCD_Op(){
   const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
   const scroll=mk({});scroll.className='op-scroll';
   if(!CD.running&&!CD.result){
+    scroll.appendChild(buildThemePicker('cd',CD.themeId,'var(--red)'));
     const pg=mk({});pg.className='preset-grid';
     CD_PRESETS.forEach(p=>{const btn=mk({});btn.className='preset-btn'+(cd_selectedPreset===p.sec?' active':'');btn.addEventListener('click',()=>{cd_selectedPreset=p.sec;render();});const t=mk({});t.className='preset-time';t.textContent=fmtTime(p.sec);const l=mk({});l.className='preset-label';l.textContent=p.label;btn.appendChild(t);btn.appendChild(l);pg.appendChild(btn);});
     scroll.appendChild(pg);
@@ -2600,7 +2618,8 @@ function buildCD_Op(){
 }
 
 function buildCD_Aud(wrap){
-  if(!CD.running&&!CD.result){const w=mk({});w.className='waiting';const t=mk({});t.className='waiting-title';t.style.color='var(--red)';t.textContent='⏱';const s=mk({});s.className='waiting-label';s.textContent='Countdown Timer';w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;}
+  const cdTheme=themeMeta(CD.themeId||'neon');
+  if(!CD.running&&!CD.result){const w=mk({});w.className='waiting';const t=mk({});t.className='waiting-title';t.style.color=cdTheme.accent;t.style.textShadow=`0 0 30px ${rgba(cdTheme.accent,.5)}`;t.textContent='⏱';const s=mk({});s.className='waiting-label';s.textContent='Countdown Timer';w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;}
   const rem=CD.running?Math.max(0,Math.ceil((CD.timerEnd-Date.now())/1000)):0;
   const pct=CD.totalSec>0?rem/CD.totalSec:0;
   const ringSize=Math.min(window.innerWidth,window.innerHeight)*.85;const r=ringSize/2-20;const circ=2*Math.PI*r;
@@ -2609,12 +2628,14 @@ function buildCD_Aud(wrap){
   const ringWrap=mk({});ringWrap.className='ring-wrap';ringWrap.style.width=ringSize+'px';ringWrap.style.height=ringSize+'px';
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','ring-svg');svg.setAttribute('width',ringSize);svg.setAttribute('height',ringSize);
   const bgC=document.createElementNS('http://www.w3.org/2000/svg','circle');bgC.setAttribute('class','ring-bg');bgC.setAttribute('cx',ringSize/2);bgC.setAttribute('cy',ringSize/2);bgC.setAttribute('r',r);
-  const fgC=document.createElementNS('http://www.w3.org/2000/svg','circle');fgC.setAttribute('class','ring-fg');fgC.setAttribute('cx',ringSize/2);fgC.setAttribute('cy',ringSize/2);fgC.setAttribute('r',r);fgC.setAttribute('stroke-dasharray',circ);fgC.setAttribute('stroke-dashoffset',circ*(1-pct));fgC.setAttribute('stroke',rem<=5?'#ef4444':rem<=10?'#f59e0b':'#22d3ee');
+  const fgC=document.createElementNS('http://www.w3.org/2000/svg','circle');fgC.setAttribute('class','ring-fg');fgC.setAttribute('cx',ringSize/2);fgC.setAttribute('cy',ringSize/2);fgC.setAttribute('r',r);fgC.setAttribute('stroke-dasharray',circ);fgC.setAttribute('stroke-dashoffset',circ*(1-pct));fgC.setAttribute('stroke',rem<=5?'#ef4444':rem<=10?'#f59e0b':cdTheme.accent);
   svg.appendChild(bgC);svg.appendChild(fgC);ringWrap.appendChild(svg);
   const te=mk({});te.className='aud-timer';
   if(CD.result==='finished'){te.className+=' finished';te.textContent='FINISHED!';}
   else if(CD.result==='expired'){te.className+=' done';te.textContent="TIME'S UP!";}
-  else{te.className+=(rem<=5?' danger':rem<=10?' warning':' chill');te.textContent=fmtTime(rem);}
+  else{te.className+=(rem<=5?' danger':rem<=10?' warning':' chill');te.textContent=fmtTime(rem);
+    if(rem>10){te.style.color=cdTheme.accent;te.style.textShadow=`0 0 60px ${rgba(cdTheme.accent,.4)}`;}
+  }
   ringWrap.appendChild(te);wrap.appendChild(ringWrap);
   if(CD.running){const lab=mk({});lab.className='aud-cd-label';lab.textContent=rem<=5?'HURRY!':rem<=10?'ALMOST THERE...':'TIME REMAINING';wrap.appendChild(lab);}
   return wrap;
@@ -2634,6 +2655,7 @@ function buildNW_Op(){
   const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
   if(NW.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
+    scroll.appendChild(buildThemePicker('nw',NW.themeId,'var(--gold)'));
     // Players
     const pLab=mk({});pLab.className='section-label';pLab.style.color='var(--gold)';pLab.textContent=`Players (${nw_editPlayers.length})`;scroll.appendChild(pLab);
     nw_editPlayers.forEach((p,i)=>{const row=mk({});row.className='player-setup';const dot=mk({});dot.className='player-color';dot.style.background=NW_COLORS[i%NW_COLORS.length];const inp=el('input',{style:{color:NW_COLORS[i%NW_COLORS.length]},placeholder:`Player ${i+1}`,type:'text',value:p.name,onInput:e=>{nw_editPlayers[i].name=e.target.value.toUpperCase();}});const del=el('button',{className:'del-btn',disabled:nw_editPlayers.length<=2,onClick:()=>{if(nw_editPlayers.length>2){nw_editPlayers.splice(i,1);render();}}});del.textContent='✕';row.appendChild(dot);row.appendChild(inp);row.appendChild(del);scroll.appendChild(row);});
@@ -2728,6 +2750,7 @@ function buildCC_Op(){
   const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
   if(CC.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
+    scroll.appendChild(buildThemePicker('cc',CC.themeId,'var(--gold)'));
     // Timer
     const tl=mk({});tl.className='section-label cc-label';tl.textContent='Round Timer';scroll.appendChild(tl);
     const tr=mk({display:'flex',gap:'8px',alignItems:'center',marginBottom:'12px'});
@@ -2900,7 +2923,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.6';
+const APP_VERSION='1.0.7';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';
