@@ -7,6 +7,7 @@ const http = require('http');
 
 let opWin = null;
 let audWin = null;
+let isQuitting = false;
 
 ipcMain.on('hub-state', (event, state) => {
   [opWin, audWin].forEach(win => {
@@ -94,24 +95,50 @@ ipcMain.on('do-auto-update', (event, downloadUrl) => {
       const newAppPath = path.join(mountPoint, appName);
       const installPath = '/Applications/' + appName;
 
-      // Write a shell script that waits for the app to quit, then swaps and relaunches
+      // Write a shell script that waits for this process to exit, swaps the .app, and relaunches
+      const myPid = process.pid;
+      const logPath = path.join(tmpDir, 'update.log');
       const script = `#!/bin/bash
-sleep 2
+exec > "${logPath}" 2>&1
+echo "[update] waiting for PID ${myPid} to exit..."
+# Wait for the Electron main process to actually exit (up to 30s)
+for i in $(seq 1 60); do
+  if ! kill -0 ${myPid} 2>/dev/null; then break; fi
+  sleep 0.5
+done
+echo "[update] PID gone, swapping app bundle"
 rm -rf "${installPath}"
 cp -R "${newAppPath}" "${installPath}"
-hdiutil detach "${mountPoint}" -quiet 2>/dev/null
-rm -rf "${tmpDir}"
-open "${installPath}"
+# Clear quarantine so macOS doesn't block re-launch
+xattr -rd com.apple.quarantine "${installPath}" 2>/dev/null || true
+hdiutil detach "${mountPoint}" -quiet 2>/dev/null || true
+echo "[update] launching new version"
+open -n "${installPath}"
+echo "[update] done"
+rm -rf "${tmpDir}" 2>/dev/null || true
 `;
       const scriptPath = path.join(tmpDir, 'update.sh');
       fs.writeFileSync(scriptPath, script, { mode: 0o755 });
 
       send('Restarting with new version...');
 
-      // Launch the update script and quit
-      spawn('bash', [scriptPath], { detached: true, stdio: 'ignore' }).unref();
+      // Spawn the update script detached so it survives our quit
+      const child = spawn('bash', [scriptPath], {
+        detached: true,
+        stdio: 'ignore',
+        cwd: '/'
+      });
+      child.unref();
 
-      setTimeout(() => { app.quit(); }, 500);
+      // Force quit — set the flag so audience-window close handler doesn't block
+      isQuitting = true;
+      setTimeout(() => {
+        try {
+          if (audWin && !audWin.isDestroyed()) audWin.destroy();
+          if (opWin && !opWin.isDestroyed()) opWin.destroy();
+        } catch(e) {}
+        app.exit(0); // app.exit is more forceful than app.quit
+      }, 800);
 
     } catch(e) {
       send('Update failed: ' + e.message);
@@ -131,7 +158,13 @@ function createWindows() {
     webPreferences: prefs,
   });
   opWin.loadFile(path.join(__dirname, 'index.html'), { hash: 'operator' });
-  opWin.on('closed', () => { opWin = null; });
+  // When the operator window is closed, quit the whole app (don't leave hidden audience window running)
+  opWin.on('close', () => { isQuitting = true; });
+  opWin.on('closed', () => {
+    opWin = null;
+    if (audWin && !audWin.isDestroyed()) audWin.destroy();
+    app.quit();
+  });
 
   audWin = new BrowserWindow({
     width: 1280, height: 800, minWidth: 800, minHeight: 600,
@@ -142,12 +175,14 @@ function createWindows() {
   });
   audWin.loadFile(path.join(__dirname, 'index.html'), { hash: 'audience' });
   audWin.on('close', (e) => {
-    if (opWin && !opWin.isDestroyed()) {
+    // Only hide (instead of close) while the app is still running normally AND we're not quitting
+    if (!isQuitting && opWin && !opWin.isDestroyed()) {
       e.preventDefault();
       audWin.hide();
     }
   });
 }
 
+app.on('before-quit', () => { isQuitting = true; });
 app.whenReady().then(createWindows);
 app.on('window-all-closed', () => app.quit());
