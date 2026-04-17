@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.8",
-    "notes": "Theme packs! 6 downloadable add-on packs: Neon Nights, Retro Arcade, Galaxy Quest, Christmas, Easter, VBS Jungle. Topical packs include bonus phrases + Bible trivia.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.8/Game.Hub-1.0.8-arm64.dmg",
+    "version": "1.0.9",
+    "notes": "New beta-only theme pack: Guitar Stage. Modern electric rock guitar with chrome hardware and cyan LED accents. Only visible with a BETA key + GTR key.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.9/Game.Hub-1.0.9-arm64.dmg",
     "date": "2026-04-17"
   }
 }
