@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.5",
-    "notes": "License system: Scoreboard & Countdown are free, other games need a registration key",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/v1.0.5/Game.Hub-1.0.5.dmg",
-    "date": "2026-04-15"
+    "version": "1.0.6",
+    "notes": "Public release: 3 games + Scoreboard + Countdown. Beta access available via key.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.6/Game.Hub-1.0.6-arm64.dmg",
+    "date": "2026-04-17"
   }
 }
