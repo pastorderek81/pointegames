@@ -456,26 +456,57 @@ function soundCCCatWon(){try{const c=ac(),n=c.currentTime;[[523,0],[659,.1],[784
 // Scoreboard is the master team list. All games pull team names from it.
 function getMasterTeams(){return SB.teams&&SB.teams.length?SB.teams:[{name:'TEAM 1',score:0,color:'#22d3ee'},{name:'TEAM 2',score:0,color:'#f59e0b'}];}
 
+// Build a single built-in theme chip — a solid color block (no emoji).
+// The accent color of the theme fills the chip; the active one gets a white ring.
+function makeBuiltinChip(tid, gameId, currentThemeId, accentColor){
+  const t = THEMES[tid];
+  const active = currentThemeId === tid;
+  const chip = el('button',{
+    className:'theme-chip'+(active?' active':''),
+    title: tid.toUpperCase(),
+    style: Object.assign({
+      background: t.a,
+      border: active ? '2px solid #fff' : '1px solid rgba(255,255,255,0.18)',
+      boxShadow: active ? '0 0 0 2px ' + (accentColor || 'var(--gold)') : 'none',
+      padding: '0'
+    }),
+    onClick:()=>setState(gameId,{themeId:tid})
+  });
+  chip.textContent = '';
+  return chip;
+}
+
+// Build a single pack-theme chip — a small image thumbnail of the pack bg.
+function makePackChip(pack, gameId, currentThemeId, accentColor){
+  const tid = 'pack:'+pack.id;
+  const active = currentThemeId === tid;
+  const loaded = THEME_PACKS.getLoadedPack(pack.id);
+  const bgUrl = loaded && loaded._bgUrl;
+  const chip = el('button',{
+    className:'theme-chip'+(active?' active':''),
+    title: pack.name,
+    style: Object.assign({
+      backgroundImage: bgUrl ? 'url("'+bgUrl+'")' : 'none',
+      backgroundColor: bgUrl ? '#000' : '#1a1408',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      border: active ? '2px solid #fff' : '1px solid rgba(255,255,255,0.18)',
+      boxShadow: active ? '0 0 0 2px ' + (accentColor || 'var(--gold)') : 'none',
+      padding: '0'
+    }),
+    onClick:()=>setState(gameId,{themeId:tid})
+  });
+  // If we don't have the image yet, show the emoji as a placeholder
+  chip.textContent = bgUrl ? '' : (THEME_PACKS.PACK_ICON[pack.id] || '🎨');
+  return chip;
+}
+
 // Append activated theme pack chips to an existing theme bar
 function appendPackChips(bar, gameId, currentThemeId, accentColor){
   try{
     if(typeof THEME_PACKS==='undefined') return;
     const activated = THEME_PACKS.getActivatedPacks();
-    activated.forEach(p=>{
-      const tid = 'pack:'+p.id;
-      const active = currentThemeId===tid;
-      const chip = el('button',{
-        className:'theme-chip'+(active?' active':''),
-        title: p.name,
-        style: Object.assign(
-          {border:'1px solid #3a2a0a', background:'#1a1408'},
-          active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.15)':accentColor+'33'}:{}
-        ),
-        onClick:()=>setState(gameId,{themeId:tid})
-      });
-      chip.textContent = THEME_PACKS.PACK_ICON[p.id] || '🎨';
-      bar.appendChild(chip);
-    });
+    activated.forEach(p => bar.appendChild(makePackChip(p, gameId, currentThemeId, accentColor)));
   }catch(e){}
 }
 
@@ -484,11 +515,7 @@ function buildThemePicker(gameId, currentThemeId, accentColor){
   const wrap=mk({});
   const lab=mk({});lab.className='section-label';lab.style.color=accentColor||'var(--gold)';lab.textContent='Theme';wrap.appendChild(lab);
   const bar=mk({});bar.className='theme-bar';
-  THEME_ORDER.forEach(tid=>{
-    const t=THEMES[tid],active=currentThemeId===tid;
-    const chip=el('button',{className:'theme-chip'+(active?' active':''),style:active?{borderColor:accentColor||'var(--gold)',background:(accentColor||'var(--gold)').startsWith('var')?'rgba(245,158,11,.1)':accentColor+'22'}:{},onClick:()=>setState(gameId,{themeId:tid})});
-    chip.textContent=t.e;bar.appendChild(chip);
-  });
+  THEME_ORDER.forEach(tid => bar.appendChild(makeBuiltinChip(tid, gameId, currentThemeId, accentColor)));
   appendPackChips(bar, gameId, currentThemeId, accentColor);
   wrap.appendChild(bar);
   return wrap;
@@ -3288,6 +3315,133 @@ function showKeyEntryModal(){
   }
 }
 
+// Theme picker modal — accessible via the 🎨 button during gameplay.
+// Shows color-block chips for built-in themes and image-thumbnail chips for
+// activated theme packs. Targets the currently active game.
+function showThemePickerModal(){
+  const existing = document.getElementById('theme-picker-modal');
+  if(existing) existing.remove();
+
+  const gameStateMap = {pf:PF, wd:WD, ttt:TTT, grid:GRID, sb:SB, cd:CD, nw:NW, cc:CC};
+  const gs = gameStateMap[activeGame];
+  if(!gs) return;
+  const currentTheme = gs.themeId;
+
+  // Game accent colors, for the active-ring highlight
+  const gameAccentMap = {
+    pf:'var(--gold)', wd:'var(--cyan)', ttt:'var(--purple)', grid:'var(--green)',
+    sb:'var(--gold)', cd:'var(--red)', nw:'var(--gold)', cc:'var(--gold)'
+  };
+  const accentColor = gameAccentMap[activeGame] || 'var(--gold)';
+
+  const overlay = mk({
+    position:'fixed', inset:'0', background:'rgba(0,0,0,0.85)',
+    display:'flex', alignItems:'center', justifyContent:'center',
+    zIndex:'9999', padding:'20px'
+  });
+  overlay.id = 'theme-picker-modal';
+
+  const box = mk({
+    maxWidth:'640px', width:'100%', padding:'36px 32px',
+    background:'#0a0a0c', border:'1px solid #2a2a2e', borderRadius:'16px',
+    boxShadow:'0 20px 60px rgba(0,0,0,0.7)',
+    display:'flex', flexDirection:'column', gap:'20px', maxHeight:'85vh', overflowY:'auto'
+  });
+
+  const title = mk({fontFamily:'"Black Ops One",sans-serif', fontSize:'20px', letterSpacing:'3px', color:accentColor, textAlign:'center'});
+  title.textContent = '🎨  CHOOSE THEME';
+  box.appendChild(title);
+
+  // Built-in themes (color blocks)
+  const builtinLabel = mk({fontSize:'12px', letterSpacing:'3px', color:'#666', fontFamily:'"Barlow Condensed",sans-serif', textTransform:'uppercase', fontWeight:'700'});
+  builtinLabel.textContent = 'Built-in';
+  box.appendChild(builtinLabel);
+
+  const builtinGrid = mk({
+    display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:'10px'
+  });
+  THEME_ORDER.forEach(tid => {
+    const t = THEMES[tid];
+    const active = currentTheme === tid;
+    const chip = el('button',{
+      style:{
+        aspectRatio:'1',
+        background: t.a,
+        border: active ? '2px solid #fff' : '1px solid rgba(255,255,255,0.18)',
+        boxShadow: active ? '0 0 0 3px ' + accentColor : 'none',
+        borderRadius:'10px',
+        cursor:'pointer',
+        transition:'transform .15s'
+      },
+      onClick:()=>{ setState(activeGame, {themeId: tid}); overlay.remove(); }
+    });
+    builtinGrid.appendChild(chip);
+  });
+  box.appendChild(builtinGrid);
+
+  // Pack themes (image thumbnails)
+  try{
+    const packs = (typeof THEME_PACKS!=='undefined') ? THEME_PACKS.getActivatedPacks() : [];
+    if(packs.length){
+      const packLabel = mk({fontSize:'12px', letterSpacing:'3px', color:'#666', fontFamily:'"Barlow Condensed",sans-serif', textTransform:'uppercase', fontWeight:'700', marginTop:'8px'});
+      packLabel.textContent = 'Theme Packs';
+      box.appendChild(packLabel);
+
+      const packGrid = mk({display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'12px'});
+      packs.forEach(p => {
+        const tid = 'pack:'+p.id;
+        const active = currentTheme === tid;
+        const loaded = THEME_PACKS.getLoadedPack(p.id);
+        const bgUrl = loaded && loaded._bgUrl;
+        const card = el('button',{
+          style:{
+            aspectRatio:'16/9',
+            backgroundImage: bgUrl ? 'url("'+bgUrl+'")' : 'none',
+            backgroundSize:'cover',
+            backgroundPosition:'center',
+            backgroundColor: bgUrl ? '#000' : '#1a1408',
+            border: active ? '2px solid #fff' : '1px solid rgba(255,255,255,0.18)',
+            boxShadow: active ? '0 0 0 3px ' + accentColor : 'none',
+            borderRadius:'10px',
+            cursor:'pointer',
+            position:'relative',
+            overflow:'hidden',
+            padding:'0'
+          },
+          onClick:()=>{ setState(activeGame, {themeId: tid}); overlay.remove(); }
+        });
+        const label = mk({
+          position:'absolute', bottom:'0', left:'0', right:'0',
+          padding:'4px 8px',
+          background:'rgba(0,0,0,0.75)',
+          fontSize:'11px',
+          color:'#fff',
+          fontFamily:'"Barlow Condensed",sans-serif',
+          letterSpacing:'2px',
+          textAlign:'center',
+          fontWeight:'700'
+        });
+        label.textContent = (p.name || p.id).toUpperCase();
+        card.appendChild(label);
+        packGrid.appendChild(card);
+      });
+      box.appendChild(packGrid);
+    }
+  }catch(e){}
+
+  // Close button
+  const close = el('button',{
+    style:{padding:'12px', background:'#1a1a1e', color:'#aaa', border:'1px solid #2a2a2e', borderRadius:'10px', fontFamily:'"Barlow Condensed",sans-serif', fontWeight:'700', letterSpacing:'2px', cursor:'pointer', marginTop:'8px'},
+    onClick:()=>overlay.remove()
+  });
+  close.textContent = 'CLOSE';
+  box.appendChild(close);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // THEME PACKS — downloadable add-on theme packs (loaded from GitHub)
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3428,15 +3582,22 @@ const THEME_PACKS = (function(){
   };
 })();
 
-// Apply the active pack's background to BOTH the operator and audience windows.
-// If the pack defines a `viewport` in its manifest, clip the game UI to fit inside
-// that rectangle (so the gameboard sits "inside" the guitar/frame/etc).
+// Apply the active pack's background. Only the audience window gets the big
+// immersive image + viewport clipping — the operator stays on a normal layout
+// and only picks up the pack's colors (through themeMeta), which keeps the
+// operator's control UI readable.
 function applyPackBackground(themeId){
   let styleEl = document.getElementById('pack-bg-style');
   if(!styleEl){
     styleEl = document.createElement('style');
     styleEl.id = 'pack-bg-style';
     document.head.appendChild(styleEl);
+  }
+  // Operator: never apply the image; the theme's colors still flow through themeMeta
+  if (typeof ROLE !== 'undefined' && ROLE !== 'audience') {
+    styleEl.textContent = '';
+    document.body.removeAttribute('data-pack');
+    return;
   }
   if(themeId && typeof themeId==='string' && themeId.indexOf('pack:')===0){
     const pid = themeId.slice(5);
@@ -3532,6 +3693,7 @@ function buildOperator(){
   if(updateInfo){const ub=el('button',{className:'hub-btn',style:{color:'var(--gold)',borderColor:'rgba(245,158,11,.3)',animation:'breathe 2s ease-in-out infinite'},onClick:()=>{if(confirm('Game Hub '+updateInfo.version+' is available!\n\n'+(updateInfo.notes||'')+'\n\nInstall now? The app will restart automatically.')){if(ipc)ipc.send('do-auto-update',updateInfo.downloadUrl);ub.textContent='⏳ UPDATING...';ub.disabled=true;}}});ub.textContent='⬆ UPDATE';right.appendChild(ub);}
   if(typeof _updateMsg==='string'&&_updateMsg){const um=mk({fontSize:'10px',color:'var(--gold)',letterSpacing:'1px',fontFamily:'"Barlow Condensed",sans-serif'});um.textContent=_updateMsg;right.appendChild(um);}
   const lk=el('button',{className:'hub-btn',style:{color:'#666',borderColor:'#222'},onClick:showKeyEntryModal});lk.textContent='🔑';lk.title='Enter License Key';right.appendChild(lk);
+  const tb=el('button',{className:'hub-btn',style:{color:'#888',borderColor:'#222'},onClick:showThemePickerModal});tb.textContent='🎨';tb.title='Change Theme';right.appendChild(tb);
   const g=el('button',{className:'hub-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}});g.textContent='🟢';right.appendChild(g);
   const r=el('button',{className:'hub-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}});r.textContent='🔴';right.appendChild(r);
   tabs.appendChild(right);wrap.appendChild(tabs);
@@ -3612,7 +3774,7 @@ function buildPF_Op(){
     addW.appendChild(pi);addW.appendChild(hi);addW.appendChild(ab);scroll.appendChild(addW);
     // Theme
     const tl=mk({});tl.className='section-label pf-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(PF.themeId===tid?' active':''),style:PF.themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'pf',PF.themeId,'var(--gold)');scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>tb.appendChild(makeBuiltinChip(tid,'pf',PF.themeId,'var(--gold)')));appendPackChips(tb,'pf',PF.themeId,'var(--gold)');scroll.appendChild(tb);
     const sb=el('button',{className:'start-btn',style:{background:'linear-gradient(135deg,var(--gold),#d97706)'},onClick:()=>{
       if(!pf_edit.length){alert('Add at least one phrase.');return;}
       saveJSON(PF_DIR,'phrases.json',pf_edit);
@@ -3661,7 +3823,7 @@ function buildPF_Op(){
     lb.textContent=letter;grid.appendChild(lb);}
   scroll.appendChild(grid);
   // Theme
-  const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(themeId===tid?' active':''),style:themeId===tid?{borderColor:'var(--gold)',background:'rgba(245,158,11,.1)'}:{},onClick:()=>setState('pf',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'pf',themeId,'var(--gold)');scroll.appendChild(tb);
+  const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>tb.appendChild(makeBuiltinChip(tid,'pf',themeId,'var(--gold)')));appendPackChips(tb,'pf',themeId,'var(--gold)');scroll.appendChild(tb);
   frag.appendChild(scroll);return frag;
 }
 
@@ -3691,7 +3853,7 @@ function buildWD_Op(){
     }
     // Theme
     const tl=mk({});tl.className='section-label wd-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(WD.themeId===tid?' active':''),style:WD.themeId===tid?{borderColor:'var(--cyan)',background:'rgba(34,211,238,.1)'}:{},onClick:()=>setState('wd',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'wd',WD.themeId,'var(--cyan)');scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>tb.appendChild(makeBuiltinChip(tid,'wd',WD.themeId,'var(--cyan)')));appendPackChips(tb,'wd',WD.themeId,'var(--cyan)');scroll.appendChild(tb);
     // Verses
     const vl=mk({});vl.className='section-label wd-label';vl.textContent=`Verses (${wd_edit.length})`;scroll.appendChild(vl);
     const list=mk({});list.className='verse-list';
@@ -3754,7 +3916,7 @@ function buildTTT_Op(){
   if(TTT.screen==='setup'){
     const scroll=mk({});scroll.className='op-scroll';
     const tl=mk({});tl.className='section-label ttt-label';tl.textContent='Theme';scroll.appendChild(tl);
-    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>{const chip=el('button',{className:'theme-chip'+(TTT.themeId===tid?' active':''),style:TTT.themeId===tid?{borderColor:'var(--purple)',background:'rgba(168,85,247,.1)'}:{},onClick:()=>setState('ttt',{themeId:tid})});chip.textContent=THEMES[tid].e;tb.appendChild(chip);});appendPackChips(tb,'ttt',TTT.themeId,'var(--purple)');scroll.appendChild(tb);
+    const tb=mk({});tb.className='theme-bar';THEME_ORDER.forEach(tid=>tb.appendChild(makeBuiltinChip(tid,'ttt',TTT.themeId,'var(--purple)')));appendPackChips(tb,'ttt',TTT.themeId,'var(--purple)');scroll.appendChild(tb);
     const ql=mk({});ql.className='section-label ttt-label';ql.textContent=`Questions (${ttt_edit.length})`;scroll.appendChild(ql);
     const list=mk({});list.className='q-list';
     ttt_edit.forEach((q,i)=>{const row=mk({});row.className='q-row';const info=mk({});info.className='q-info';const qt=mk({});qt.className='q-text';qt.textContent=q.q;info.appendChild(qt);const qa=mk({});qa.className='q-answer';qa.textContent='Answer: '+q.a;info.appendChild(qa);const del=el('button',{className:'del-btn',onClick:()=>{ttt_edit.splice(i,1);saveJSON(TTT_DIR,'questions.json',ttt_edit);render();}});del.textContent='✕';row.appendChild(info);row.appendChild(del);list.appendChild(row);});
@@ -4396,7 +4558,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.11';
+const APP_VERSION='1.0.12';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';
