@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.11",
-    "notes": "Theme pack backgrounds now show on the audience window too. Guitar Stage gameboard fits inside the screen-shaped rectangle in the image. Fix for 🔑 key entry button from v1.0.10 included.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.11/Game.Hub-1.0.11-arm64.dmg",
+    "version": "1.0.12",
+    "notes": "Theme chips redesigned: built-ins are now color blocks, packs show their actual image as a thumbnail. New 🎨 button in the top bar lets you change the theme during gameplay. The operator window now only picks up theme colors — the full image stays on the audience window where it belongs.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.12/Game.Hub-1.0.12-arm64.dmg",
     "date": "2026-04-17"
   }
 }
