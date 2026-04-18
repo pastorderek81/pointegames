@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.12",
-    "notes": "Theme chips redesigned: built-ins are now color blocks, packs show their actual image as a thumbnail. New 🎨 button in the top bar lets you change the theme during gameplay. The operator window now only picks up theme colors — the full image stays on the audience window where it belongs.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.12/Game.Hub-1.0.12-arm64.dmg",
+    "version": "1.0.13",
+    "notes": "Theme picker is now always visible in the operator window during gameplay — a compact footer bar at the bottom shows all color blocks and pack thumbnails so you can switch palettes mid-round without opening the \ud83c\udfa8 modal.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.13/Game.Hub-1.0.13-arm64.dmg",
     "date": "2026-04-17"
   }
 }
