@@ -448,6 +448,52 @@ let cc_editCats=ccSaved?copy(ccSaved):copy(CC_DEFAULT);
 let cc_wordInputs=['','','','','',''];
 let CC={screen:'setup',categories:copy(cc_editCats),catDone:[false,false,false,false,false,false],catWinner:[null,null,null,null,null,null],currentTeam:0,activeCat:null,wordIndex:0,wordsGotten:0,timerEnd:null,timerRunning:false,timerTotal:30,roundOver:false,scores:[0,0],gameOver:false,themeId:'gem'};
 let cc_settingTimer=30;
+
+// ── PRICE CHECK STATE ──
+const PC_DIR=getDataDir('Price Check');
+const PC_DEFAULT={
+  bible:[
+    {label:'Books in the Bible',answer:66,unit:'books',emoji:'📖'},
+    {label:'Books in the Old Testament',answer:39,unit:'books',emoji:'📖'},
+    {label:'Books in the New Testament',answer:27,unit:'books',emoji:'📖'},
+    {label:'Disciples Jesus chose',answer:12,unit:'disciples',emoji:'👥'},
+    {label:'Days Jonah was in the fish',answer:3,unit:'days',emoji:'🐳'},
+    {label:'Days Noah was on the ark',answer:150,unit:'days',emoji:'🚢'},
+    {label:'Plagues of Egypt',answer:10,unit:'plagues',emoji:'🦗'},
+    {label:'Commandments',answer:10,unit:'commandments',emoji:'📜'},
+    {label:'Years Israelites wandered in the desert',answer:40,unit:'years',emoji:'🏜️'},
+    {label:'Age of Methuselah when he died',answer:969,unit:'years',emoji:'🧓'},
+    {label:'Tribes of Israel',answer:12,unit:'tribes',emoji:'🛡️'},
+    {label:'Days Jesus fasted in the wilderness',answer:40,unit:'days',emoji:'🥖'},
+    {label:'Psalms in the book of Psalms',answer:150,unit:'psalms',emoji:'🎵'},
+    {label:'Days the Israelites marched around Jericho total',answer:7,unit:'days',emoji:'🏛️'},
+    {label:'Feet (cubits) of Goliath\u2019s height',answer:9,unit:'ft',emoji:'⚔️'}
+  ],
+  product:[
+    {label:'Average loaf of white bread',answer:3,unit:'$',emoji:'🍞'},
+    {label:'Gallon of milk',answer:4,unit:'$',emoji:'🥛'},
+    {label:'Soccer ball',answer:20,unit:'$',emoji:'⚽'},
+    {label:'Dozen eggs',answer:5,unit:'$',emoji:'🥚'},
+    {label:'Can of soda',answer:1,unit:'$',emoji:'🥤'},
+    {label:'Softcover Bible',answer:15,unit:'$',emoji:'📕'},
+    {label:'Pizza slice',answer:4,unit:'$',emoji:'🍕'},
+    {label:'Movie ticket',answer:14,unit:'$',emoji:'🎬'},
+    {label:'Box of cereal',answer:5,unit:'$',emoji:'🥣'},
+    {label:'Bag of chips',answer:4,unit:'$',emoji:'🥨'}
+  ]
+};
+const pcSaved=loadJSON(PC_DIR,'items.json');
+let pc_editItems=pcSaved?copy(pcSaved):copy(PC_DEFAULT);
+let pc_editType='bible'; // 'bible' | 'product'
+let pc_inputLabel='';
+let pc_inputAnswer='';
+let pc_inputUnit='';
+let pc_inputEmoji='';
+let pc_settingPts=100;
+// guesses: keyed by team index -> number (or null if not guessed)
+let PC={screen:'setup',currentItem:null,guesses:{},revealed:false,winnerIdx:null,ptsPerWin:100,themeId:'trophy'};
+function soundPCDing(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.1,.12,n+.03);tone(c,'sine',1320,n+.05,n+.18,.1,n+.08);}catch(e){}}
+function soundPCBust(){try{const c=ac(),n=c.currentTime;tone(c,'sawtooth',220,n,n+.25,.2,n+.05);tone(c,'sawtooth',110,n+.15,n+.5,.15,n+.2);}catch(e){}}
 function soundCCCorrect(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.1,.15,n+.03);tone(c,'sine',1100,n+.06,n+.15,.12,n+.08);}catch(e){}}
 function soundCCPass(){try{const c=ac(),n=c.currentTime;tone(c,'sine',300,n,n+.1,.1,n+.03);}catch(e){}}
 function soundCCCatWon(){try{const c=ac(),n=c.currentTime;[[523,0],[659,.1],[784,.2],[1047,.35]].forEach(([f,t])=>{tone(c,'square',f,n+t,n+t+.3,.12,n+t+.06);tone(c,'sine',f,n+t,n+t+.35,.18,n+t+.08);});}catch(e){}}
@@ -3150,12 +3196,12 @@ let LICENSE = loadLicense();
 
 // Game prefix map — which prefix unlocks which game
 const GAME_PREFIX = {
-  pf:'PF', wd:'WD', ttt:'TTT', grid:'GRD', nw:'NW', cc:'CC'
+  pf:'PF', wd:'WD', ttt:'TTT', grid:'GRD', nw:'NW', cc:'CC', pc:'PC'
 };
 // Games that don't require a license (free)
 const FREE_GAMES = ['sb','cd'];
 // Games that are BETA-ONLY — hidden from public unless beta mode is active
-const BETA_GAMES = ['grid','nw','cc'];
+const BETA_GAMES = ['grid','nw','cc','pc'];
 
 // Beta mode is enabled when the user has activated any BETA-XXXX key
 function isBetaModeActive(){
@@ -3322,7 +3368,7 @@ function showThemePickerModal(){
   const existing = document.getElementById('theme-picker-modal');
   if(existing) existing.remove();
 
-  const gameStateMap = {pf:PF, wd:WD, ttt:TTT, grid:GRID, sb:SB, cd:CD, nw:NW, cc:CC};
+  const gameStateMap = {pf:PF, wd:WD, ttt:TTT, grid:GRID, sb:SB, cd:CD, nw:NW, cc:CC, pc:PC};
   const gs = gameStateMap[activeGame];
   if(!gs) return;
   const currentTheme = gs.themeId;
@@ -3330,7 +3376,7 @@ function showThemePickerModal(){
   // Game accent colors, for the active-ring highlight
   const gameAccentMap = {
     pf:'var(--gold)', wd:'var(--cyan)', ttt:'var(--purple)', grid:'var(--green)',
-    sb:'var(--gold)', cd:'var(--red)', nw:'var(--gold)', cc:'var(--gold)'
+    sb:'var(--gold)', cd:'var(--red)', nw:'var(--gold)', cc:'var(--gold)', pc:'var(--green)'
   };
   const accentColor = gameAccentMap[activeGame] || 'var(--gold)';
 
@@ -3640,7 +3686,7 @@ function applyPackBackground(themeId){
 
 // ── IPC SYNC ──
 function pushState(){
-  if(ipc)ipc.send('hub-state',{activeGame,pf:PF,wd:WD,ttt:TTT,grid:GRID,sb:SB,cd:CD,nw:NW,cc:CC});
+  if(ipc)ipc.send('hub-state',{activeGame,pf:PF,wd:WD,ttt:TTT,grid:GRID,sb:SB,cd:CD,nw:NW,cc:CC,pc:PC});
 }
 function setState(game,patch){
   if(game==='pf')PF=Object.assign({},PF,patch);
@@ -3651,6 +3697,7 @@ function setState(game,patch){
   else if(game==='cd')CD=Object.assign({},CD,patch);
   else if(game==='nw')NW=Object.assign({},NW,patch);
   else if(game==='cc')CC=Object.assign({},CC,patch);
+  else if(game==='pc')PC=Object.assign({},PC,patch);
   pushState();render();
 }
 function switchGame(g){activeGame=g;pushState();render();}
@@ -3689,6 +3736,7 @@ function buildOperator(){
   const t6=el('button',{className:'hub-tab'+(activeGame==='cd'?' active-cd':''),onClick:()=>switchGame('cd')});t6.textContent='⏱ COUNTDOWN';tabs.appendChild(t6);
   if(isGameVisible('nw')){const t7=el('button',{className:'hub-tab'+(activeGame==='nw'?' active-nw':''),onClick:()=>switchGame('nw')});t7.textContent='🎰 NO WHAMMIES'+_lock('nw');tabs.appendChild(t7);}
   if(isGameVisible('cc')){const t8=el('button',{className:'hub-tab'+(activeGame==='cc'?' active-cc':''),onClick:()=>switchGame('cc')});t8.textContent='🔺 CLUE CLIMB'+_lock('cc');tabs.appendChild(t8);}
+  if(isGameVisible('pc')){const t9=el('button',{className:'hub-tab'+(activeGame==='pc'?' active-pc':''),onClick:()=>switchGame('pc')});t9.textContent='💲 PRICE CHECK'+_lock('pc');tabs.appendChild(t9);}
   const right=mk({});right.className='hub-right';
   if(updateInfo){const ub=el('button',{className:'hub-btn',style:{color:'var(--gold)',borderColor:'rgba(245,158,11,.3)',animation:'breathe 2s ease-in-out infinite'},onClick:()=>{if(confirm('Game Hub '+updateInfo.version+' is available!\n\n'+(updateInfo.notes||'')+'\n\nInstall now? The app will restart automatically.')){if(ipc)ipc.send('do-auto-update',updateInfo.downloadUrl);ub.textContent='⏳ UPDATING...';ub.disabled=true;}}});ub.textContent='⬆ UPDATE';right.appendChild(ub);}
   if(typeof _updateMsg==='string'&&_updateMsg){const um=mk({fontSize:'10px',color:'var(--gold)',letterSpacing:'1px',fontFamily:'"Barlow Condensed",sans-serif'});um.textContent=_updateMsg;right.appendChild(um);}
@@ -3708,7 +3756,8 @@ function buildOperator(){
     ttt:{name:'TIC TAC TOE',color:'var(--purple)'},
     grid:{name:'THE GRID',color:'var(--green)'},
     nw:{name:'NO WHAMMIES',color:'var(--gold)'},
-    cc:{name:'CLUE CLIMB',color:'var(--gold)'}
+    cc:{name:'CLUE CLIMB',color:'var(--gold)'},
+    pc:{name:'PRICE CHECK',color:'var(--green)'}
   };
   if(gameInfo[activeGame] && !isGameUnlocked(activeGame)){
     wrap.appendChild(buildLockScreen(activeGame, gameInfo[activeGame].name, gameInfo[activeGame].color));
@@ -3723,7 +3772,8 @@ function buildOperator(){
   else if(activeGame==='sb')wrap.appendChild(buildSB_Op());
   else if(activeGame==='cd')wrap.appendChild(buildCD_Op());
   else if(activeGame==='nw')wrap.appendChild(buildNW_Op());
-  else wrap.appendChild(buildCC_Op());
+  else if(activeGame==='cc')wrap.appendChild(buildCC_Op());
+  else wrap.appendChild(buildPC_Op());
 
   // When the active game is running (past setup), show a compact theme picker
   // footer so the operator can change the theme / palette mid-game.
@@ -3736,7 +3786,7 @@ function buildOperator(){
 // Different games track "running" differently (screen !== 'setup' for most,
 // running/result for Countdown).
 function appendOperatorThemeFooter(wrap){
-  const stateMap = {pf:PF, wd:WD, ttt:TTT, grid:GRID, sb:SB, cd:CD, nw:NW, cc:CC};
+  const stateMap = {pf:PF, wd:WD, ttt:TTT, grid:GRID, sb:SB, cd:CD, nw:NW, cc:CC, pc:PC};
   const gs = stateMap[activeGame];
   if(!gs) return;
 
@@ -3747,7 +3797,7 @@ function appendOperatorThemeFooter(wrap){
 
   const accentMap = {
     pf:'var(--gold)', wd:'var(--cyan)', ttt:'var(--purple)', grid:'var(--green)',
-    sb:'var(--gold)', cd:'var(--red)', nw:'var(--gold)', cc:'var(--gold)'
+    sb:'var(--gold)', cd:'var(--red)', nw:'var(--gold)', cc:'var(--gold)', pc:'var(--green)'
   };
   const accent = accentMap[activeGame] || 'var(--gold)';
 
@@ -4016,7 +4066,7 @@ function buildAudience(){
   wrap.appendChild(glow);
 
   // Check if any game is started
-  const anyStarted=(PF.screen==='game')||(WD.screen!=='setup')||(TTT.screen==='game')||(GRID.screen==='game')||(SB.screen==='game')||(CD.running||CD.result)||(NW.screen==='game')||(CC.screen==='game');
+  const anyStarted=(PF.screen==='game')||(WD.screen!=='setup')||(TTT.screen==='game')||(GRID.screen==='game')||(SB.screen==='game')||(CD.running||CD.result)||(NW.screen==='game')||(CC.screen==='game')||(PC.screen==='game');
   if(!anyStarted){
     const w=mk({});w.className='waiting';
     const t=mk({});t.className='waiting-title';t.textContent='GAME HUB';
@@ -4031,7 +4081,8 @@ function buildAudience(){
   if(activeGame==='sb')return buildSB_Aud(wrap);
   if(activeGame==='cd')return buildCD_Aud(wrap);
   if(activeGame==='nw')return buildNW_Aud(wrap);
-  return buildCC_Aud(wrap);
+  if(activeGame==='cc')return buildCC_Aud(wrap);
+  return buildPC_Aud(wrap);
 }
 
 // ── PF AUDIENCE ──
@@ -4547,6 +4598,257 @@ function buildCCAudPyramid(){
   return pyr;
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// PRICE CHECK OPERATOR + AUDIENCE
+// ══════════════════════════════════════════════════════════════════════════════
+function buildPC_Op(){
+  const frag=mk({flex:'1',display:'flex',flexDirection:'column',overflow:'hidden'});
+
+  if(PC.screen==='setup'){
+    const scroll=mk({});scroll.className='op-scroll';
+
+    // Bible / Product toggle
+    const typeBar=mk({display:'flex',gap:'8px',marginBottom:'8px'});
+    ['bible','product'].forEach(type=>{
+      const btn=el('button',{className:'mode-btn'+(pc_editType===type?' active':''),onClick:()=>{pc_editType=type;render();}});
+      btn.innerHTML=(type==='bible')?'📖 BIBLE FACTS':'🛒 PRODUCTS';
+      typeBar.appendChild(btn);
+    });
+    scroll.appendChild(typeBar);
+
+    // Items list
+    const items=pc_editItems[pc_editType]||[];
+    const lbl=mk({});lbl.className='section-label';lbl.style.color='var(--green)';
+    lbl.textContent=(pc_editType==='bible'?'Bible Facts':'Products')+' ('+items.length+')';
+    scroll.appendChild(lbl);
+
+    const list=mk({display:'flex',flexDirection:'column',gap:'6px'});
+    items.forEach((item,i)=>{
+      const row=mk({display:'flex',alignItems:'center',gap:'12px',padding:'10px 14px',background:'#0a0a0c',border:'1px solid #1a1a1e',borderRadius:'8px'});
+      const em=mk({fontSize:'24px',minWidth:'32px',textAlign:'center'});em.textContent=item.emoji||'❓';row.appendChild(em);
+      const info=mk({flex:'1',display:'flex',flexDirection:'column',gap:'2px',minWidth:'0'});
+      const il=mk({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'15px',color:'#fff',fontWeight:'700'});il.textContent=item.label;info.appendChild(il);
+      const ia=mk({fontSize:'12px',color:'#888',letterSpacing:'1px',fontFamily:'"Barlow Condensed",sans-serif'});ia.textContent='Answer: '+(item.unit==='$'?'$':'')+item.answer+((item.unit&&item.unit!=='$')?' '+item.unit:'');info.appendChild(ia);
+      row.appendChild(info);
+      const del=el('button',{className:'del-btn',onClick:()=>{pc_editItems[pc_editType].splice(i,1);saveJSON(PC_DIR,'items.json',pc_editItems);render();}});
+      del.textContent='✕';row.appendChild(del);
+      list.appendChild(row);
+    });
+    scroll.appendChild(list);
+
+    // Add-item rows
+    const addLbl=mk({});addLbl.className='section-label';addLbl.style.color='var(--green)';addLbl.textContent='ADD ITEM';scroll.appendChild(addLbl);
+    const addW=mk({display:'flex',flexDirection:'column',gap:'8px'});
+    const r1=mk({display:'flex',gap:'8px'});
+    const ei=el('input',{className:'add-input',style:{width:'70px',fontSize:'22px',textAlign:'center'},placeholder:'🎯',type:'text',maxLength:'4',onInput:e=>{pc_inputEmoji=e.target.value;}});ei.value=pc_inputEmoji;
+    const li=el('input',{className:'add-input',style:{color:'var(--green)',flex:'1'},placeholder:'Label (e.g. Books in the Bible)',type:'text',onInput:e=>{pc_inputLabel=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addPC();}});li.value=pc_inputLabel;
+    r1.appendChild(ei);r1.appendChild(li);
+    const r2=mk({display:'flex',gap:'8px'});
+    const ai=el('input',{className:'add-input',style:{color:'var(--green)',width:'140px'},placeholder:'Answer',type:'number',onInput:e=>{pc_inputAnswer=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addPC();}});ai.value=pc_inputAnswer;
+    const ui=el('input',{className:'add-input',style:{width:'160px'},placeholder:pc_editType==='bible'?'Unit (books, days...)':'$',type:'text',onInput:e=>{pc_inputUnit=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addPC();}});ui.value=pc_inputUnit;
+    r2.appendChild(ai);r2.appendChild(ui);
+    function addPC(){
+      if(!pc_inputLabel.trim()||pc_inputAnswer===''||pc_inputAnswer===null)return;
+      const item={label:pc_inputLabel.trim(),answer:parseFloat(pc_inputAnswer),unit:(pc_inputUnit.trim()||(pc_editType==='product'?'$':'')),emoji:(pc_inputEmoji.trim()||(pc_editType==='bible'?'📖':'🛒'))};
+      if(!pc_editItems[pc_editType])pc_editItems[pc_editType]=[];
+      pc_editItems[pc_editType].push(item);
+      saveJSON(PC_DIR,'items.json',pc_editItems);
+      pc_inputLabel='';pc_inputAnswer='';pc_inputUnit='';pc_inputEmoji='';
+      render();
+    }
+    const ab=el('button',{className:'add-btn',style:{background:'var(--green)'},onClick:addPC});ab.textContent='+ Add Item';
+    addW.appendChild(r1);addW.appendChild(r2);addW.appendChild(ab);
+    scroll.appendChild(addW);
+
+    // Points stepper
+    const sLbl=mk({});sLbl.className='section-label';sLbl.style.color='var(--green)';sLbl.textContent='SETTINGS';scroll.appendChild(sLbl);
+    const sRow=mk({});sRow.className='setting-row';
+    const sl=mk({});sl.className='setting-label';sl.textContent='Points per Win';sRow.appendChild(sl);
+    const ss=mk({});ss.className='stepper';
+    ss.appendChild(el('button',{className:'stepper-btn',onClick:()=>{pc_settingPts=Math.max(25,pc_settingPts-25);render();}}));ss.lastChild.textContent='−';
+    const sv=mk({});sv.className='stepper-val';sv.textContent=pc_settingPts;ss.appendChild(sv);
+    ss.appendChild(el('button',{className:'stepper-btn',onClick:()=>{pc_settingPts=Math.min(1000,pc_settingPts+25);render();}}));ss.lastChild.textContent='+';
+    sRow.appendChild(ss);scroll.appendChild(sRow);
+
+    // Theme picker
+    scroll.appendChild(buildThemePicker('pc',PC.themeId,'var(--green)'));
+
+    // Start
+    const startBtn=el('button',{className:'start-btn',style:{background:'linear-gradient(135deg,var(--green),#16a34a)'},onClick:()=>{
+      saveJSON(PC_DIR,'items.json',pc_editItems);
+      setState('pc',{screen:'game',currentItem:null,guesses:{},revealed:false,winnerIdx:null,ptsPerWin:pc_settingPts});
+    }});
+    startBtn.textContent='▶ START GAME';scroll.appendChild(startBtn);
+
+    frag.appendChild(scroll);return frag;
+  }
+
+  // ── GAME SCREEN ──
+  const teams=getMasterTeams();
+  const tm=themeMeta(PC.themeId||'trophy');
+
+  // Item picker (no current item)
+  if(!PC.currentItem){
+    const header=mk({padding:'14px 16px',background:'#050505',borderBottom:'1px solid #0a0a0a',display:'flex',alignItems:'center',gap:'10px',flexShrink:'0'});
+    const hl=mk({flex:'1',fontFamily:'"Black Ops One",sans-serif',fontSize:'16px',letterSpacing:'2px',color:'var(--green)'});hl.textContent='PICK AN ITEM';header.appendChild(hl);
+    const setupBtn=el('button',{className:'op-btn',style:{padding:'8px 16px'},onClick:()=>setState('pc',{screen:'setup'})});setupBtn.textContent='⚙ Setup';header.appendChild(setupBtn);
+    frag.appendChild(header);
+
+    const typeBar=mk({display:'flex',gap:'8px',padding:'10px 16px',background:'#070708',borderBottom:'1px solid #0a0a0a',flexShrink:'0'});
+    ['bible','product'].forEach(type=>{
+      const btn=el('button',{className:'mode-btn'+(pc_editType===type?' active':''),onClick:()=>{pc_editType=type;render();}});
+      btn.innerHTML=(type==='bible')?'📖 BIBLE FACTS':'🛒 PRODUCTS';
+      typeBar.appendChild(btn);
+    });
+    frag.appendChild(typeBar);
+
+    const picker=mk({flex:'1',overflow:'auto',padding:'16px',display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'});
+    (pc_editItems[pc_editType]||[]).forEach(item=>{
+      const card=el('button',{style:{padding:'20px 14px',background:'#0a0a0c',border:'1px solid #1a1a1e',borderRadius:'12px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:'8px',textAlign:'center'},onClick:()=>{setState('pc',{currentItem:copy(item),guesses:{},revealed:false,winnerIdx:null});}});
+      const cem=mk({fontSize:'44px',lineHeight:'1'});cem.textContent=item.emoji||'❓';card.appendChild(cem);
+      const cl=mk({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'13px',color:'#ddd',letterSpacing:'1px',lineHeight:'1.3'});cl.textContent=item.label;card.appendChild(cl);
+      picker.appendChild(card);
+    });
+    frag.appendChild(picker);
+    return frag;
+  }
+
+  // Current item active
+  const item=PC.currentItem;
+
+  // Item header
+  const header=mk({padding:'16px',background:'#050505',borderBottom:'1px solid #111',display:'flex',alignItems:'center',gap:'14px',flexShrink:'0'});
+  const hem=mk({fontSize:'48px',lineHeight:'1',flexShrink:'0'});hem.textContent=item.emoji||'❓';header.appendChild(hem);
+  const hi=mk({flex:'1',display:'flex',flexDirection:'column',gap:'3px',minWidth:'0'});
+  const hl=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(16px,2vw,22px)',letterSpacing:'2px',color:tm.accent,lineHeight:'1.2'});hl.textContent=item.label;hi.appendChild(hl);
+  const hs=mk({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'11px',color:'#555',letterSpacing:'2px',textTransform:'uppercase'});
+  hs.textContent=(item.unit==='$')?"What's the price? (closest without going over wins)":'How many? (closest without going over wins)';
+  hi.appendChild(hs);
+  header.appendChild(hi);
+  if(PC.revealed){
+    const rvBox=mk({textAlign:'center',padding:'8px 18px',background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.35)',borderRadius:'10px',flexShrink:'0'});
+    const rl=mk({fontSize:'10px',color:'#888',letterSpacing:'2px',fontFamily:'"Barlow Condensed",sans-serif'});rl.textContent='ACTUAL';rvBox.appendChild(rl);
+    const rv=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'26px',color:'var(--green)',letterSpacing:'2px'});
+    rv.textContent=(item.unit==='$'?'$':'')+item.answer+((item.unit&&item.unit!=='$')?' '+item.unit:'');
+    rvBox.appendChild(rv);
+    header.appendChild(rvBox);
+  }
+  frag.appendChild(header);
+
+  // Team guess cards
+  const teamArea=mk({flex:'1',overflow:'auto',padding:'18px',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:'14px',alignContent:'start'});
+  teams.forEach((team,i)=>{
+    const guess=(PC.guesses&&PC.guesses[i]!==undefined&&PC.guesses[i]!==null)?PC.guesses[i]:null;
+    const hasG=guess!==null&&guess!==''&&!isNaN(parseFloat(guess));
+    const isWinner=PC.revealed&&PC.winnerIdx===i;
+    const over=PC.revealed&&hasG&&parseFloat(guess)>item.answer;
+    const card=mk({padding:'18px',background:isWinner?'rgba(74,222,128,0.18)':'#0a0a0c',border:isWinner?'2px solid var(--green)':'1px solid '+(over?'rgba(239,68,68,0.45)':'#1a1a1e'),borderRadius:'12px',display:'flex',flexDirection:'column',gap:'12px',boxShadow:isWinner?'0 0 30px rgba(74,222,128,0.25)':'none'});
+    const nm=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'18px',letterSpacing:'2px',color:getTeamColor(i)});
+    nm.textContent=team.name+(isWinner?' 🏆':over?' 💥':'');
+    card.appendChild(nm);
+    if(!PC.revealed){
+      const input=el('input',{style:{width:'100%',padding:'12px 16px',background:'#050505',border:'1px solid #2a2a2e',borderRadius:'10px',color:'#fff',fontFamily:'"Black Ops One",sans-serif',fontSize:'26px',letterSpacing:'2px',textAlign:'center'},placeholder:'?',type:'number',inputMode:'numeric',value:guess!==null?guess:'',onInput:e=>{const ng=Object.assign({},PC.guesses||{});ng[i]=(e.target.value===''?null:parseFloat(e.target.value));PC=Object.assign({},PC,{guesses:ng});pushState();}});
+      card.appendChild(input);
+    }else{
+      const gd=mk({padding:'14px',textAlign:'center',background:over?'rgba(239,68,68,0.15)':'#050505',border:'1px solid '+(over?'rgba(239,68,68,0.35)':'#2a2a2e'),borderRadius:'10px',fontFamily:'"Black Ops One",sans-serif',fontSize:'26px',color:over?'var(--red)':(isWinner?'var(--green)':'#888')});
+      gd.textContent=hasG?((item.unit==='$'?'$':'')+guess):'—';
+      card.appendChild(gd);
+    }
+    teamArea.appendChild(card);
+  });
+  frag.appendChild(teamArea);
+
+  // Controls
+  const ctrl=mk({padding:'14px 16px',background:'#050505',borderTop:'1px solid #0a0a0a',display:'flex',gap:'10px',justifyContent:'center',alignItems:'center',flexWrap:'wrap',flexShrink:'0'});
+  if(!PC.revealed){
+    const rvBtn=el('button',{className:'op-btn',style:{padding:'12px 36px',background:'linear-gradient(135deg,var(--green),#16a34a)',color:'#000',fontFamily:'"Black Ops One",sans-serif',fontSize:'14px',letterSpacing:'3px'},onClick:()=>{
+      let winnerIdx=null,bestDiff=Infinity;
+      teams.forEach((_,i)=>{
+        const g=PC.guesses&&PC.guesses[i];
+        if(g===null||g===undefined||g==='')return;
+        const num=parseFloat(g);
+        if(isNaN(num))return;
+        if(num>item.answer)return;
+        const diff=item.answer-num;
+        if(diff<bestDiff){bestDiff=diff;winnerIdx=i;}
+      });
+      if(winnerIdx!==null){
+        const exact=parseFloat(PC.guesses[winnerIdx])===item.answer;
+        const pts=(PC.ptsPerWin||100)+(exact?50:0);
+        addToScoreboard(winnerIdx,pts);
+      }
+      setState('pc',{revealed:true,winnerIdx:winnerIdx});
+    }});
+    rvBtn.textContent='🎯 REVEAL';ctrl.appendChild(rvBtn);
+    const clearBtn=el('button',{className:'op-btn',style:{padding:'12px 20px'},onClick:()=>setState('pc',{guesses:{}})});clearBtn.textContent='↺ Clear';ctrl.appendChild(clearBtn);
+    const backBtn=el('button',{className:'op-btn',style:{padding:'12px 20px'},onClick:()=>setState('pc',{currentItem:null,guesses:{},revealed:false,winnerIdx:null})});backBtn.textContent='↰ Pick Different';ctrl.appendChild(backBtn);
+  }else{
+    const nxt=el('button',{className:'op-btn',style:{padding:'12px 36px',background:'linear-gradient(135deg,var(--green),#16a34a)',color:'#000',fontFamily:'"Black Ops One",sans-serif',fontSize:'14px',letterSpacing:'3px'},onClick:()=>setState('pc',{currentItem:null,guesses:{},revealed:false,winnerIdx:null})});
+    nxt.textContent='▶ NEXT ROUND';ctrl.appendChild(nxt);
+  }
+  frag.appendChild(ctrl);
+  return frag;
+}
+
+function buildPC_Aud(wrap){
+  if(PC.screen!=='game'){
+    const w=mk({});w.className='waiting';
+    const t=mk({});t.className='waiting-title';t.style.color='var(--green)';t.textContent='💲';
+    const s=mk({});s.className='waiting-label';s.textContent='PRICE CHECK';
+    w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;
+  }
+  const teams=getMasterTeams();
+  const tm=themeMeta(PC.themeId||'trophy');
+
+  if(!PC.currentItem){
+    const w=mk({});w.className='waiting';
+    const t=mk({});t.className='waiting-title';t.style.color=tm.accent;t.textContent='💲';
+    const s=mk({});s.className='waiting-label';s.textContent='Picking next item...';
+    w.appendChild(t);w.appendChild(s);wrap.appendChild(w);return wrap;
+  }
+
+  const item=PC.currentItem;
+  const ctr=mk({display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'clamp(16px,3vh,32px)',padding:'clamp(20px,4vh,50px)',width:'100%',height:'100%',textAlign:'center'});
+
+  const em=mk({fontSize:'clamp(100px,16vw,220px)',lineHeight:'1',filter:'drop-shadow(0 8px 30px rgba(0,0,0,0.5))'});em.textContent=item.emoji||'❓';ctr.appendChild(em);
+
+  const lbl=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(28px,5vw,56px)',letterSpacing:'clamp(2px,0.4vw,6px)',color:tm.accent,lineHeight:'1.2',maxWidth:'90%',textShadow:`0 0 30px ${rgba(tm.accent,.4)}`});lbl.textContent=item.label;ctr.appendChild(lbl);
+
+  const ask=mk({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'clamp(18px,2.5vw,28px)',letterSpacing:'3px',color:'#888',textTransform:'uppercase'});
+  ask.textContent=(item.unit==='$')?"What's the price?":'How many?';
+  ctr.appendChild(ask);
+
+  if(PC.revealed){
+    const rvBox=mk({padding:'clamp(16px,3vh,32px) clamp(32px,6vw,80px)',background:'linear-gradient(135deg,rgba(74,222,128,0.2),rgba(22,163,74,0.1))',border:'3px solid var(--green)',borderRadius:'24px',boxShadow:'0 0 80px rgba(74,222,128,0.35)',animation:'scaleIn .5s cubic-bezier(.34,1.4,.64,1)'});
+    const rl=mk({fontSize:'clamp(14px,1.8vw,20px)',color:'#888',letterSpacing:'5px',fontFamily:'"Barlow Condensed",sans-serif',textTransform:'uppercase'});rl.textContent='The Answer Is';rvBox.appendChild(rl);
+    const rv=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(56px,10vw,120px)',color:'var(--green)',letterSpacing:'4px',textShadow:'0 0 40px rgba(74,222,128,0.8)'});
+    rv.textContent=(item.unit==='$'?'$':'')+item.answer+((item.unit&&item.unit!=='$')?' '+item.unit:'');
+    rvBox.appendChild(rv);
+    ctr.appendChild(rvBox);
+  }
+
+  const cards=mk({display:'flex',gap:'clamp(10px,2vw,24px)',flexWrap:'wrap',justifyContent:'center',width:'100%'});
+  teams.forEach((team,i)=>{
+    const guess=PC.guesses&&PC.guesses[i];
+    const hasG=guess!==null&&guess!==undefined&&guess!==''&&!isNaN(parseFloat(guess));
+    const isWinner=PC.revealed&&PC.winnerIdx===i;
+    const over=PC.revealed&&hasG&&parseFloat(guess)>item.answer;
+    const card=mk({padding:'clamp(14px,2vh,22px) clamp(18px,3vw,32px)',background:isWinner?'rgba(74,222,128,0.2)':'#0a0a0e',border:isWinner?'3px solid var(--green)':'2px solid '+(over?'rgba(239,68,68,0.45)':'#1a1a1e'),borderRadius:'16px',minWidth:'180px',display:'flex',flexDirection:'column',gap:'8px',boxShadow:isWinner?'0 0 50px rgba(74,222,128,0.45)':'none',transition:'all .3s'});
+    const nm=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(14px,2vw,22px)',letterSpacing:'2px',color:getTeamColor(i)});
+    nm.textContent=team.name+(isWinner?' 🏆':over?' 💥':'');
+    card.appendChild(nm);
+    const gd=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(28px,4vw,48px)',color:isWinner?'var(--green)':over?'var(--red)':'#666',letterSpacing:'2px'});
+    if(PC.revealed){gd.textContent=hasG?((item.unit==='$'?'$':'')+guess):'—';}
+    else{gd.textContent=hasG?'?':'—';}
+    card.appendChild(gd);
+    cards.appendChild(card);
+  });
+  ctr.appendChild(cards);
+
+  wrap.appendChild(ctr);
+  return wrap;
+}
+
 // ── TIMER TICKS (Word Drop + Countdown + Clue Climb) ──
 // Only re-render when a timer is actively running, and only for the active game
 let _lastTickSec=-1,_timerInt=null;
@@ -4590,6 +4892,7 @@ function subscribeIPC(){
     const prevPF=copy(PF),prevWD=copy(WD),prevTTT=copy(TTT);
     activeGame=s.activeGame||activeGame;
     if(s.pf)PF=s.pf;if(s.wd)WD=s.wd;if(s.ttt)TTT=s.ttt;if(s.grid)GRID=s.grid;if(s.sb)SB=s.sb;
+    if(s.pc){const prevPC=PC;PC=s.pc;if(ROLE==='audience'){if(PC.revealed&&!prevPC.revealed){if(PC.winnerIdx!==null){soundPCDing();setTimeout(()=>spawnConfetti(),200);}else{soundPCBust();}}}}
     if(s.cd){const prevCD=CD;CD=s.cd;if(ROLE==='audience'){if(CD.result==='finished'&&prevCD.result!==CD.result){soundCDFinished();setTimeout(()=>spawnConfetti(),200);}if(CD.result==='expired'&&prevCD.result!==CD.result){soundCDTimesUp();setTimeout(soundWompWomp,200);}}}
     if(s.nw){const prevNW=NW;NW=s.nw;if(ROLE==='audience'){if(NW.landed&&!prevNW.landed){if(NW.landed.square.whammy)soundNWWhammy();else{soundNWPrize();if(NW.landed.square.value>=500)setTimeout(()=>spawnConfetti(),100);}}if(NW.spinning&&!prevNW.spinning)startNWAudSpin();if(!NW.spinning&&prevNW.spinning)stopNWAudSpin();}}
     if(s.cc){const prevCC=CC;CC=s.cc;if(ROLE==='audience'){if(CC.roundOver&&!prevCC.roundOver&&CC.wordsGotten>0)soundCCCatWon();if(CC.roundOver&&!prevCC.roundOver&&CC.wordsGotten===0)soundTimesUp();if(CC.gameOver&&!prevCC.gameOver){soundSolve();setTimeout(()=>spawnConfetti(),300);}}}
@@ -4608,7 +4911,7 @@ function subscribeIPC(){
 }
 
 // ── UPDATE CHECK ──
-const APP_VERSION='1.0.13';
+const APP_VERSION='1.0.14';
 const UPDATE_URL='https://raw.githubusercontent.com/pastorderek81/pointegames/main/updates.json';
 let updateInfo=null;
 let _updateMsg='';
