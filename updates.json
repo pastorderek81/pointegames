@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.13",
-    "notes": "Theme picker is now always visible in the operator window during gameplay — a compact footer bar at the bottom shows all color blocks and pack thumbnails so you can switch palettes mid-round without opening the \ud83c\udfa8 modal.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.13/Game.Hub-1.0.13-arm64.dmg",
-    "date": "2026-04-17"
+    "version": "1.0.14",
+    "notes": "New game: PRICE CHECK. Closest-without-going-over guessing game with operator-picked items — Bible facts or everyday products. Exact guesses get a bonus. Beta-gated.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.14/Game.Hub-1.0.14-arm64.dmg",
+    "date": "2026-04-22"
   }
 }
