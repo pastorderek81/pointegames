@@ -1,0 +1,47 @@
+{
+  "name": "countdown",
+  "version": "1.0.0",
+  "description": "Dramatic countdown timer utility for kids ministry events",
+  "main": "main.js",
+  "author": "The Pointe Church",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.thepointe.countdown",
+    "productName": "Countdown",
+    "files": ["main.js", "index.html", "build/icon.png", "build/icon.icns", "build/icon.ico"],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [{"target": "dmg", "arch": ["arm64"]}]
+    },
+    "dmg": {
+      "title": "Install Countdown",
+      "backgroundColor": "#030304",
+      "window": {"width": 540, "height": 360},
+      "contents": [
+        {"x": 150, "y": 165, "type": "file"},
+        {"x": 390, "y": 165, "type": "link", "path": "/Applications"}
+      ],
+      "iconSize": 120
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Countdown"
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}

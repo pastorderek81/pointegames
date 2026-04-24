@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Countdown</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow+Condensed:wght@700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#f59e0b;--cyan:#22d3ee;--purple:#a855f7;--red:#ef4444;--green:#4ade80;--bg:#030304;--surface:#0a0a0c;--border:#1a1a1e;}
+html,body{width:100%;height:100%;background:var(--bg);color:#fff;font-family:'Nunito',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;}
+input{outline:none;font-family:inherit;}
+
+/* ── LOBBY ── */
+#lobby{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#1a0000 0%,#030304 60%);z-index:100;}
+.lobby-title{font-family:'Black Ops One',sans-serif;font-size:clamp(32px,8vw,72px);letter-spacing:6px;color:var(--red);text-shadow:0 0 40px rgba(239,68,68,.5),0 0 80px rgba(239,68,68,.2);margin-bottom:8px;}
+.lobby-sub{font-size:clamp(11px,2.5vw,14px);color:#444;letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;}
+.lobby-card{background:#0a0a0c;border:1px solid #1a1a1e;border-radius:20px;padding:32px;width:min(420px,90vw);display:flex;flex-direction:column;gap:16px;}
+.lobby-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+.lobby-input{width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fff;font-size:18px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-transform:uppercase;}
+.lobby-input::placeholder{color:#333;letter-spacing:2px;}
+.lobby-divider{display:flex;align-items:center;gap:12px;color:#222;font-size:11px;}
+.lobby-divider::before,.lobby-divider::after{content:'';flex:1;height:1px;background:#1a1a1e;}
+.btn-primary{padding:15px;background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;box-shadow:0 4px 20px rgba(239,68,68,.3);}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{padding:15px;background:transparent;color:#444;border:1px solid #1a1a1e;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;}
+
+/* ── OPERATOR ── */
+#operator{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;}
+.op-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#030304;border-bottom:1px solid #111;flex-shrink:0;min-height:52px;}
+.op-title{font-family:'Black Ops One',sans-serif;font-size:15px;letter-spacing:3px;color:var(--red);}
+.op-room{font-size:11px;color:#333;letter-spacing:2px;}
+.op-topbtns{display:flex;gap:8px;align-items:center;}
+.op-btn{padding:6px 12px;background:#0e0e10;color:#555;border:1px solid #111;border-radius:7px;font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;font-weight:700;}
+.op-scroll{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+/* Time presets */
+.preset-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px;}
+.preset-btn{width:90px;height:90px;background:#0e0e10;border:2px solid #1a1a1e;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;}
+.preset-btn.active{border-color:var(--red);background:rgba(239,68,68,.08);box-shadow:0 0 20px rgba(239,68,68,.15);}
+.preset-btn:active{transform:scale(.95);}
+.preset-time{font-family:'Black Ops One',sans-serif;font-size:28px;color:var(--red);letter-spacing:2px;}
+.preset-label{font-size:10px;color:#444;letter-spacing:1px;text-transform:uppercase;}
+
+/* Custom time */
+.custom-row{display:flex;gap:8px;align-items:center;margin-bottom:24px;}
+.custom-input{width:80px;padding:12px;background:#0e0e10;border:1px solid #1a1a1e;border-radius:10px;color:var(--red);font-family:'Black Ops One',sans-serif;font-size:24px;text-align:center;letter-spacing:2px;}
+.custom-label{font-size:12px;color:#444;letter-spacing:1px;}
+
+/* Control buttons */
+.ctrl-big{padding:20px 50px;border-radius:14px;font-family:'Black Ops One',sans-serif;font-size:22px;letter-spacing:4px;transition:all .15s;}
+.ctrl-big:active{transform:scale(.95);}
+.ctrl-start{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;box-shadow:0 6px 30px rgba(239,68,68,.4);}
+.ctrl-finish{background:linear-gradient(135deg,var(--green),#16a34a);color:#000;box-shadow:0 6px 30px rgba(74,222,128,.4);}
+.ctrl-stop{background:linear-gradient(135deg,#555,#333);color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.ctrl-row{display:flex;gap:12px;margin-top:16px;}
+
+/* Operator timer display */
+.op-timer{font-family:'Black Ops One',sans-serif;font-size:72px;letter-spacing:6px;text-align:center;margin-bottom:16px;}
+
+/* ── AUDIENCE ── */
+#audience{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;}
+
+/* Giant timer */
+.aud-timer{font-family:'Black Ops One',sans-serif;font-size:clamp(120px,30vw,300px);letter-spacing:clamp(8px,2vw,20px);transition:color .3s,text-shadow .3s;user-select:none;position:relative;z-index:2;}
+.aud-timer.chill{color:var(--cyan);text-shadow:0 0 60px rgba(34,211,238,.4),0 0 120px rgba(34,211,238,.15);}
+.aud-timer.warning{color:var(--gold);text-shadow:0 0 60px rgba(245,158,11,.5),0 0 120px rgba(245,158,11,.2);}
+.aud-timer.danger{color:var(--red);text-shadow:0 0 80px rgba(239,68,68,.6),0 0 160px rgba(239,68,68,.3);animation:dangerPulse .5s ease-in-out infinite;}
+.aud-timer.done{color:var(--red);text-shadow:0 0 100px rgba(239,68,68,.8);font-size:clamp(60px,15vw,160px);animation:none;}
+.aud-timer.finished{color:var(--green);text-shadow:0 0 100px rgba(74,222,128,.8);font-size:clamp(60px,15vw,160px);animation:winFlash 1s ease-in-out infinite;}
+
+/* Progress ring */
+.ring-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+.ring-svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);z-index:1;}
+.ring-bg{fill:none;stroke:#111;stroke-width:8;}
+.ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .3s;}
+
+/* Glow pulse background */
+.aud-bg-pulse{position:fixed;inset:0;pointer-events:none;z-index:0;transition:opacity .5s;}
+.aud-bg-pulse.danger{background:radial-gradient(ellipse at 50% 50%,rgba(239,68,68,.08) 0%,transparent 70%);animation:bgPulse .5s ease-in-out infinite;}
+
+/* Label */
+.aud-label{font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,3vw,28px);color:#333;letter-spacing:4px;text-transform:uppercase;margin-top:clamp(12px,2vw,24px);z-index:2;}
+
+/* Waiting */
+.waiting{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;}
+.waiting-title{font-family:'Black Ops One',sans-serif;font-size:clamp(48px,12vw,96px);color:var(--red);text-shadow:0 0 30px rgba(239,68,68,.4);}
+.waiting-label{font-size:clamp(12px,2.5vw,16px);color:#444;letter-spacing:3px;text-transform:uppercase;}
+
+/* ── ANIMATIONS ── */
+@keyframes dangerPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+@keyframes bgPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+@keyframes winFlash{0%,100%{opacity:1;}50%{opacity:.6;}}
+@keyframes confFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@keyframes screenFlash{0%{opacity:1;}100%{opacity:0;}}
+@keyframes shakeHard{0%,100%{transform:translateX(0);}10%{transform:translateX(-15px);}30%{transform:translateX(12px);}50%{transform:translateX(-10px);}70%{transform:translateX(8px);}90%{transform:translateX(-5px);}}
+</style>
+</head>
+<body>
+
+<!-- ── ELECTRON ── -->
+
+<div id="app"></div>
+
+<script>
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LICENSE GATE — registration key required (CD or MST prefix keys)
+// ══════════════════════════════════════════════════════════════════════════════
+const LICENSE_HASHES = {
+  CD: [
+    "2690ea209ca98be1b25942df4a84d99ee7a424564a23e2a5d58bc78a253a3a71",
+    "e77b8ab611e65db1df1f401e09ea1e1a53867b3fb832eebbf59dc181d945c1d6",
+    "e7ec8f3c3406a55687525e03a93d386f232d0bd65090aff9f8cb4a3c4deaec68",
+    "4983ce943ba29f1a6227ec2e3d5267ab3aba8cfe5899a374ce948d3e8978abe1",
+    "5b2a5d446dd9bd0d268e82b2fff6e84d9423b97f40126a394f845a56358f1249",
+    "411bd48d36f666a2738df93520f915060a1d24ef1d484065fa45dac3c824c8bf",
+    "7f90ce50ee5e3dd8b22737f070e730ef6aa96795a6bded3bc093a66b999e3fd8",
+    "136f7ffb137f382c4f9e8693eb307b80a2bef6be9c474649f31c8414b0c10b32",
+    "f79e48773dfc1627e6825dae3fd3bbe4783c19ddb77515bd23af0d20f5f4ceb0",
+    "f87d57fa0928d45924def7f16789621c12ea494d53e94e05c4fd601d0414bf07",
+    "2cd07ca6cdcf468b535a8e281fffaf7ca9e3fceb16ddb990ba7d0c5505177fca",
+    "84ab7117069a1efcb944b44f7c4718c9d137adc1cd82f4c059e8e12dff0e4977",
+    "f3e566f6bceaa08fd390e3548997ee88504068909aef6feab86909797597957e",
+    "6c574a4c8a81a65f7198f89e2ea337f004cd249e4b6706a82d165dc601893440",
+    "44bbca351f9e556fbf4a591fd3976339b93f1ff87d5ef8364997dc7679000244",
+    "361262a5b93b9fd99148e6e7a160ad45038aeb7852b4aeb8745d1c1b8366b441",
+    "5fe1ad7bb2a748f3740c086cfeb9735b1d7440a07dfc4235791b77250f6e0a6b",
+    "7284a0393f88feafa19884b4bec48b4ec77e1ad7469ef3d7d795cefc58192d47",
+    "afc86f09a6805193f94895deaa6533c8258694d4daeedbfd43e5ece86d7466bf",
+    "8fcc4dcc14981640da73da4ee3dcf02a464425c2412779bc95f62fce23fa6952",
+    "ce9613f9d4e835e6d8f4efd0b8df2f72e3fdb63db1c7c2360ffbc75f692f05fa",
+    "6c61070a542e5ef1c88a80232630fbd3707475a905649b25a0b8cf9b0797234f",
+    "282e0cbb58f69d4c954657757dfd396bcbedd71b384b7b6eb0d5ad38e01d34ab",
+    "b5a864d6c2c6bcef712e0c9a75fa42cc060583f107319cde62bcdfc9d8893169",
+    "f27fe80b9897d575f822fbd016b577841c53ad70fb7ed67265688fbcf3027c83",
+    "cd8fd7f036913fad6813e496ff1ed4a93e291929ca268abf3afebcecc03c928b",
+    "7ad88b04eba34aa4598ac4ff1264876e1f85e6fbbaabe8e43a56fcf46ab0a146",
+    "de97c22bf407df4ebdb41b5f32feed4cbc295e326b9e2b1c9e873fef916a2b6d",
+    "f2708161ff265306fe14f44b21e262cceaf97d5ab3f1bce6c42f79afd9eab80d",
+    "b9c9bbbfd9b601f1c80485107533518c15e66c87b6dad12404ff72955a1b52a6",
+    "fee4dc4eb82f23439949432c520be563111d835a7cce01f733ef4d54de62c6d1",
+    "fbf67dd4cb1d0ae0b52ce474c99efbabe2147281ce6887f998d4fe04b68bed7d",
+    "daadc082f4c8be774cb2052b0fcd2f61501e318976da9898834fc1d920aabae7",
+    "e161fdd0a1a1d968007ef29b86d2500598ff32e090f67869620f28675861d1b6",
+    "ee42d29be67745839dcd525e2dcf6ad906b7e14670681b9527361dbebf6cf859",
+    "aa2611f809ab38e3e45277ecd5f720bc9252f698fa62dfaa7d9558e58f33bf89",
+    "00ba813f1199229ecd9473586de9fd4dbad195d1b94fdeb35f8e7b6892c87e13",
+    "440dfe6413e238497ed1cf17d60965f9c2ce9a54904fa43f27acae3f1e9fbe14",
+    "97d8f71609452ec28ad92116bbd13bc7bc5a6ca7eebbf6c1f0392f38a4b4d463",
+    "4702f06d846a03d52a092d612395541076ca5551116106afde432827ca3f3612",
+    "cd971271afeaf27b91ad14a6a29b93bba24a4acade72085ed3d2809f8b41a4c8",
+    "b5ce4113912b3556c94f0a81cadcca9122e0984c8f26f769935a976a876771f0",
+    "7e845204f43b2d1dd00b55ce1f60934383ad3b85069bfdc551d1916be51600b7",
+    "9acf00ea92a62c7d98a7289dee0b676579f44f7637781364b4ca799ba4a44186",
+    "b5bfd52f3a3350e30f4e6bddb87e7d07644fced5b5620b9d74c30ac3b18d4722",
+    "4f6e38d6293245773c9c6fc134cba08606659e00391b33caa35630b2becbdd34",
+    "f21933ee153256dc62797dc07d83ed22309e26965ebbd5a009bc8c0697cbdcdc",
+    "061701eee8cfb40b1e63b0e880e8809aa5361f3af14504e6f1c5a88bffe9a4ce",
+    "de8f4152052f4dc78f141d65e232104fb60a9c096d5bab0355772bdcb185439d",
+    "7a706743de403f43cfc25707653dcb689b19731294153c111058edb1eda6e05b",
+    "75c73bd18593d984acee355a87d9d648e359428051fc21b675f543ccfddd6881",
+    "3b25f17e509fb982eaafd6c8ec834e4084a8115d9cc4c41d29f839ff8d197d72",
+    "4254f1e4ce31899d2199402e52b468362e66d48e6ce1c8903c296c77224ede7e",
+    "16cc92def87dbac2967a77152155c307673153991906bf40ee5dd7b9c6c2bfec",
+    "f3e1233f82473671d59e65a2a4eee45805be8a9e7bc0af5e8a3556e7e0e81b0d",
+    "c045ec65a92abfa0a3567f4f44c0bebfea0dd42d85ead8009bc5f482ba2cb579",
+    "6746bf569a18648bc21bb56b20149554e12c4fc61e5d38055ca0b39c6c9d7dfd",
+    "14a03340038d04aa0f1a3b27367728aaa35be39f937de8001188688bd016b4c1",
+    "f16bf6a588df733439f84877ff7f070696be8361e222746ca95b40774b9845dc",
+    "a40fe320581956fb9ba1f478ba680ffc70161e5295703c9a79c41676704d2576",
+    "0d9cc472e3f3a29b688adae22b2f45df86a844611dacee2b02757cc3e513ed10",
+    "937eae2e975629c1f708b537f898217d8adeb1467ff06aaf07eed6c6629c5c3e",
+    "6dc1ffdccc3d6cff07e10dc06b8319ee00fa6fa4d626c44d1f63a5cb51cac44e",
+    "16d0bb19789dad214934924c4c96da8f9ded4fc860ab442569360886f621fdeb",
+    "18489a7cea016aa408fa808d3c2444ff39f76feb9fd79c49a484870a650b3aa7",
+    "d8ce4078611e7e14dc3e15f14d8ccc9c3c3da89096f3d7b8ed7fc7e971c7c930",
+    "0b02f80d95d42544f4b0fd4166fbda23fde5c064d13f39c272f68f8bb815cb98",
+    "1d2aff5a9e8426064923f605f8ad9cf1d969af307fac9f9bb84b23628118978b",
+    "9f972f1418566eb913f11ebf4fbc83fc38be83dac9a07794ed72aaa504b50fb6",
+    "b124716236ed9fcbf6de8cfcd05303f6d709e9cd3dccba7d98de932c7976be3b",
+    "e89f24439bb099b033eb1ffb635938f23785e3eae5a3f288e37ac4c9bb023ab8",
+    "e945398f42a04b8589a3e4d3fc50088aadbc4194123223d6c2fed458d9e6d6bb",
+    "fc4b424501abab2ed954d31ca750e14cc13152e36eed23b184ef6c914261b36b",
+    "f3572580453aacd3250f6cb282aa85b585580f40fef6ae2329c2eaf9b3575f1a",
+    "add016f11d3b5c62ac0fc1cdf1f225a587007d9d8b51d738907a9616564cf13a",
+    "7ab2fb937ec323c04c9936844c1fc931b67c1546f9067f34b012480db1772097",
+    "59ad31bc52fc47bdcd160a4f668eedeaa842682fad4738b8c75439cbaf9abb8c",
+    "87bd24999796f2d2fa2586d94f8e2ec7ac2975cac8551d8de9de766347a012ca",
+    "43d4a3e6fca523c6b2df9ae353368ad586c5944de97c485c190475ebe3ca4c1b",
+    "79f9d87885ac61bbe79b6ab803e90f08abbee1d26fcfb5d4a8b0d9e3efd7963e",
+    "b0707e42206c8e494b643c271cb170f7fab0896872cdbc51697014618de3ac4b",
+    "f9648c7588c577bf432cb80a522971a820a3e8a130fe0a834518ca6ed7225806",
+    "0e5fae55b58fab0bb61e5d775b304fd1710eb40a2d90aa9944750322edcd211f",
+    "4b1078016855e993a9d730fca76dddfbcbcaed29740870bdfa66520bf0f32730",
+    "0fd9236007b5485255aad3155b90c10da393873b019d5da459d87e8ccdec988a",
+    "7a2f0406381967ec2d84066f062456bba2dec38cfee1895b7abcf44438441c88",
+    "c395cd31271b127cae09e9224d90f2bdc69287a3f34b638df3da3a574cff4dcd",
+    "eaa676601f4aa17917f5f44f21633a7c51ab1eb35bb36f88e20393c86ef86c73",
+    "0b08f0c4401493c8ea679c896dbd41678f848d4225d799dd8a76327121cd3179",
+    "3bd87f5f70e607a5d73c4b549f1a9dfc2c0c818d0731c19c0afdb6c98443771d",
+    "70bc25891665c5be06edae6bde2b80026c713c3094f58d22030320759d5e7bd9",
+    "7a878b6d7071829159dc974641683173a9c6e8e5e9e40f64d9f2f8e8f4760193",
+    "05c8db159608b3aff5551960d7fb27aae507775cc64baa18dbc46f0dd88c6568",
+    "1039b837b9ac247c7d2f3d07b5ff62649ecbb79b330de63bbcfb0e3234dc10fa",
+    "95e69614be4d4a7521409e45af8613b1d0a1292578eac8a98410ee648ca143d4",
+    "5628d22dfcd1ac2569a722a37394825780bb72c4fc6b95e7d562ec0822515c38",
+    "1b8dafbc072b4c401e2edd0d4ce7a15cbe49805a80bb360e83fba418b5f82106",
+    "6798b5ed700eec64ed59f238ff66555f639bf9cf96fa504585d3ffe0f2d1089c",
+    "77798361b8e6cfdfe3166691591d1b48401ee8952d8467b8a0b09313a5521e6a",
+    "df2641d0be6c9fb02bfc5ea9eae49c4003b2b1255eabf3170b10b0b052d7571e",
+    "c67b8749d6d32bdbb0f9b0efcf6f3c1076e9855d49b2629e38009e2321103ead",
+    "ef6b21eb5e8da66fde2bba52dcdb51903a4770b47421e966c34a30cebbd0fdf9",
+    "783292fce89dd7f32b466e02ce8d0868f190b4d22dd837e876a4f8bc4b91a807",
+    "aef4cdd5fee53b217f45850367c98fa2cb537eb31080a6606925d70d5fe3e9a3",
+    "b68b9b211024ee5b84756b8fe2b371bba10d5dd8b4927e08dd3b43cff725d6f4",
+    "2fbeec61ffca5bcffc6acf8921ad4868d757a64765b08d3c8217f2fd281bcac6",
+    "5c950d9373b9b77cd77e6b521430c1c70b6c48b005308ceb459a7ca5ca9843f6",
+    "243fae1a09ba33c2c8d11893efe13ef5bb8a56c877c4ee9a82f5ca8b02ff80ff",
+    "e9c5b9eeec02b9bbf3a0db1ba38956267c17e77d2c5c35b873f7d1d35bf89f2a",
+    "083ddd62599f2e5f6ac5327fe43438a1416f87d7adbbd6f2f977349acaba5a2b",
+    "4d38986fb9a766d0088aef98d246e2e027152a888e7e342eaa9b0abc5da771d6",
+    "b9c6d04d69c3991980988a86c6b69fdbf0dcd3dc6ae996042f33acf22711a650",
+    "6ee5beb7bfb1af88964391396fd63145900fadb9dfb90d82330daffb4f3b607c",
+    "d74628ea2dd332808ddb7e36cd34de6170405e41fcc2f2fa4b58888c89741241",
+    "70fef02df4e22467f9f9e7fabe40e2e9cf29b46770501867ad70a8588d000de1",
+    "4ff0c32709f172f4614f07f3f190c9a2f928da9419ca2c72397da2be83fb9981",
+    "c9a61df86fee8b67265a6b9fd15a6535a1a17717d75f82f59642504771e04d5a",
+    "4c2c7ad7084c27629230fc7f645a2281da2be00ecff0fbe97ce9c73913bf6e50",
+    "d77148b0e166b232339662af74b9c7d1ed8049fff934f27ca712893ba423a790",
+    "ab1b14541d1aa94f1fcf0eac93f5695818895d1f90443c0738a5e03da1f71cd8",
+    "15544516041e3682ca8f9b8bd83851000050a9bb87dde4b19dfb01db8c92a387",
+    "da535e6f8d8eb5678af1b114ea850ea906e034a8ddf3680815cee917694359b1",
+    "069cf059cfe06dfd37dd1ec977a51bcecfe1df7e1cebea0c8be16b081342c215",
+    "9a85d530f8c32e0b3a9e6e8b12387def6ad4e44579d501aa5c1129ca72a05d24",
+    "f6dc02b7e9673b1737ecd8fe3bf06501bd9fee731a877c7bd350e6185aac9b55",
+    "6d512c9289944be90732a0248a3470dc302de0154c8a02b780463f1da31066df",
+    "59695237a7aacc74d03ff2362bd91c170fed35d4889b6118e86c108b39322bac",
+    "b98dd6d97051fb164ec957c60476ee27068ed7ff61f5c6b97dee719f7218ea97",
+    "7ff224606f3bfb38b071c31f9e008d107fa8adee53d1a4c653991c8d71272fe0",
+    "c4a86e7eba674b106b3bcd5d0c8dcc2ed71b6dbda4ad2e7a1b61e3fbc59e116f",
+    "8b3dad9a3a51d94344b555e88b9950e77ad5b0549dcbfc9da86707c7bdcfe84c",
+    "f11724c36a65d600f85923769341881b64edb8ce07353668f406670c2789ec20",
+    "f5425b07f9681635775fc5dc65762921f17a8a13789e18d2b425cffa0b31628a",
+    "cdd3e57300570bf9fc5eb1a870552353b92e61083906a8be0eb98e73f8570630",
+    "d62f9a0c654de111cacac3a8155dd5f8c0df40dd769939fde2abd43c061322e0",
+    "f819253228503b5a9bc36d290526323a96563a766c239695bb843dd77d9f533d",
+    "b8c0fdd52f7335da2ac902d89cdcd9c9d309238fd0098da9e2391e9951e56dbf",
+    "53ae1f738ddf3867fd994e7a235640ef3647105f51cc2c6fc6796fa77f8e5c32",
+    "d376b3ad067ecd631df4875c41cf647a2ca1a3c6f2eb4a8cd65e8b07868edb4f",
+    "c50c40330c5c9d7415d475be521a01845ea5eaa2c21e730129bd9740ee9ae949",
+    "970aaef12ed0eabd59da05cb0031592905cdb9650d9ba63fe3f22a780cee698b",
+    "22efb2bdf8c3883696cf4e5e508e75ac596496f2bbdd938244892df8374c6716",
+    "2a1ff613400121176c313e373a9f39d3dbcea47340750cff7a73423e5561d85e",
+    "3f653255717fd3624a50484c9c28ccfb404f857e4c126d39e86a020d964bc846",
+    "5c78d2f4ec92df01caa52656589da775615b185e9e0bceef71a0a1b1dcc62ae7",
+    "fa3093c03c089c76b47a6c97edd8575f7084a40d7d135d7f2cf91290086736ac",
+    "5040e81581664f25bfb01728d2c1794326ae20fbf7c04f573b6f1ae063976bd6",
+    "50502761275590f05e63e9f109e7d5f56926f559d25ba81e136e9fa335707fd3",
+    "6de622635e5f47637b42fdc7f5cd50780552c895821d4ebd4647ef244637fab0",
+    "b4c269389be82ed9baf4836f994b68433aedb40de3ccc8ad0b4504be37a183df",
+    "6f92de7735940207fba96e8ba8efa4fabaca5fc9b775c1bacb1b19b7067990ee",
+    "3aac0b38f0cd4b6fe882aeb7fa028a48d8a31f73d98b9ad4cabfa0f78be3ee83",
+    "1a61edd72b9c40c1f2bce6eaebab1b4a41383ba612a77b9b9c64d4d11d450b5e",
+    "3c83d443e75838cf5b0bbe4735f1e7aa325e7fef92d77fb0946d3657010d81e8",
+    "4419438bd20283dc8efe85e66206881f6ad0986ec4bf4b87d85a5453dffb8fc8",
+    "0c0bf1e7d636c2cd5d754e3bca16cc21d854f1631fce4be86a1517fc4f3c22bc",
+    "94cee70085ea39847f37e23be037d00d549969f67297b05283c868a1e7fe2d13",
+    "b4088e145dd5950e94c65cb250d9a3fea505693c65cb1c21e35c18cb5b1c7063",
+    "9977e7e0cb4bef66c0b7633eb110d85d0a14fa0c3566d06460d8ea91e229c441",
+    "82169c287717b6bd6434bfdf2aec11a5aa84e76911b244b2e0fc705ec461dbb5",
+    "b9a40bc6c1ef8722d6d5b065bb980980f78a7f3932929c6428c0d1cc8f840cc1",
+    "c25cdbf2f54cfd9083ffc768d093fd145f4d0b4804b2063b6bef416a6cf47af0",
+    "d237d921fcb6021a75972df50301d329a53ad84df2b08300645bb5e011fbb14f",
+    "908be460275b94e5909d872f30b4ec38dfd3fb2da019d34f82648b11879af41b",
+    "8d492479a7bbd681a2014bbf653ff230b0987b4b129928f2ae76b5880015e75e",
+    "d90cbea81f0e834331dc58b70f8ad6d0126c0c8b16075e885f3766480b873473",
+    "094023e2eae80c9307bab78263727aaa7441ef62d39a7abc02ce58e22aac202d",
+    "27b61b0c1ed8b0654c07fee12d616a5421e5314b2a2d0bfba0e5d92644b9a700",
+    "224ce734313f3e82b6f6c682e5c4d7edffa377a7a9337473abaab8fb1675db4c",
+    "8720c7b61774c80cf69a6f441a4c8c58074ed6c2a848d996b46ac21af804029c",
+    "9d68fa6e0bdcfec7b6788399e96ba4a6f839954a57a7d38b7d3f753c18d19a42",
+    "0cb1dd048cba55e203de142b1087ebc2e4e27a024f8cf7136f0c59107232e477",
+    "a3038896f9929e1c7d52b0decef5029b097eb3240e741241ccba353731bc106c",
+    "efd5725c8f715d7e79fe9988702b3430f6244dd747d08d0a2da6a310358c739d",
+    "793d892e77c5a16a306dc5e94b6ea8d9ceae8fd9dd9184b0f46dfe71bed96409",
+    "d11149b33fc4f4d873a52212b0c3f39db03ed4dbb9d7391484aebf18c51ceaf0",
+    "ec3bb2d7b0ff89e59f91bb0bfabcea210caa29c096444f44a829534aaabc9b25",
+    "d23768311909acf8b53ee49ceb8e4c401722e29dc7cff19b152b092202de0022",
+    "6428958f229a71da9bfb49aa4b948233c5d9a86ad3a2fdf06c47d45c0efac39e",
+    "941f2d3911ea273a166b9618d624e17ec47ce0a18a6ae613fb546f7f48852644",
+    "b2ba98bbf331106faa87960608eb13bcf510ccf29f2880c7213747f65800f7cc",
+    "bd1fb787b15dae8aee56e311aebca66992a07950cb46ef7bb929384a95d4d77b",
+    "46371d53ca3ec2134c0b3d5405bbabc469bcf4cb23927923f002b375cad0637b",
+    "15a0097595bf30c07cb617e53a20fcd267523164f7da6f4c5f5b847dc442e25d",
+    "7fa3922d7d4f52caff90c71e91b1acd8c978476aa6afeb71524444a1b191e72c",
+    "c4faf83cbd94bfb216bed63da8d38b1022e5dec6462a800add4888857434d19c",
+    "386a863c224972e5fedd098a0e52ed9492b97e0311adb77e000863cb655fb281",
+    "e4491caf2066c8c72f529e7ee02a1732bc56293af39f56a9962afb093b1f93c8",
+    "821aee8264feae6e75626dc085fc11b5b59b25b57e7bf0ba30c1f484f00e96aa",
+    "6ff7a6a87868e5c4dfe94adfa4f51bb3e96f309da205d62f5989683bd6bfd643",
+    "07d399e395bfe28fa9bec4051146d6b6466a392bc1cd7844ab8005d17cb460e4",
+    "0e5c3f6d1eb18c7416d5af0e470f4aa4e861fb34e020e550b8b8c49a0117f4d6",
+    "f73e1ecee6edba69298682226d744a8992b189e779016e0bb8d7d5b9b740af30",
+    "0d2c51000c935c9a16deb42c3250090ded173621ed8a542ee075d4d7d15307e1",
+    "5c62e9db89be37abc45ee326867f1b912aa9b2f2a7a2d1b4f44b042297c8ade2",
+    "70668f96246259c3717d39198ae3cd362a4b1f7d42fd02547761c8f5d0df66f5",
+    "0a093372bf9d833b4b22637721fa9343d20e7ddc0a76d6348455b247d9293129",
+    "988d0f90eda99ad9830ca12b01a1d52f3b7375ca1b125ba58e49afb48c0b23ff",
+    "70b3b5d17f009b8d0c7d465ec66b86b04f917ad921750d6f77c562598f858276",
+    "e9cacb56d098db4359b77f6ee4633cf077d218add1315ee80466fd5231786232",
+  ],
+  MST: [
+    "7c7b95722a5cb194863897bf16720919cd823cf8b619544264648d8de11b6a81",
+    "1b46bb78e13a8fcb94fc5cd82cfa45877e4ae1b0596c9cf67ee467e4e588e953",
+    "c3267cbd7151067fa61758c4e9fdfdac3c49a1b4ba97adc1b992d1ac716bbe38",
+    "075cbf1d4e3ae49e4dbe506b3f83198fe9f1128af3cda9e13ac44b4c4750cb67",
+    "bff286fa92c1490b29cb789142f5af98b2985a5a54d23f48cf4a9558cdf87a3f",
+    "112240e78228ef90249bb94a0da83eb7c33a892ca6273236f26692442971ea8a",
+    "b2f23f043ef097b2d2ffd4741f4a8d0681322b7063750de9eb6bec6203aed925",
+    "ec23d3739490101c9fa5bbf4da300ab297266a648fd7e828bcff55e28d44430f",
+    "f310b83ab5d14521ead3b36c23098dbc6671a0832e2ea5e89cb41b2d05f262f5",
+    "06ee4baaf21162897dd91cede8aaab5bb7eecc20fc2634aa23777cf846546943",
+    "494a7e69cfb29511881403f11a92fe7ad2548de22cd7f37b388d5c32f3c104a5",
+    "f518663431a73c1f77d7682bbf153d99353fe1c4ef698f31274c477a41868a45",
+    "5e3a581e4a2762c074ae8153801e142977c5d57e573d8c460681236ed11363a3",
+    "8d26ff60a0a339cb1163b03bb4e59d96b7437b7158d5c478ec0270c7ca6cc992",
+    "076389a229868d7d59dd768773be98484015f16326a386fee59198fc70c94483",
+    "86b78133fa608579996acf52b7e195f969e46d7d41da63d0c22d83a4d48b7e9f",
+    "30c573566079969dbd852c7e1cdc07a9ad3c21c92a3402c75fa57a8fab6d9c6d",
+    "926359e026924e261c242421f0ed951a25313cf5d1b98049c67e640c4c96634a",
+    "56766f7e6ce9246fc38b0330f4640a2fd1c0c28c55e04a3cdc22e4352b1f6183",
+    "62fc3b90c87888c11ebc92c93c294636d760248396fd6da051f0620c4ce3ee11",
+    "d434210e93881d3279ad479bb70f4f1a777075c8c6b0531862c30c4f88f749ee",
+    "7d7fbe5c6c7ae1afc63c51f96eb4cd9f46683ed86fe5d59b8355a04a09b44de3",
+    "313695701d4b6ebc56847b47bb449c8f8479d36ea5de492b7d4fa1aac62fa709",
+    "747b17338361dd93648f149d40eab32d012bf43c8f32917a06f16a49cbc8bac9",
+    "e5c999b7e7f0c28d387cb658cf87fd16666f8c25800e8be827f1ebc6b334f0b6",
+    "bbc57875f4729bd8b9a78ae045a8bb48f192a7aef204b6b41f112c080d21d9f0",
+    "eada05c46c3e8b0160a1e2b686f621e25d9d748fdc4005630ae0789b55ec1550",
+    "15933e77f3b6b55e386ce2f2f471956d94ed0added4b12935a03e2af28d62073",
+    "e5e6490c4fedc57b09f8814a151cfa6d3cae6d809ed883e7d5a545cc1b36bd6d",
+    "8895d9156a27be9f0f57d31859496c7c46fa9c6baef5ef6ee5ea28a04b4c9c6a",
+    "c3d817d3a69916af78256eefd99242acbcf6307108bbe09f6c3b160022b9a432",
+    "a13866de5cb9a8de0de8ad94d72d33a18519db46ebbbc28679e44c450e4c391b",
+    "8c425061c9a145f471bdf93e955877859dd56871857f36aed8aa2feccb1ae961",
+    "a8f5bec658126c894771c4a7f0ccfd3c078301e4bff4b360ba1b64017f24a34a",
+    "8aad08ac550907c355321a2f82898c79db7e7d2f533a74e711db56dd2b051656",
+    "aa3554f9bb2213f1f41c17e2dc54c50fcfe31452c170d2aa4cc7551f53297737",
+    "55579f59e869f1054fdf2d606d546445e04089db992a6576e52dda1dc56d572c",
+    "f37415f34052f63cadba253b00f4c29cca2fa378b28840c36801f7360542fb3e",
+    "049459d5a6e829a337496399a3cb49483a95654bcc8f6f7b73dbe116635ef7b3",
+    "c00c99e4c8ace950c941ff058313312358669787c4ee5d45054a80db55dc7587",
+    "1ed6365dbd6e485dfd93d40539aefac3bd3c733dc4e631f9f4d274949202be6c",
+    "4417e2c6442d49db5352229d05cc9c4323028a7e3eb095662e9b4bc7f5f0b23e",
+    "edbe1e529768454d3506ed97e78eabae17d9a5a2e85387cf1fe6024f34c7c8d6",
+    "292ce38c2c64221bbb1c070c9ab3258c3ae45b785b08fdfa7d4ea575c2bd22fa",
+    "7d3a2cbdb5a6663b538291edb2169926cffa14cd6639b998014ced4c78d58d0a",
+    "57f5c78b2ebe1778cef58055094c8555de9910d2891994b0c00d450f9af04ee0",
+    "c64482cbb4aac9a865be4b16a0cb7cca7ecab22257bcd8767fbc7500cefc30f3",
+    "6088402f2def3b7e71927aa94a10ea4a9a3d3accd7bb88a706bad66b7964505f",
+    "969854bab59501423efba3aac8df5b2e024a411ab7fe0372ca7a80cf395907f9",
+    "393d6b60992f6fe8d065782df975b45c292ffc1ded45afa3426805feb7767ce2",
+    "44978b72eb8a6123b37115413e35aaf5fee8cc125cb02f4be0925c207ee50e7c",
+    "bce8d33ce452614f730884c6befa36d8f3fbc980b7de01fc24ca0183d894570b",
+    "749f725d0e3799a3197241b8e423c927dac18b117d510b182cdd6aec161ed083",
+    "208792ff0fd4a9601a065ac479af968936bcbf0f8949319d6519735ea1ba340c",
+    "d26703db71ac3349e371a0b5f2bfce5d1e5a2314767334a102f78502a9610076",
+    "308d308109601a540dc85b4790943b48fd7c37f6571c0870e34bac2c4629f8dd",
+    "786185ee093a451bddc1614548444bfd0ebbedfba1f5e07104322ac0dc71c68d",
+    "b505593c0a9666ea76da81f0fb423b3d7de66c1e340b07ee01cda499953437f7",
+    "57a26d5cfc0330d27dd5348459d9ff51e648a13f6a574665c59e2e3531e6f682",
+    "b42b0404fcf9aafd914ec3a179353f4bd2c8d1f26a008e27218901428e1a2b69",
+    "8d032b1a9deed712cdf0a86416f7d8235d632e0d9b0cef898ba8d4dd5cd7a87a",
+    "fa66765b3b798197cfeb8c7ef6da0caf6e4511309e5a91311607370c7df612ec",
+    "c087017201d4dc474c100485e265a9adb3e16dac0d79c9166041f13adafc4564",
+    "438028c5581475cc95e2e1fa8885494115496f49d04ae128ba089c5a006b574c",
+    "2127bc255766d4bfa9248be94cd83d3c3cac6ac1fc9176bb575d10ebf9117dc8",
+    "0b0f12f0fc9de77d20663d9a0ec5acf86e954b02752df549e45735800aaf73ea",
+    "9b7272a3aed7dbdcb8be45430b991aa8d488e24d53e3d6bb1318085650f7e5c8",
+    "aae89c48bff5424da1285dea7a072906a4825d2a49ec00513325d35e5a45a3f5",
+    "908b3441a0fea596624df39e887fda9a3307d9cdd2b657f73816ece2d84c4f42",
+    "58d9b2fbed4c9349a0c1a0e041a1785cbd371809444849aed9457414b15585a3",
+    "fcc8dd9ab1edf7624ef59a6e51ee06fd76b5dec6b691ed65e1942cfda3bc45ca",
+    "b891fdac0a8bdf246ec2e7b65786c67e8737cfdc4505c40eefcb180f1faa386a",
+    "1c21f8d4e17dae26bfd63d2dca9bce9dfb817a036d45e7628454e7aa0196a98c",
+    "c8641ac7df203027438346ac728d518b573d4a30b2be39cc535fd0c83920be3f",
+    "9aa8cd8827ac1a22cdfc86658e0c4e290398d868b50b48335d962c1a2a0085d6",
+    "f99c0733b1518a93d007d797365f48ab69864de748acdf8be9ea88fb83a2b2e2",
+    "ccc51ac69dfddf4fb0905915359cacfb7739e3cdacdb583b0a9203bd04f21439",
+    "3bf5a5d882ca4aa4d82a57ebcaaf341b4129f18b1b96539248be35e2073c1cbf",
+    "f024f251ec50c096528bb9be8d55d16ab0e2b68a1a5792574a932a78008fb04c",
+    "133742f80a4da7b9f17f5af2ec85833e4cf841c3e3b7423b0f6bb242ba344815",
+    "b2f667a0be7357e227f98cdc4071c83a4384029f103f1cdd543894cff15e6601",
+    "ae1da87552ca79816a233846426b74a0808e96b31855057b07001f8863d2c2ff",
+    "c56d57e79248b563df13566d1aa78a5f890dd719ba513b47d3cbe0416e278baa",
+    "ff7443e9b6f43421357481c1266774ed7140042ed429ab7ea58e1dcf8b26dcf4",
+    "02b6c9e236153b1c7e04fb0b3817ee714bc6db600368eca5631ad89b67102fe0",
+    "a53afdea5626a5036d35670fb78dcb8ad9fc29dea6f7133c695576fedae5d3c4",
+    "f476d375b1ba542b3ce4f1ae24f588167b7991d2c4013cea91529138729c2b13",
+    "699da1cba4f2734a7acf01b13b5a6089053042206765e94335353dc0e0342736",
+    "795062a53e7bf69244ab623b668310744ac8307b1ec476a8c0e434a425e0e160",
+    "5483f809a4509980455a3bd6fb2fd018bd97881010c09456a339cdc849c0e252",
+    "994f3f641a5bdf7c97b4cd42459c31aec69c1e84b970fcc049a366177eb19daa",
+    "dc6390c0ef84cd785b8d16463890600e95c45e0faee41b67c3911075375a2ce4",
+    "f67123bcaf26f989162eb06dce782ba8128f79226338a969dc0ede90e19bd0cf",
+    "f7d85fdba4c434914857b772534153d559a2d70027a841652442190115e27773",
+    "f303fd5091d5bffda68473e524522a8e22a731698baa2abf3aca2707af7fb62c",
+    "ee48f472a031f6be69b88fd8f833de796b2115d64f3cda9428bbbb7aa3784c1c",
+    "98b81140942700002fcd29c9b4d8d79faf9bf536c33433f737060632be911f14",
+    "545c831ac43f1b9b208c59e2730900f64f24881c54d64e39ec4370a36b564014",
+    "f7a6afb47968dc0064955a0bf3af2342473319443b2ba9b8317998f2f5333183",
+    "82591b9f1427c788b7b877b451dc80fbcb5e7110309cef500aab5a37f3afa16f",
+    "5a5cd93e2636867058f02ca8125669092015bc64092a751a197ac477ddcefc49",
+    "8ef9d10f215103965e60805a0ace741faa78fee49df7d1377a6dd680c3ef449c",
+    "2a78407645cc0f3e76b4679815fb4e096e2a217ad9d93c97620fbe98b0001923",
+    "a8ad0752583835153f1979ab23e7e0853d65d23e314faa9673c5f0f25e42c2f5",
+    "6e95b8a409675c14d1e73fcfa96f2091a43e01c708e5d4416363fc4b978002c8",
+    "d908616475fb828975c8727217198d7f22c65cbce57ca5db7eb9bbc9969a998b",
+    "bb52f8b543b3ee3747d944704960876601b9a3de97b7c4f75a1e9a8c35d7c26a",
+    "b74a473ed9c043fb8314cfe646e203486c462181dcf0a4bd9e73d0d5fa6c6643",
+    "db36492284714d261c13e59f1199ad39d1a1605c6aac2a1aec21dd56cc74a9fb",
+    "c9972eab0051c50200a767f3ee5cf718d285bc74b6197bdca46c816a3622d7a3",
+    "8301bf512d9a941c242877394de20e992fcebfe5749189cb53b26c5eaf3e841f",
+    "13ad9e48876775cce4cd052f567e352d1dd234a243c10c3c353758c5698f96be",
+    "bdc34dd1465ff6c38b484f0f44eea04cb3188b2f5740c528a766e31a94c08fbe",
+    "e03b25d5a34f3683f1bc4246607bd69b5c9a61efac6b291672674c87ced2cf32",
+    "26299dab373d2756b75145d95eb7e10fbf43886b52421a3ddb17720e4d36ff53",
+    "c8358c3d3640e759a34712823f28da2a47b6fe3b3b214607b3be2ecbd990a8ae",
+    "1265f8789ba002e6d3bccec6675ebc18246f50a723662ae3b1d2e0962d56a006",
+    "1f29e9930acbe59210cf9013400d8d2cd14155eeb640577e11c44589fbd113e9",
+    "0336a09826aecad4ebb6d5ac0b923c6b3684238c10fe8a750890f2ae507d54c2",
+    "531ee93d40f3b40e2b148168e8f5b1fc092a486f8c76b615b91f33f192a96c3e",
+    "980989de3f815438021cb1c662bbefb73fd7b091285105010223aeab816a895a",
+    "c0fdfaee97e2964ac816e9c44397d3952d912f6016e839baecf13977155e5ee7",
+    "cd5a7d87d1e14c50d29601a36b1d1869a9abdb5b1f2270c6a065328d4ae3058f",
+    "431d2412cb261c6f6d23f4b133497a57d87ae314b1397db0969ffc3c89e82896",
+    "cda65fad87c638cff020eadc76a5c486b851d289bc81be26a77ab8c1cd749813",
+    "740b0fa962909b79f751317c44ed416ffc9465a7fe2b87d0e12fccf0d5991a90",
+    "dd235e45443fb6b5b2caa3a35d572903085a349eddea2ab8211828fe70b47407",
+    "7d1a8b00e07db9f41ce6c194ace0d3b84c8c9d40c73749abcc86e75a8f9fd8b2",
+    "a7e61b6af7fbf4ba8dd66285cd50e4d6583e6eeb374fb0dc3850b268ae482cf3",
+    "ba6f28c383c7cdb69b711f65aed2a6df3886799c67a88a60ec1ea3317fb544bf",
+    "b47618c348e0241784208c18c9e187f9e94a27eba2ec0faed24f5f156d671478",
+    "5c8c1b871c19fe454db99ccf2a453089028a68d8b27a373e0226cf9886cccf21",
+    "aeec54eeed1c01f23320ebade92a2532d480253762ad6579237efae885d9456a",
+    "e7c35f7e07bcb04f15be322039508105d6101f4046c8b200a7eecbf3456f8b41",
+    "342e50e55788d601e2a6988262662603cbbac16c96b920b7b72e1641d05b9db6",
+    "0869d8c409d9fdc643d9ff7c918ec8c780367979be4dc2133c54c373c7011afc",
+    "35ee38adb1739b9a78a32b0586dc8b7fb3221761743000d50be408fc337b53ea",
+    "9ede603a4130b4ab4c416ad2e7320c9ca9f7a73fe899bdf83bb611448f83399c",
+    "d4de5d155fed7305ba8915562b2bea8140cc68bc7d19b93b41091d91dbd76a90",
+    "39e54bf54949de9b0ceb8e295b753fa9dd877dff6ee68eb68e51e829e6c8917f",
+    "b0d9c72ef21cc8a46f8a27726cdb2c5252354b466778d3b98ba2e4bfc493232e",
+    "63d04939eeefba9072b3aa622c602779a338382b2599f9ef84d4527d6f55684b",
+    "0736caa4ee42eb01f223e5325d829cc92eac46c18d7169d42aaafe7e04aae9e2",
+    "8b7584bcf185b327b65f69e8677a63f30ed40bdf17dc175c2f60baadfbe3d178",
+    "9ac4e986f7d2617ddd10bcc862aafaf8f8b1c2c5d1eb75bbafe95faf689ee399",
+    "50ec1388f4d20cc27bc060897e8c1f22d7d4e9c511d6aecadcd09032856d8b4f",
+    "69bc6b525cd3bf01e72b5aafc25d30a9a8e32e5920ecc5318fa49c09db0135be",
+    "fd3019b58e19755a1fbb7a3c7b95842cd9173f709396ef87e09bf3a083cd782e",
+    "4f09af117e4f5b2f3e83d38a0632ac1e01e039a3b8e7d7f1e277d480f34c920e",
+    "4145527c2f7f218f7b6eac314e42aec8f212f8921f18cb560a47510817d523c0",
+    "822c9ae410c5a61fd723e55ca0e789d305d4929881930821b1fab22368793067",
+    "6fcc4bc3449690f9557c1273c537a5e5993fadeaec96105518a3de1b90d8640b",
+    "1083f02663fa09bdecd059f6c18dfbe4bbc152e9c1e0c3ff780a5097a3145a8d",
+    "090f4eaa006953dfcc803ca6a3e97ba1ecc4d0fe78146c79b610b5ea4e9b05b5",
+    "5e043be3d2c1971e7904fd36d0e7334df1fd6a561f2319d1fc53e5f68c05601b",
+    "1363e7131b3b6683a66caa682aadc93d6ccb4abb44f8d5a69ee52b1e757fa94e",
+    "39ea0a51a80be2649eb5a14ca8fcd0967349c99954b256be533b60fb9627c6af",
+    "1d8cfc8e000dff73899ddaac2f4c553e381d56698b2cf6822c6ff1882e63de42",
+    "6ab139163fbecc9f949f962fe42a62e7547b1a6d621dd863218f25419034da47",
+    "657fa2b0e11173fb3f7e2af13b1a57d457b70e2aa5452a80540310159e6094c7",
+    "849c0858bbe78302ce655315676adba9ae6bda0a1e82e8704f1322db66e6033d",
+    "7fb34f6d9049f37b30db95377a02c8c18382201d445c208259d5d66d27507523",
+    "4593321d3292912431e061bbda77f7008f0f32230bdd46d64e482ab18cf768ce",
+    "76df80c53e8df2e55ffbd9d0ba48466d4a4b4e0c7fbea38caac0a0ee972ed9fc",
+    "32ccefedfb329d17a1ac0ea6932a63f16fa63ad06f937355f3ff3c949ddba0e6",
+    "50e0ec72b4b2ddda78e5a12feaee3847a7b560d5e869c5c7ead0746e2861dc8e",
+    "623b5a7475f84d65750a7aab99826b1b6843a3ae0978a7c027fdb9d3146f438f",
+    "e63b27a6f91e97ce003e6ea6048cbde5da31497a450f52de7ae00ae70da698a1",
+    "a68d8ba63a9671fdd0d6b873937c461364a8e08b2d2f6e86b0ba814570ea0146",
+    "e28aee22ecf73cfa24531694b011570d2160f40dd1dd18122730b62fd18f013b",
+    "c5a3be4428d952f5080cac8075d1de2940645b8668a76efdad110daa3bc57bf0",
+    "218f093bdb38e29323ce9f029715b98e891fc71106b3f1dfccf2d13992aab1ec",
+    "f6638eb9596560471f20d62182128d2a867e939bcf2c18f7e0e1140e338248ed",
+    "72c6571d514f79ce19bb97877241dc5d3d22401be18f0ce253850fb093552bfd",
+    "3f2f79362540ec614da4d14505d1d6706bb1e3a3bd93b35aa4be7bbaa91b7432",
+    "4fe4fff36fe5a9bd647908bd9642b9305bd846def433be97076fd22c9b9b9812",
+    "1ea76ac0b5f256f83ebc85c38161f60ee0fc0f0a86f72414dc8c02d0729574cb",
+    "83e0886f54815336999c30565d42ca6d22eb78a8edc16581f2fee98c7c923286",
+    "a43d2a00ea87175bf02ad89b1a4a6b989326cf2f638fa32fdb964862d5f23276",
+    "9c2b83a834d826a4f2d0365a747f1bbbf5054bcef92d62a34c7a70881d5ee13d",
+    "7d5e6d8cb103b9a1a46116b0163355cfe7a1915243104a336a7262f52e0775bf",
+    "6895604a781b25fde0069405450baf5321814bee2e9d97f84166f335985a7230",
+    "d14a59d4df80acd0c6ed534453bc7a85eb5cb140c64e10b4cb786e6a651408d6",
+    "d5db4e0c5fcfd2b4a3302de156db57ea187c045a471d53141f286bb10d9ec482",
+    "374b31dc142bff0431ca9a5d10ed051bdc7286c54447b711115550e025875e61",
+    "f421a0c9780f683fec7ec6f8acd9fa99323da8ab7ceb041fb6e8ddc239ec8bb4",
+    "92c88a34686f64bd85109095484038a61879c28274cd17891195807746d80276",
+    "12d1029eab4fb714124394ced04aeb965ff61603de3bca8ef3ae1dd8fadd07e7",
+    "35f2193865776dd24ed2a28c0b9eca93aab1043a67637b6937dc653f20b5ec3d",
+    "10c91d8053b3a7b9b88cd13877c1e8c3fd99be4374b715731c4a10f97927753f",
+    "8d07a6753bbe13327baa767ad9778888f02459ceccc861de32e4786083a01f8b",
+    "220ea2b59a475af614389240bcd986f1989d8d00f3c33fffe4a32b4bd0e18fed",
+    "154e8650d68bfe3fddc459e523e044204ffbf22e27f2d24f0ce81487a40dd366",
+    "acdff514076ff6ab00bf9646ce4d7500df6b73c81789657b7004ad01174ac59d",
+    "bbc2f375d5bb4e168020fa2ebfa13788394ba45c4650496ccd7b292e7010f0a5",
+    "4fc90587e5df740d3e484fa5eb65ff83ea67024625225bcbdab7a98f7968db32",
+    "1e9a4d9500bffc81ac8c2a0527534299c84d5bb14406843113444d094ac212c6",
+    "780b7f6df242c92d73249b5a8dc8e552b6c693435361122f3a163f6d2b56b2f0",
+    "b60bb6992ec336b7b49f4f5eee1406ef455134bd71f29f767fb07807a028b250",
+    "587012afe48536322b1592fcb62ca1c25f5fc532922bd4aae9063a6457b92cdb",
+  ],
+};
+
+const _lfs = typeof require!=='undefined' ? require('fs') : null;
+const _lpath = typeof require!=='undefined' ? require('path') : null;
+const _los = typeof require!=='undefined' ? require('os') : null;
+function _licenseDir(){
+  if(!_lfs||!_lpath||!_los) return null;
+  const d = _lpath.join(_los.homedir(),'Library','Application Support','Countdown');
+  try{ _lfs.mkdirSync(d,{recursive:true}); }catch(e){}
+  return d;
+}
+function _sha256(s){
+  try{ const crypto=require('crypto'); return crypto.createHash('sha256').update(s).digest('hex'); }catch(e){ return ''; }
+}
+function _loadLicense(){
+  const dir = _licenseDir(); if(!dir) return {activated:[]};
+  try{ return JSON.parse(_lfs.readFileSync(_lpath.join(dir,'license.json'),'utf8')); }catch(e){ return {activated:[]}; }
+}
+function _saveLicense(lic){
+  const dir = _licenseDir(); if(!dir) return;
+  try{ _lfs.writeFileSync(_lpath.join(dir,'license.json'),JSON.stringify(lic)); }catch(e){}
+}
+let LICENSE = _loadLicense();
+function isUnlocked(){
+  if(!LICENSE.activated||!LICENSE.activated.length) return false;
+  return LICENSE.activated.some(h =>
+    (LICENSE_HASHES.CD && LICENSE_HASHES.CD.includes(h)) ||
+    (LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(h))
+  );
+}
+function activateLicenseKey(input){
+  const k = (input||'').trim().toUpperCase();
+  if(!k) return {ok:false, msg:'Enter a key'};
+  const h = _sha256(k);
+  let matched = false;
+  for(const pfx of Object.keys(LICENSE_HASHES)){
+    if(LICENSE_HASHES[pfx].includes(h)){ matched = true; break; }
+  }
+  if(!matched) return {ok:false, msg:'Invalid key — check for typos'};
+  if(!LICENSE.activated) LICENSE.activated = [];
+  if(LICENSE.activated.includes(h)) return {ok:false, msg:'This key is already activated'};
+  LICENSE.activated.push(h);
+  LICENSE.date = Date.now();
+  _saveLicense(LICENSE);
+  return {ok:true};
+}
+function renderLockScreen(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  const wrap = document.createElement('div');
+  Object.assign(wrap.style,{position:'fixed',inset:'0',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at 50% 0%,#1a0000 0%,#030304 60%)',gap:'18px',padding:'40px'});
+  const icon = document.createElement('div'); icon.textContent = '⏱'; icon.style.cssText='font-size:80px;opacity:.8;margin-bottom:8px;'; wrap.appendChild(icon);
+  const title = document.createElement('div'); title.textContent='COUNTDOWN';
+  title.style.cssText = "font-family:'Black Ops One',sans-serif;font-size:clamp(30px,7vw,56px);letter-spacing:6px;color:#ef4444;text-shadow:0 0 40px rgba(239,68,68,.5);margin-bottom:6px;";
+  wrap.appendChild(title);
+  const sub = document.createElement('div'); sub.textContent='Enter your registration key to unlock';
+  sub.style.cssText='font-size:13px;color:#666;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;text-align:center;';
+  wrap.appendChild(sub);
+  const card = document.createElement('div');
+  card.style.cssText='background:#0a0a0c;border:1px solid #1a1a1e;border-radius:16px;padding:28px;width:min(420px,95vw);display:flex;flex-direction:column;gap:14px;';
+  const inp = document.createElement('input'); inp.type='text'; inp.placeholder='CD-XXXX-XXXX-XXXX'; inp.autofocus=true;
+  inp.style.cssText='width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#ef4444;font-size:16px;font-family:"Barlow Condensed",sans-serif;letter-spacing:3px;text-align:center;text-transform:uppercase;outline:none;';
+  card.appendChild(inp);
+  const err = document.createElement('div'); err.style.cssText='font-size:13px;color:#ef4444;text-align:center;min-height:18px;letter-spacing:1px;font-family:"Barlow Condensed",sans-serif;font-weight:700;'; card.appendChild(err);
+  const btn = document.createElement('button'); btn.textContent='🔓 UNLOCK';
+  btn.style.cssText='padding:14px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-family:"Black Ops One",sans-serif;font-size:14px;letter-spacing:3px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(239,68,68,.3);';
+  function tryAct(){
+    const r = activateLicenseKey(inp.value);
+    if(r.ok){ LICENSE = _loadLicense(); render(); }
+    else { err.textContent = r.msg; }
+  }
+  btn.addEventListener('click', tryAct);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') tryAct(); });
+  card.appendChild(btn);
+  const help = document.createElement('div'); help.innerHTML='Don\'t have a key? Purchase at <span style="color:#888;">livefrenzy.com</span>';
+  help.style.cssText='font-size:11px;color:#444;letter-spacing:1px;text-align:center;margin-top:8px;font-family:"Barlow Condensed",sans-serif;';
+  card.appendChild(help);
+  wrap.appendChild(card);
+  app.appendChild(wrap);
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COUNTDOWN TIMER
+// ══════════════════════════════════════════════════════════════════════════════
+const PRESETS=[{sec:10,label:'10 SEC'},{sec:15,label:'15 SEC'},{sec:30,label:'30 SEC'},{sec:45,label:'45 SEC'},{sec:60,label:'1 MIN'},{sec:90,label:'90 SEC'},{sec:120,label:'2 MIN'},{sec:180,label:'3 MIN'}];
+
+function el(tag,props,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(props||{})){if(k==='style'&&typeof v==='object')Object.assign(e.style,v);else if(k==='onClick')e.addEventListener('click',v);else if(k==='onInput')e.addEventListener('input',v);else if(k==='className')e.className=v;else if(k==='disabled')e.disabled=!!v;else if(k==='placeholder')e.placeholder=v;else if(k==='value'&&tag==='input')e.value=v;else if(k==='type')e.type=v;}kids.flat().forEach(k=>{if(k!=null&&k!==false)e.appendChild(typeof k==='string'?document.createTextNode(k):k);});return e;}
+function mk(s){const d=document.createElement('div');Object.assign(d.style,s);return d;}
+function copy(x){return JSON.parse(JSON.stringify(x));}
+function rgba(h,a){h=h.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;}
+function fmtTime(s){const m=Math.floor(s/60),sec=s%60;return m>0?(m+':'+String(sec).padStart(2,'0')):String(sec);}
+function makeCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');}
+
+// ── SOUNDS ──
+let _ctx=null;
+function ac(){if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();if(_ctx.state==='suspended')_ctx.resume();return _ctx;}
+function tone(c,type,freq,t0,t1,pk,fd){const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(pk,t0+.015);g.gain.setValueAtTime(pk,fd||t0+.015);g.gain.exponentialRampToValueAtTime(.001,t1);o.start(t0);o.stop(t1+.01);}
+
+function soundTick(rem){
+  try{const c=ac(),n=c.currentTime;
+  if(rem<=3){
+    // Last 3 — huge booming ticks
+    const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);
+    o.type='square';o.frequency.setValueAtTime(800+(3-rem)*200,n);g.gain.setValueAtTime(.3,n);g.gain.exponentialRampToValueAtTime(.001,n+.15);o.start(n);o.stop(n+.2);
+    // Sub boom
+    const o2=c.createOscillator(),g2=c.createGain();o2.connect(g2);g2.connect(c.destination);
+    o2.type='sine';o2.frequency.setValueAtTime(80,n);g2.gain.setValueAtTime(.4,n);g2.gain.exponentialRampToValueAtTime(.001,n+.3);o2.start(n);o2.stop(n+.35);
+  }else if(rem<=5){
+    const p=600+((5-rem)*100);tone(c,'square',p,n,n+.08,.2,n+.02);tone(c,'square',p*1.25,n+.1,n+.18,.2,n+.12);
+  }else if(rem<=10){
+    const vol=.08+((10-rem)*.02);tone(c,'sine',500+((10-rem)*40),n,n+.1,vol,n+.03);
+    // Click
+    const buf=c.createBuffer(1,c.sampleRate*.02,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(.6-i/d.length*.6);
+    const ns=c.createBufferSource(),ng=c.createGain();ns.buffer=buf;ns.connect(ng);ng.connect(c.destination);ng.gain.setValueAtTime(vol*.5,n);ns.start(n);ns.stop(n+.03);
+  }else{
+    // Normal steady tick
+    tone(c,'sine',800,n,n+.04,.06,n+.01);
+    const buf=c.createBuffer(1,c.sampleRate*.015,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(.4-i/d.length*.4);
+    const ns=c.createBufferSource(),ng=c.createGain();ns.buffer=buf;ns.connect(ng);ng.connect(c.destination);ng.gain.setValueAtTime(.04,n);ns.start(n);ns.stop(n+.02);
+  }}catch(e){}
+}
+
+function soundTimesUp(){
+  try{const c=ac(),n=c.currentTime;
+  // Massive buzzer
+  [[100,0],[130,0],[160,0],[200,.0]].forEach(([f,t])=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';o.frequency.setValueAtTime(f,n+t);g.gain.setValueAtTime(.25,n+t);g.gain.setValueAtTime(.25,n+t+.5);g.gain.exponentialRampToValueAtTime(.001,n+t+1.2);o.start(n+t);o.stop(n+t+1.25);});
+  }catch(e){}
+}
+
+function soundWompWomp(){
+  try{const c=ac(),n=c.currentTime;
+  const o1=c.createOscillator(),g1=c.createGain();o1.connect(g1);g1.connect(c.destination);o1.type='sawtooth';o1.frequency.setValueAtTime(311,n+.2);o1.frequency.exponentialRampToValueAtTime(233,n+.65);g1.gain.setValueAtTime(.25,n+.2);g1.gain.exponentialRampToValueAtTime(.001,n+.7);o1.start(n+.2);o1.stop(n+.75);
+  const o1b=c.createOscillator(),g1b=c.createGain();o1b.connect(g1b);g1b.connect(c.destination);o1b.type='sine';o1b.frequency.setValueAtTime(156,n+.2);o1b.frequency.exponentialRampToValueAtTime(117,n+.65);g1b.gain.setValueAtTime(.15,n+.2);g1b.gain.exponentialRampToValueAtTime(.001,n+.7);o1b.start(n+.2);o1b.stop(n+.75);
+  const o2=c.createOscillator(),g2=c.createGain();o2.connect(g2);g2.connect(c.destination);o2.type='sawtooth';o2.frequency.setValueAtTime(233,n+.75);o2.frequency.exponentialRampToValueAtTime(147,n+1.6);g2.gain.setValueAtTime(.25,n+.75);g2.gain.setValueAtTime(.2,n+1.2);g2.gain.exponentialRampToValueAtTime(.001,n+1.7);o2.start(n+.75);o2.stop(n+1.75);
+  const o2b=c.createOscillator(),g2b=c.createGain();o2b.connect(g2b);g2b.connect(c.destination);o2b.type='sine';o2b.frequency.setValueAtTime(117,n+.75);o2b.frequency.exponentialRampToValueAtTime(73,n+1.6);g2b.gain.setValueAtTime(.15,n+.75);g2b.gain.exponentialRampToValueAtTime(.001,n+1.7);o2b.start(n+.75);o2b.stop(n+1.75);
+  }catch(e){}
+}
+
+function soundFinished(){
+  try{const c=ac(),n=c.currentTime;
+  [[392,0],[523,.12],[659,.24],[784,.4],[880,.52],[1047,.68],[1319,.85]].forEach(([f,t],i)=>{const v=.12+i*.025;tone(c,'square',f,n+t,n+t+.5,v*.6,n+t+.1);tone(c,'sine',f,n+t,n+t+.6,v,n+t+.12);tone(c,'sine',f*2,n+t+.02,n+t+.4,v*.3,n+t+.06);});
+  [1319,1568,2093].forEach(f=>{tone(c,'sine',f,n+1.0,n+2.5,.1,n+1.4);tone(c,'triangle',f,n+1.0,n+2.2,.06,n+1.3);});
+  // Shimmer
+  const buf=c.createBuffer(1,c.sampleRate*1.5,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+  const ns=c.createBufferSource(),ng=c.createGain(),nf=c.createBiquadFilter();ns.buffer=buf;ns.connect(nf);nf.connect(ng);ng.connect(c.destination);nf.type='highpass';nf.frequency.value=6000;nf.Q.value=2;ng.gain.setValueAtTime(0,n+.8);ng.gain.linearRampToValueAtTime(.08,n+1.0);ng.gain.exponentialRampToValueAtTime(.001,n+2.5);ns.start(n+.8);ns.stop(n+2.6);
+  }catch(e){}
+}
+
+// ── CONFETTI ──
+function spawnConfetti(){
+  if(document.querySelector('.conf'))return;
+  const colors=['#4ade80','#22d3ee','#fff','#a855f7','#f59e0b','#60a5fa'];
+  const l=mk({position:'fixed',top:'0',left:'0',width:'100%',height:'100%',pointerEvents:'none',overflow:'hidden',zIndex:'999'});l.className='conf';
+  for(let i=0;i<100;i++){const s=(6+Math.random()*16)+'px';l.appendChild(mk({position:'absolute',left:Math.floor(Math.random()*100)+'%',top:'-25px',width:s,height:s,background:colors[i%colors.length],borderRadius:Math.random()>.5?'50%':'2px',animation:`confFall ${2+Math.random()*3}s ${Math.random()*2}s ease-in forwards`}));}
+  document.getElementById('app').appendChild(l);setTimeout(()=>l.remove(),7000);
+}
+
+// ── STATE ──
+const ipc=(typeof require!=='undefined')?require('electron').ipcRenderer:null;
+let ROLE=(window.location.hash||'').replace('#','').trim()||null;
+let ROOM='LOCAL';
+let STATE={screen:'idle',totalSec:30,timerEnd:null,running:false,result:null}; // result: null | 'finished' | 'expired'
+let selectedPreset=30,customSec='';
+let dbUnsubscribe=null;
+
+function setState(patch){STATE=Object.assign({},STATE,patch);pushState();render();}
+
+// ── IPC SYNC ──
+function pushState(){if(ipc)ipc.send('cd-state',STATE);}
+function subscribeRoom(){
+  if(!ipc)return;
+  ipc.on('cd-state',(event,s)=>{if(s)handleRemoteState(s);});
+  ipc.on('cd-request',()=>{if(ROLE==='operator')pushState();});
+  if(ROLE==='audience')ipc.send('cd-request');
+}
+
+let _prevResult=null,_prevRunning=null;
+function handleRemoteState(s){
+  if(!s)return;
+  const pr=_prevResult,prun=_prevRunning;
+  _prevResult=s.result;_prevRunning=s.running;
+  STATE=s;
+  if(ROLE==='audience'){
+    if(s.result==='finished'&&pr!==s.result){soundFinished();setTimeout(spawnConfetti,200);}
+    if(s.result==='expired'&&pr!==s.result){soundTimesUp();setTimeout(soundWompWomp,200);}
+  }
+  render();
+}
+
+// ── TIMER TICK ──
+let _lastTick=-1,_timerInt=null;
+function startTick(){
+  if(_timerInt)clearInterval(_timerInt);_lastTick=-1;
+  _timerInt=setInterval(()=>{
+    if(!STATE.running||!STATE.timerEnd)return;
+    const rem=Math.max(0,Math.ceil((STATE.timerEnd-Date.now())/1000));
+    if(rem!==_lastTick&&rem>0){soundTick(rem);_lastTick=rem;}
+    if(rem<=0&&_lastTick!==0){
+      _lastTick=0;
+      soundTimesUp();setTimeout(soundWompWomp,200);
+      if(ROLE==='operator')setState({running:false,result:'expired'});
+      render();return;
+    }
+    render();
+  },200);
+}
+
+// ── RENDER ──
+function render(){
+  if(ROLE==='operator' && !isUnlocked()){ renderLockScreen(); return; }
+  const app=document.getElementById('app');app.innerHTML='';
+  if(ROLE==='operator')app.appendChild(buildOperator());
+  else if(ROLE==='audience')app.appendChild(buildAudience());
+  else app.appendChild(buildOperator());
+}
+
+// ── LOBBY ──
+function buildLobby(){
+  const wrap=mk({});wrap.id='lobby';
+  wrap.appendChild(Object.assign(mk({}),{className:'lobby-title',textContent:'COUNTDOWN'}));
+  wrap.appendChild(Object.assign(mk({}),{className:'lobby-sub',textContent:'Game Timer'}));
+  const card=mk({});card.className='lobby-card';
+  card.appendChild(Object.assign(mk({}),{className:'lobby-label',textContent:'Start as Operator'}));
+  card.appendChild(el('button',{className:'btn-primary',onClick:()=>{ac();ROOM=makeCode();ROLE='operator';pushState();subscribeRoom();render();}}));card.lastChild.textContent='▶ CREATE ROOM';
+  card.appendChild(Object.assign(mk({}),{className:'lobby-divider',textContent:'OR'}));
+  card.appendChild(Object.assign(mk({}),{className:'lobby-label',textContent:'Join as Audience'}));
+  let jc='';const ji=el('input',{className:'lobby-input',placeholder:'ROOM CODE',type:'text',onInput:e=>{jc=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);ji.value=jc;},onKeydown:e=>{if(e.key==='Enter'&&jc.length===4){ac();ROOM=jc;ROLE='audience';subscribeRoom();render();}}});
+  card.appendChild(ji);card.appendChild(el('button',{className:'btn-secondary',onClick:()=>{if(jc.length<4)return;ac();ROOM=jc;ROLE='audience';subscribeRoom();render();}}));card.lastChild.textContent='JOIN AUDIENCE';
+  wrap.appendChild(card);return wrap;
+}
+
+// ── OPERATOR ──
+function buildOperator(){
+  const wrap=mk({});wrap.id='operator';
+  const topbar=mk({});topbar.className='op-topbar';
+  const left=mk({display:'flex',flexDirection:'column'});
+  left.appendChild(Object.assign(mk({}),{className:'op-title',textContent:'COUNTDOWN'}));
+  left.appendChild(Object.assign(mk({}),{className:'op-room',textContent:'v1.0.0'}));
+  const btns=mk({});btns.className='op-topbtns';
+  btns.appendChild(el('button',{className:'op-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}}));btns.lastChild.textContent='🟢';
+  btns.appendChild(el('button',{className:'op-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}}));btns.lastChild.textContent='🔴';
+  topbar.appendChild(left);topbar.appendChild(btns);wrap.appendChild(topbar);
+
+  const scroll=mk({});scroll.className='op-scroll';
+
+  if(!STATE.running&&!STATE.result){
+    // Idle — show presets
+    const pg=mk({});pg.className='preset-grid';
+    PRESETS.forEach(p=>{
+      const btn=mk({});btn.className='preset-btn'+(selectedPreset===p.sec?' active':'');
+      btn.addEventListener('click',()=>{selectedPreset=p.sec;render();});
+      const t=mk({});t.className='preset-time';t.textContent=fmtTime(p.sec);
+      const l=mk({});l.className='preset-label';l.textContent=p.label;
+      btn.appendChild(t);btn.appendChild(l);pg.appendChild(btn);
+    });
+    scroll.appendChild(pg);
+
+    // Custom
+    const cr=mk({});cr.className='custom-row';
+    const ci=el('input',{className:'custom-input',placeholder:'##',type:'number',value:customSec,onInput:e=>{customSec=e.target.value;if(parseInt(customSec)>0)selectedPreset=parseInt(customSec);}});
+    cr.appendChild(ci);cr.appendChild(Object.assign(mk({}),{className:'custom-label',textContent:'seconds (custom)'}));
+    scroll.appendChild(cr);
+
+    // Start
+    scroll.appendChild(el('button',{className:'ctrl-big ctrl-start',onClick:()=>{
+      ac();const sec=selectedPreset||30;
+      setState({screen:'running',totalSec:sec,timerEnd:Date.now()+sec*1000,running:true,result:null});
+    }}));scroll.lastChild.textContent='▶ START';
+  }else if(STATE.running){
+    // Running — show timer + finish/stop buttons
+    const rem=Math.max(0,Math.ceil((STATE.timerEnd-Date.now())/1000));
+    const te=mk({});te.className='op-timer';te.style.color=rem<=5?'var(--red)':rem<=10?'var(--gold)':'var(--cyan)';
+    te.textContent=fmtTime(rem);scroll.appendChild(te);
+
+    const row=mk({});row.className='ctrl-row';
+    row.appendChild(el('button',{className:'ctrl-big ctrl-finish',onClick:()=>{soundFinished();setTimeout(spawnConfetti,200);setState({running:false,result:'finished'});}}));row.lastChild.textContent='✅ FINISHED!';
+    row.appendChild(el('button',{className:'ctrl-big ctrl-stop',onClick:()=>{setState({running:false,result:null,timerEnd:null});}}));row.lastChild.textContent='⏹ STOP';
+    scroll.appendChild(row);
+  }else if(STATE.result){
+    // Result shown — reset button
+    const te=mk({});te.className='op-timer';
+    te.style.color=STATE.result==='finished'?'var(--green)':'var(--red)';
+    te.textContent=STATE.result==='finished'?'FINISHED!':'TIME\'S UP!';
+    scroll.appendChild(te);
+    scroll.appendChild(el('button',{className:'ctrl-big ctrl-start',onClick:()=>{setState({screen:'idle',running:false,result:null,timerEnd:null});}}));scroll.lastChild.textContent='↺ RESET';
+  }
+
+  wrap.appendChild(scroll);return wrap;
+}
+
+// ── AUDIENCE ──
+function buildAudience(){
+  const wrap=mk({});wrap.id='audience';
+
+  if(!STATE.running&&!STATE.result){
+    const w=mk({});w.className='waiting';
+    w.appendChild(Object.assign(mk({}),{className:'waiting-title',textContent:'⏱'}));
+    w.appendChild(Object.assign(mk({}),{className:'waiting-label',textContent:'Countdown Timer'}));
+    wrap.appendChild(w);return wrap;
+  }
+
+  const rem=STATE.running?Math.max(0,Math.ceil((STATE.timerEnd-Date.now())/1000)):0;
+  const pct=STATE.totalSec>0?rem/STATE.totalSec:0;
+  const ringSize=Math.min(window.innerWidth,window.innerHeight)*.85;
+  const r=ringSize/2-20;
+  const circ=2*Math.PI*r;
+
+  // Background pulse for danger zone
+  if(STATE.running&&rem<=5){
+    const bgp=mk({});bgp.className='aud-bg-pulse danger';wrap.appendChild(bgp);
+  }
+
+  // Screen flash on result
+  if(STATE.result==='expired'){
+    const flash=mk({position:'fixed',inset:'0',background:'rgba(239,68,68,.15)',pointerEvents:'none',zIndex:'1',animation:'screenFlash 2s ease-out forwards'});
+    wrap.appendChild(flash);
+    wrap.style.animation='shakeHard .5s ease';
+  }
+
+  // Ring
+  const ringWrap=mk({});ringWrap.className='ring-wrap';
+  ringWrap.style.width=ringSize+'px';ringWrap.style.height=ringSize+'px';
+
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','ring-svg');svg.setAttribute('width',ringSize);svg.setAttribute('height',ringSize);
+  const bgCirc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  bgCirc.setAttribute('class','ring-bg');bgCirc.setAttribute('cx',ringSize/2);bgCirc.setAttribute('cy',ringSize/2);bgCirc.setAttribute('r',r);
+  const fgCirc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  fgCirc.setAttribute('class','ring-fg');fgCirc.setAttribute('cx',ringSize/2);fgCirc.setAttribute('cy',ringSize/2);fgCirc.setAttribute('r',r);
+  fgCirc.setAttribute('stroke-dasharray',circ);
+  fgCirc.setAttribute('stroke-dashoffset',circ*(1-pct));
+  fgCirc.setAttribute('stroke',rem<=5?'#ef4444':rem<=10?'#f59e0b':'#22d3ee');
+  svg.appendChild(bgCirc);svg.appendChild(fgCirc);ringWrap.appendChild(svg);
+
+  // Timer text
+  const te=mk({});te.className='aud-timer';
+  if(STATE.result==='finished'){
+    te.className+=' finished';te.textContent='FINISHED!';
+  }else if(STATE.result==='expired'){
+    te.className+=' done';te.textContent="TIME'S UP!";
+  }else{
+    te.className+=(rem<=5?' danger':rem<=10?' warning':' chill');
+    te.textContent=fmtTime(rem);
+  }
+  ringWrap.appendChild(te);
+  wrap.appendChild(ringWrap);
+
+  // Label
+  if(STATE.running){
+    const lab=mk({});lab.className='aud-label';
+    lab.textContent=rem<=5?'HURRY!':rem<=10?'ALMOST THERE...':'TIME REMAINING';
+    wrap.appendChild(lab);
+  }
+
+  return wrap;
+}
+
+// ── INIT ──
+function init(){subscribeRoom();startTick();render();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>
