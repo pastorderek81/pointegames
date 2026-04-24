@@ -1,6 +1,6 @@
 {
   "name": "countdown",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dramatic countdown timer utility for kids ministry events",
   "main": "main.js",
   "author": "The Pointe Church",
@@ -16,7 +16,12 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
-      "target": [{"target": "dmg", "arch": ["arm64"]}]
+      "target": [{"target": "dmg", "arch": ["arm64"]}],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": {"teamId": "D3HNM5YDJ5"}
     },
     "dmg": {
       "title": "Install Countdown",
