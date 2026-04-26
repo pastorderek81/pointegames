@@ -1,6 +1,6 @@
 {
   "name": "scoreboard",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Live team leaderboard utility for kids ministry events",
   "main": "main.js",
   "author": "The Pointe Church",

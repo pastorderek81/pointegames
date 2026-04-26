@@ -1,6 +1,6 @@
 {
   "name": "countdown",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Dramatic countdown timer utility for kids ministry events",
   "main": "main.js",
   "author": "The Pointe Church",
@@ -12,24 +12,51 @@
   "build": {
     "appId": "com.thepointe.countdown",
     "productName": "Countdown",
-    "files": ["main.js", "index.html", "build/icon.png", "build/icon.icns", "build/icon.ico"],
+    "files": [
+      "main.js",
+      "index.html",
+      "build/icon.png",
+      "build/icon.icns",
+      "build/icon.ico"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
-      "target": [{"target": "dmg", "arch": ["arm64"]}],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": {"teamId": "D3HNM5YDJ5"}
+      "notarize": {
+        "teamId": "D3HNM5YDJ5"
+      }
     },
     "dmg": {
       "title": "Install Countdown",
       "backgroundColor": "#030304",
-      "window": {"width": 540, "height": 360},
+      "window": {
+        "width": 540,
+        "height": 360
+      },
       "contents": [
-        {"x": 150, "y": 165, "type": "file"},
-        {"x": 390, "y": 165, "type": "link", "path": "/Applications"}
+        {
+          "x": 150,
+          "y": 165,
+          "type": "file"
+        },
+        {
+          "x": 390,
+          "y": 165,
+          "type": "link",
+          "path": "/Applications"
+        }
       ],
       "iconSize": 120
     },
