@@ -1,6 +1,6 @@
 {
   "name": "tic-tac-toe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Trivia-powered Tic Tac Toe for kids ministry",
   "main": "main.js",
   "author": "The Pointe Church",
@@ -29,7 +29,14 @@
             "arm64"
           ]
         }
-      ]
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": {
+        "teamId": "D3HNM5YDJ5"
+      }
     },
     "dmg": {
       "title": "Install Tic Tac Toe",
