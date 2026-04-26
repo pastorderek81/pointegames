@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Tic Tac Toe</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow+Condensed:wght@700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#f59e0b;--cyan:#22d3ee;--purple:#a855f7;--red:#ef4444;--green:#4ade80;
+  --bg:#030304;--surface:#0a0a0c;--border:#1a1a1e;
+  --teamX:#22d3ee;--teamO:#f59e0b;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:#fff;font-family:'Nunito',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;}
+input{outline:none;font-family:inherit;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+
+/* ── LOBBY ── */
+#lobby{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:radial-gradient(ellipse at 50% 0%,#1a0a2e 0%,#030304 60%);z-index:100;}
+.lobby-title{font-family:'Black Ops One',sans-serif;font-size:clamp(32px,8vw,72px);letter-spacing:6px;color:var(--purple);text-shadow:0 0 40px rgba(168,85,247,.5),0 0 80px rgba(168,85,247,.2);margin-bottom:8px;}
+.lobby-sub{font-size:clamp(11px,2.5vw,14px);color:#444;letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;}
+.lobby-card{background:#0a0a0c;border:1px solid #1a1a1e;border-radius:20px;padding:32px;width:min(420px,90vw);display:flex;flex-direction:column;gap:16px;}
+.lobby-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+.lobby-input{width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fff;font-size:18px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-transform:uppercase;}
+.lobby-input::placeholder{color:#333;letter-spacing:2px;}
+.lobby-divider{display:flex;align-items:center;gap:12px;color:#222;font-size:11px;}
+.lobby-divider::before,.lobby-divider::after{content:'';flex:1;height:1px;background:#1a1a1e;}
+.btn-primary{padding:15px;background:linear-gradient(135deg,var(--purple),#7e22ce);color:#fff;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;box-shadow:0 4px 20px rgba(168,85,247,.3);transition:transform .15s;}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{padding:15px;background:transparent;color:#444;border:1px solid #1a1a1e;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;}
+
+/* ── OPERATOR ── */
+#operator{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;}
+.op-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#030304;border-bottom:1px solid #111;flex-shrink:0;min-height:52px;}
+.op-title{font-family:'Black Ops One',sans-serif;font-size:15px;letter-spacing:3px;color:var(--purple);}
+.op-room{font-size:11px;color:#333;letter-spacing:2px;}
+.op-topbtns{display:flex;gap:8px;align-items:center;}
+.op-btn{padding:6px 12px;background:#0e0e10;color:#555;border:1px solid #111;border-radius:7px;font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;font-weight:700;}
+.op-scroll{flex:1;overflow-y:auto;padding:12px 14px;}
+.section-label{font-size:9px;color:var(--purple);font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;margin-top:16px;}
+
+/* Controls */
+.ctrl-bar{display:flex;gap:5px;padding:8px 14px;background:#040404;border-bottom:1px solid #0a0a0a;flex-shrink:0;flex-wrap:wrap;align-items:center;}
+.ctrl-btn{padding:7px 13px;background:#0e0e10;color:#555;border:1px solid #111;border-radius:7px;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+.ctrl-btn.correct{background:linear-gradient(135deg,var(--green),#16a34a);color:#000;font-family:'Black Ops One',sans-serif;font-size:13px;letter-spacing:2px;box-shadow:0 4px 14px rgba(74,222,128,.3);}
+.ctrl-btn.wrong{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;font-family:'Black Ops One',sans-serif;font-size:13px;letter-spacing:2px;box-shadow:0 4px 14px rgba(239,68,68,.3);}
+
+/* Operator grid */
+.op-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:400px;margin:0 auto 16px;}
+.op-cell{aspect-ratio:1;background:#0e0e10;border:2px solid #1a1a1e;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Black Ops One',sans-serif;font-size:28px;color:#555;cursor:pointer;transition:all .2s;user-select:none;}
+.op-cell:active{transform:scale(.95);}
+.op-cell.taken-X{background:rgba(34,211,238,.1);color:var(--teamX);border-color:rgba(34,211,238,.3);cursor:default;}
+.op-cell.taken-O{background:rgba(245,158,11,.1);color:var(--teamO);border-color:rgba(245,158,11,.3);cursor:default;}
+.op-cell.active-cell{background:rgba(168,85,247,.15);border-color:var(--purple);color:var(--purple);}
+
+/* Question display (operator) */
+.op-question{padding:16px;background:#0a0a0c;border:1px solid var(--purple);border-radius:12px;margin-bottom:12px;}
+.op-q-text{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--purple);letter-spacing:1px;margin-bottom:8px;}
+.op-a-text{font-size:14px;color:var(--green);letter-spacing:1px;}
+
+/* Question list (setup) */
+.q-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:300px;overflow-y:auto;}
+.q-row{display:flex;gap:8px;align-items:center;}
+.q-info{flex:1;padding:10px 14px;background:#0e0e10;border:1px solid #1a1a1e;border-radius:8px;}
+.q-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--purple);letter-spacing:1px;}
+.q-answer{font-size:11px;color:#444;margin-top:2px;}
+.del-btn{width:32px;height:32px;background:#1a0000;color:var(--red);border:1px solid #2a0000;border-radius:7px;font-size:14px;flex-shrink:0;}
+.add-input{width:100%;padding:11px 14px;background:#0e0e10;border:1px solid #1a1a1e;border-radius:8px;color:var(--purple);font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:1px;}
+.add-input::placeholder{color:#2a2a2a;letter-spacing:1px;}
+.add-input.ans-input{color:var(--green);font-size:14px;}
+.add-btn{flex:1;padding:11px;background:var(--purple);color:#fff;font-family:'Black Ops One',sans-serif;font-size:14px;letter-spacing:2px;border-radius:8px;}
+.start-btn{width:100%;margin-top:12px;padding:17px;background:linear-gradient(135deg,var(--purple),#7e22ce);color:#fff;font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:4px;border-radius:10px;box-shadow:0 4px 20px rgba(168,85,247,.3);}
+
+/* Team indicator */
+.team-indicator{text-align:center;padding:10px;font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:3px;margin-bottom:12px;}
+.team-X{color:var(--teamX);text-shadow:0 0 20px rgba(34,211,238,.4);}
+.team-O{color:var(--teamO);text-shadow:0 0 20px rgba(245,158,11,.4);}
+
+/* Theme chips */
+.theme-bar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+.theme-chip{width:32px;height:32px;border-radius:7px;font-size:16px;background:transparent;border:1px solid transparent;transition:all .15s;}
+.theme-chip.active{border-color:var(--purple);background:rgba(168,85,247,.1);box-shadow:0 0 10px rgba(168,85,247,.25);}
+
+/* ── AUDIENCE ── */
+#audience{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;}
+.aud-glow{position:fixed;bottom:0;left:0;width:100%;height:40%;background:radial-gradient(ellipse at 50% 100%,rgba(168,85,247,.04) 0%,transparent 70%);pointer-events:none;}
+
+/* Audience grid */
+.aud-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,16px);width:min(80vh,80vw);max-width:700px;}
+.aud-cell{aspect-ratio:1;border-radius:clamp(12px,2vw,20px);display:flex;align-items:center;justify-content:center;font-family:'Black Ops One',sans-serif;user-select:none;transition:all .4s cubic-bezier(.34,1.4,.64,1);position:relative;}
+.aud-cell.number{background:#0a0a0c;border:3px solid #1a1a1e;color:#444;font-size:clamp(32px,6vw,64px);cursor:default;}
+.aud-cell.X{background:rgba(34,211,238,.12);border:3px solid rgba(34,211,238,.4);color:var(--teamX);font-size:clamp(48px,10vw,96px);text-shadow:0 0 30px rgba(34,211,238,.5);}
+.aud-cell.O{background:rgba(245,158,11,.12);border:3px solid rgba(245,158,11,.4);color:var(--teamO);font-size:clamp(48px,10vw,96px);text-shadow:0 0 30px rgba(245,158,11,.5);}
+.aud-cell.win-cell{animation:winPulse 1s ease-in-out infinite;}
+.aud-cell.active-q{background:rgba(168,85,247,.15);border-color:var(--purple);color:var(--purple);animation:cellPulse .8s ease-in-out infinite;}
+
+/* Audience question overlay */
+.aud-question-overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,3,4,.95);z-index:50;animation:fadeIn .3s ease;}
+.aud-q-text{font-family:'Black Ops One',sans-serif;font-size:clamp(24px,5vw,56px);color:#fff;text-align:center;padding:0 40px;letter-spacing:3px;line-height:1.4;max-width:900px;animation:scaleIn .4s cubic-bezier(.34,1.4,.64,1);}
+.aud-q-team{font-family:'Barlow Condensed',sans-serif;font-size:clamp(14px,2.5vw,24px);letter-spacing:4px;margin-top:20px;text-transform:uppercase;}
+
+/* Win overlay */
+.win-overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,3,4,.9);z-index:60;animation:fadeIn .5s ease;}
+.win-text{font-family:'Black Ops One',sans-serif;font-size:clamp(36px,8vw,80px);letter-spacing:8px;animation:winFlash 1s ease-in-out infinite;}
+
+/* Waiting */
+.waiting{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;}
+.waiting-code{font-family:'Black Ops One',sans-serif;font-size:clamp(48px,12vw,96px);letter-spacing:16px;color:var(--purple);text-shadow:0 0 30px rgba(168,85,247,.4);}
+.waiting-label{font-size:clamp(12px,2.5vw,16px);color:#444;letter-spacing:3px;text-transform:uppercase;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+@keyframes winPulse{0%,100%{transform:scale(1);box-shadow:none;}50%{transform:scale(1.05);}}
+@keyframes cellPulse{0%,100%{border-color:var(--purple);}50%{border-color:rgba(168,85,247,.2);}}
+@keyframes winFlash{0%,100%{opacity:1;}50%{opacity:.6;}}
+@keyframes confFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@keyframes cellReveal{0%{transform:scale(0) rotateY(180deg);opacity:0;}60%{transform:scale(1.1) rotateY(0);opacity:1;}100%{transform:scale(1) rotateY(0);opacity:1;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- ── ELECTRON IPC ── -->
+
+<div id="app"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// LICENSE GATE — registration key required (TTT or MST prefix keys)
+// ══════════════════════════════════════════════════════════════════════════════
+const LICENSE_HASHES = {
+  TTT: [
+    "b500cf7935ec8908bd4ffee4e433dc34e5ade1e9ff47ce715fa846a2634c6d62",
+    "be8052d23a264a7ffd151b3347c5b0d988471f7685060b52bc6925b7ee519c4d",
+    "0c39e787af1b738f20aa4abf15e8d08f5b07be972a945f7470803f418a63ba6c",
+    "5b85af6bc6642c76ebf5a5c6d0433a07d454af043a4bc455f4e3fc2f8eb42381",
+    "384a15086ae70899c84487b7cf2b98293c3f6217f2b12dfa9ad79f34365771c1",
+    "04f8a4740af86eefdb71af5a80f8df154496dc6ab793e5bb9d04e3f8fc606e0a",
+    "9306423c533cd0dd2117c97c92d987f359be50931ba42caa0e970d3dfd2de122",
+    "2837c7e8c97a2bdf988098f54066cacb7ce7987e32d0e46b14860e98e47f4b15",
+    "4b43a8b817e8bc6ea42718b3b822c3fd05df4b243c8563de5b2c29735794f10a",
+    "80933f6e3b0c8e24044b3cd03c026e26804f82e07d3915d0040edf929bc7e232",
+    "77fbcf2d767c035757c2dc27f14cf2ece1fa350c4795807ca31f3805648f10b9",
+    "5d8f897c87fed3b55997294bfd6e9b0a652e908a1e1922da916d36c7a82a52d0",
+    "0a4c7c9a623e2561e97bcda12a46beb88050038ae6b0ca66e4a067aafef49a80",
+    "6ba70ed3b97d74ae043200842dc1bac3112cf30aab797b1ca93fd4ab04615418",
+    "6652be7e1b979f3a1286df1fda59c401bed4de9f05dd1f7b7954510150482ba0",
+    "f27dadef06827f045b08702538b82f479dcb83ab27cc85cbd98a4906a2665898",
+    "9ec032e570530f18f06213bf635dd002fe8ea1b65f56243a0208bc9e7fe699f9",
+    "1d60ee2472250fc75037bcc1d191248392d7c07f997fe055c5f5233d68c38ca2",
+    "76492c4f3764891f1635df6a93861b1e1bfbdc2a3cfb568627c9b6c8c57cdd10",
+    "52fe4cf35bfb946ab5c227e2ef5c802ca5314e31757f75dcdac86409ae5fe764",
+    "d3ccbfeb7ceca4837a902c62dd166c34a9938db160e80429ddaebc15b827eccc",
+    "efd4c260deb9a47fdf44e06d362ea3c98fa08d4fa32623f7c24515c47ecd5dda",
+    "5800e968a24700bd3b2f07e9f110cffc7f12ad5dbf9861953f1891b5f9904e29",
+    "8d48b354f7bf94fe474b54a54994d29a7dd2b1204819e1b8699066b69064485f",
+    "94912c491261e5592ceb9b066dc2732530c39964664557245862b050c3958890",
+    "8d4b9ef06ac402fc4a66bde09c51688f1139348f21b9f662b976480890b3e180",
+    "52a79bd0b7f1f51ed1ff08de4a95364fa8299073f4aa439317d60186e60ee023",
+    "d17556bed2ef9f6ae263e3348c52855da15e07e00629e352fdae2abfc28e1803",
+    "7ce999605e42969211333a1dc0c6161aa72528c8fa03315d21c83e3880bd2e96",
+    "c65d36ad69b0497102ee3138ce64eb071b89a2be6d41c844e17d115fe415bbaa",
+    "74d7f291543d54562600ac8bb9265ce698f8751ac35bc2886cfedbf613ed4b75",
+    "801ad620afeb85a3d2d54879c0a5a8934d7fddfa2beb05b718bce13158539d62",
+    "984319df67e9404a907859b2162f95d249fd219256eb797f762bec1cf702653e",
+    "d76d477a18a0d01fa9ba9a7a702913e4944fceddb51b7105019aa0a8e4cee5ea",
+    "0d5cd9b38ec33969dc83512436e6980fc7dd351f197ed9a5a21f381870b2f72c",
+    "b6108c8688aa449626593dfb4c288ed770bfd02777a89d3b2b965ae67c0ed73f",
+    "4810b9d72166ff5913216780a27090e72525f9191d7ad6ed5db2d16f2cb9ac2f",
+    "ee3fc303b7c0a5a1f9702be086c1e9cbdcf75bbdaf44a2ab3b83da8ba8985463",
+    "cc8a1c89fc974573ab49759744db27a35d20005a0e9bca21b522cec88894699d",
+    "20bf2d8d270a86a008b70d41259eb10dee52238b0c2675e28d14333527699e18",
+    "373f51535a74038ca3e40833be1e7c3e6b8ef47ee4bbbe4d61cc229f6eefb6cb",
+    "9266823a697102b1d989cdc2fb3b4e2be1c23805daf960aed6e813a0efc4d206",
+    "2b0007218c17743c0fdd7d716b0d57bf8676ce3a71d4be2597bc15aca770f8ec",
+    "2216d4e5e147d7e9e6bda3ef2cdcd5fd47c0e9f359b2dcb06172c40a19b31c70",
+    "219146cf47d547535506ff6a5ee7602cd5a541641a39327c0afaafa49e3a3233",
+    "33c28e75e4abe31c1ed7b169fedc29f13205d2f76b199e3d3da12d7518c3c030",
+    "8873b4f2591e0fa3e19ac5f7358fe26811e0ea1906ba5cf5cb967b077570a589",
+    "0ff6797d55917a43af6f4785523c5fbd9da4734020e23e45940018facd4b0365",
+    "0d60a97f10ac11254097da58142d5ea5b406b16748a5268b3af74895e5c1c9e5",
+    "77fbe4e1aac936255e9a7990e12c44d7645e516c5b86d47b7843aa33d9754d08",
+    "29592cd65fd7ee2fc5d63222429c08634cbaeb948b2e657c821eb56639a3ab43",
+    "268c54215cba0777a46b0faeb07895c6250cc3e243584145c4ae49ee8e866f3a",
+    "a98ddf178e2ce66381798c047be92e3873fcb77563c6adadbbc48d487c591137",
+    "4aed0b588f1f54ea8afb21a1f8ba25bd7a61570829236c1a5771033e89498cdf",
+    "14ce61db270eb3006f3068c0e03a93ee5ec5731e6be4a961dafffc8b8620bca6",
+    "b145fbb112083e9a160fdf492766bc95cac0c40c5f666b4147a4dcf8e213eb65",
+    "a077a5d55dce81ae34682495b1605a5f509c064dec14ea76e2b3f10ccf5966be",
+    "bafe95350b6e48de2b52f0470fd71a18677e6994fbd1468f1b11d1206a5a6f71",
+    "7a11a33d2c1b96632e82eb85d9a81c3ee0845958e4ad3cbb86804441885d2a35",
+    "4ccd425f14ef2f3da6a2f6d00c964190ceb064a834b7f19e7f53bd0ef4fa8420",
+    "a953b256083df6e5758ee5933c4ac0772f470055072c20b42ecfd7eaadf20679",
+    "f023718f0fef07b9ba614cfcb884d457144c870274c34c5e57bf920881306813",
+    "02302d49eea860c1ed8b86e81e7c8996b47395c9339e8a5cdae529b868eab52a",
+    "ccb9291506d38043933d58fd5e27ea086790df478fb4d2749119adf3ee9362c8",
+    "ff17718c46cd0866b15f77650f98500fcbfcd2de9bcbe3ca7bec7debd16f6fee",
+    "53fba320e604f65bfd7720df74ebb52067350e72d29883e0c43593f11f1e34b2",
+    "8672217009062efd9ef302f7a6e7e2f8222ab02303e7b2bcbc3e3353de935dca",
+    "1c830397005ac1887ff16f28c5a9b86c5b81e2124f6707665db85b3cbf47f680",
+    "f1caa1e647b0ab1d2eaf2e6642ad7a4de6df13db5151cb18aec37798f3b74aed",
+    "eb954738688eba24621850b2d23c758cf2f4544507e6d1713f34019aeef9d1a9",
+    "8be3ad9333fd3175ca0253d893220b60e3f0ea19c0fe4aecbd467d26030955a6",
+    "46011ca8e40cf63750e5d1944a27bac5a99f7144b18c8eb8d8a00d7eee113d10",
+    "8f1a68750f4b696d88fb4fb3d4451f20710c85d7d90b9ecbf6b45aadf4c09a0d",
+    "6b7e22b082ce561f95a1a33f718a4d9c7e36786d9021693e3c939c3bc4d856f7",
+    "4307ed41e0e9461ea8ee67cf0a41fca0564884c1b236a567501b1de2bdf96579",
+    "96b424ea788a49371152c0748e4479211ea6a56fabc1a8bacdb9dc5202ac99a7",
+    "ce88b84dd8ae3319087d032b63c6c42a36a78408bd5d2c5b93a974d1699c4b42",
+    "40dde4d167d05e5c6460f4763dae937ca2b5520114b27cd946612d682ffed600",
+    "51602896c99b24800d5eb90be6f061fcc0f87e63c117a898da84528228c784e6",
+    "d9d8893f971d2107cb6f7d27587acabbd2b2702cc544848debd35d3e791cfec3",
+    "48f5337fa7d703250d92d5bc1904e6d97b13d143418f978bc79c23a164af325a",
+    "eb00ee0669b8da2da04598df1a60cc06e12709e5f33b0ee249064e213cc5bd39",
+    "23ac26ffb535e39203f2e4c8f2923f7dedc4b78f270ea4e6ca127b061e22f6fc",
+    "2b0e8d9097a8e502874012d650c06f1d2919cca2830efb920628539730dfc6ce",
+    "df25e601ace3367704695c6cc9cc58cb0e0bc3ba69a9488b82194c46fd8f7e84",
+    "3ddb82eec1ac7b42ede0a4e598a89620113525f2a65784154d63a50ba3370e42",
+    "a6031733ab12d5bf12317876e2027386e5c749ee2712ca3d698ae030edea7a02",
+    "f07c27961ec4c9338977c2c68ad33b00cb244fbedff42e694f56c45bae7e0247",
+    "823d7493e0615a4f5138fc0dacf11f3cc438d7649286b36176d2171b4145a562",
+    "97777b6bbd6e4dd987465082851e18fdf12fd613c39e92f31d6acc12fd900c4f",
+    "0b414c17b1ba695b7816ac46a5a1f5211d0907461e4ff4773c9dbdea2daf1c29",
+    "29fc04176e9fa23cfdf08b39d9796118d138deda5f6db9a6bd7c978a31da43be",
+    "cbdca3cf041fc40a9426a8b28ac238d216009f94469573e23ff2c96f129b0649",
+    "f66e5c53a0eea462e528e256c4d14a400231b2664487f3454a00fb0beac04b56",
+    "713c23e5188af825055ef35af5c024ebb04f819dcc761584f2ec90d16f7a859d",
+    "160a365972bdc6db2f9426ed1c527c972c8f46852eb61085a205cdc1babb8e6d",
+    "f652781ca00448f5c56f50d429d71f7fff0d5460533d7df5bfa9c6031f5e1aa6",
+    "dbd9774ecd14a704816c37c02ca06debc959ead462873410301c63f422e96742",
+    "27c2365f75fe9f5517c64280ffe3c4bb598dc7d083ea3d427d04eba933133e81",
+    "0c9c5ea0efe2f84387778dd1cdd2a74418be3119ccc951b526049d30df7ab492",
+    "99e8689448bcea0bdb732b2a0b785cea138c308a257006f284ed1467dbae1c76",
+    "27084e0f62990f29b88bbb9b1e65a2950442ede306db97bae0dea4a12aa93528",
+    "c4e96b7cc118ab150d1d279615374f2dae49cacaf52c2a12930184026497f0b5",
+    "f5593e112badadc4049915d03998f1a7a1ffb757a4773d5dd33693f4fc914c43",
+    "c87b84a9db6e3079d079f0952583cea84f4fa67fd9ee3e161e5d1a1c2d9584e1",
+    "3446f450749953098f9593014bf684def3ab0882d37163385d669696693a7f3b",
+    "2c7558e68da282f479ce4665a6b0dd1318a59f7501704601b7266219b99fd2dc",
+    "15c77aa95eba0c94ed3676d42f36b798c14c00938baa3e9326bd15572fb1185d",
+    "33b700209f90913d3ee409b949fd16190b27de704b99a19a264438e57b00dc14",
+    "58917ab0bea20a63c1ce4fc80474ae3083dc86d4cf9572605c3d6ce76f10c6f9",
+    "ea47746134d2c078aebba8acfabac094baf0a3187104eec89914ae7ec10f2f05",
+    "8209123541a67ab5e068ea481e9e9a9ce96e02e0116db64868c87acb68c992b4",
+    "b2df98302f1b40f4a1986984af193d971f01c085739a9df521cef6a1484438d6",
+    "d9bd2a82ba268ed2faa8ca44405817b24e90027f0672ce65b8f2dd153295aaa1",
+    "c7cf5ea9214002dce7893c958a2c37ac171e6e46f482981664899a3b042ff900",
+    "812e03122b16b1000f0f41c95d6e7b0b767b92955f068a41da0a1167c4388071",
+    "0d6117f9cf6fcf162ae6291f5c3b515dac7800808c1a9d10f3330cdda0c091aa",
+    "adc2a8832f861ce5a429a6094b6c2b2f6fe46be8bb43472bac79f00a54718eb5",
+    "7ef029de2e43765d3aae22c1ef53ecf2f8e9b1f105dac0dca3c9b6768787b7f4",
+    "0cc503f09f1d0e866fa1b35e557edce17dcc43208db83bec277026b8fa8b1f2b",
+    "84b8401b500228e56bdf90c3613f6ebcd8bb66a4e8fcfad406b101ef64ff1039",
+    "acac0ee60a330f01b641494707afaea38559a7fac5c450356ae75235552b0ca8",
+    "5494f4069b98c22a1d1d6d3f285938fa781a9e98289939de553f8873de8193fb",
+    "be1eb7b829eee415050606bdcaaef05fb21eaaf3b44ee871824d332b66459912",
+    "155cd716d9f000e542ac60d37b49d4c565638134ed99c85ff7bf64d3ddf8b4ae",
+    "6fa99a0bce0c9e8bbeb75f89b2e1e853fab497738c5e9fcd14e602d44688ef67",
+    "cb2763a20739401d4cf71e8b6a10eb12d22867c23b4aabf49ef89b9603295b1e",
+    "3013fcd2f8f9f5680e238cb6a53fea6a2db88b0e430810667387bb1482ac5b2a",
+    "f5636a28893c0011d12b87fe079ed1721959f7aaa033f277b3296263d6c2a35c",
+    "16375fdef1566dc879c833d697a97b05206232b0a8b812c4fce6134cd8346111",
+    "30817977e1d4de6a9d783c66ab1ec3c57fd830113fc12f6ffe338e69455a5c40",
+    "104845e3861a10da91e1ed8b439635343f59966b94d0a1aeb04f16b210789a2c",
+    "ed2e41e618e67475ead5fa2969fa488af52de8e622657cfa1b639425e3ca1ef1",
+    "d1e4ba0a572276d39621b2330611531d6ee1547f044846ef39061b0e97f9b5e0",
+    "4e37710e3aceed97498e447fd8c672b43efe441395243549271d9c94a50446e1",
+    "7b4435d48f6630b1c773d3348af8880652ebdcb579297c0ba07dc5b16d183f6b",
+    "14f6ee12feafa1a7762ca1660f91f43e3eddf5cf76f865934b6304e675a0244f",
+    "a42e5b1765e00d8e46648666810ec67893a107c42e81c9346df17809ea184b4f",
+    "1b2f105654a9d9a8da5bdc231b6cad6bbedb749dee235d5f3e8cb1198768770a",
+    "387e154cda1619b708dc8eec450704c3fed3abe41272a1bba18ae604ae8c8e5a",
+    "e317df5fb6781829db4f58bd5c7197dd66e71ceaca19f90f24d17ca9052f20ef",
+    "ccc0b63fe1fef5c85a33b04d64c010af7f399917834f279985a13e736e8030dc",
+    "b42166cdfde4be2b827275f2f2e67842a9f8f2b45ded34737dd60f4ff72f86f9",
+    "e3eaee824856b1710c15d73042543020f38d2ee353f0dac59a6ede643abf5f11",
+    "184efbdf3f7d8f81f35dfa042cb38512d7747d76b24c957eefb1fa0d18b3cc24",
+    "84c1e93634987d6f700384351249131a464371e0a3998a1014fc2fe938d4638a",
+    "8eec42379796f305fc8daf625654bf46b1327672f836467bab20ace4113352f1",
+    "3cf9aa8c2cdd15ede2550f663c9e89be9fa5d60b0c3ea22db32875a013271648",
+    "3a3f9ccae132468377611c0ced2b43f288cc6cd40fb5e75359ac6eabf5eefba9",
+    "4d429d4384b9b164cc60bda72ac004dac205597164352308682c5f0ba2dcf0fc",
+    "dc109bb14ec177b5a69f3318e6f83c56e4b43a808b55ad8fdeb25f29f6d2f117",
+    "44f3ef45822ad3eaf042b974efa82bc55501d124d4484855ab53f54b1a8c8923",
+    "18a3bf9ed60b584e16c7ad18798bf790fbdbc86463736d7ea3cb6e7a6fe4a1bc",
+    "ae542a93a620bb671cce0ba0a4e37bd1b5d91fe0c03af3ff6843704dd695938b",
+    "a8d32e531912ec2f67246937b35d9bd4d0a8f74eeb1e0a949eb7f6bbac6fb40a",
+    "7b0286eb7995e46566140e7d2a88882cfd821b7da4e39bc8c4a13e191c2c6198",
+    "f0021ecd922be335213913b33088cd2c3daef0025ebf0a88e8d0b14c0753a69b",
+    "41eea6cbb7564eec181e556a795f206f78467c8651f8d9578daff85100065360",
+    "0bee0367554dfb5f682f429f3a44bab8a753dc60c95bd79e2335a98e16df3911",
+    "f15051e6aaa2866a26a27b14d52191749dd812a9e628c749a8f8dfbf12cb288b",
+    "17882f8a40062a4e5e0a0dcc5f993d7792047691f2c912b60c2216cf46a11783",
+    "7e88f00b69556d089e78e16c9bfc79ff74d1da99f0b01ba3a50d9498d46dd32d",
+    "ce9b14c805b8f1cc4e23ee8f6cc16c401db104c70d05e435d10adf92ddc5bc93",
+    "6c9bc74be3ea7b42ffade22cc91625efcf11e467ce538f1a7fdfc1c141f19561",
+    "ef12c0b2e5f09fea0d95d051fcc865449751b09950483e10bd042d648626a515",
+    "f75413599dd8088a5a98700ca8b40fb873764fe0abf643a1d8f673533bc10c0c",
+    "f6530eb2951aed5a2818437f30e07c34932a7d54af9799cb2e3d05d94ff1306d",
+    "7c8d661e9de080ddd0f52c1c178da360634d44eeeab0759fce6e89d306ead504",
+    "d3c3f0047345587e33d6dc0e0caa1eaa2f410340ce38b6205e7d3b2fd4b8fa96",
+    "d2047a055ac543db4d565d4069539ad5402842dbf2a3a1181ee1c628354b5594",
+    "2cd9e51f8fc05a2eb07d18e4822f9b2d9311ca3f53d9a9718e9e341d98887840",
+    "c451e4f29d463c84772a817322a02fd03b64947c3a2b3747fcd5a6e9fa49dadb",
+    "756ed3cb7a67bd4b340b8877fb16690f4b16fd07ecf307a2531e40c66f404406",
+    "ce00fccd5c0b2e0250e7c0ef3ba2928b904d031d776f885eed1a26a2893738d4",
+    "8472d2cbd32ec7e2c6c069f8af5b9012afb06e7dd51e2b9924134c2caa2efc96",
+    "58bed3d2cec0384cdad14b55ac88ad146aab15bc2cdaa22a21a56062efe04812",
+    "9356adce0151e06d5c4deaf524920d84b516d53c9bb33723a63628bff2dd7b54",
+    "86a716a9af652fa94b7f2165eb48be2cd727b772303c472aac92757c90993de0",
+    "eed60d9efc38c2eda51c7c3b880063a7b7857285d37078cbae10e7669f10674a",
+    "1123c16cb94437f63631d41fbfde64b07a0cbf4c8658e7912053ee0555cef41f",
+    "65f6b75fc102cefb30233ea26953664c60ce0cd325062e1abec80d2ce064d78a",
+    "584504c8215a9fb8baaefbe83dc1bf91fd8a3f41c57057b1117bcd4a0f081109",
+    "5b3e21391c40b37d6bdcff0c29d0ead23d3d5cdd8150fe7254a5fa2c038bdeb2",
+    "065ed055f5ed7f647ae1b53a641b05f59c73689f25caa041522cf9adcd8c598e",
+    "000cbba981956855fe630ef270e6177df20e1e500acebdbe223619b3b1294652",
+    "302418dc7328fe7394392da99bccca73e81a568420bac35e6fd66b4f07eabecb",
+    "332afcc4b5dfbd9fd4ac37bf014108d274b78c878472e6f8fe7a203d0247c0b6",
+    "840e19c00bd23f386784b190c4ee8b1f900bd5dc8427c4ab67dae99aa2f4a6d0",
+    "053a2090affbbad290c15d7fdc512a1d279dc4b393784291f9be365a9201564f",
+    "8576e945090642043d74ed9527b812962102d20584418a41392f0b0af167f635",
+    "43139160652b5ab034702463a3513cf34980971b3759747b31065a01742234c5",
+    "eae122ccf8ce87242df252ab0fb79ba3db631c8759f944e8c5fa13a25e7cf499",
+    "7251d4f0f5c4c70db9a23cc655c32c05757692058d29c07a9049ff3d27cc95af",
+    "249164db3d78af0b0e2985e4cd14e01e5a94359fdf0d515a013f0ada32660a9c",
+    "c70d07fa24dea4323ccbf0423156592e9b7754c98b8996def84da43052a0638d",
+    "36f0b69f6923eac7c320ccd5d60635b1e38d9a61f0ec80973f03b256eebc7a45",
+    "e03c0df9f19adfcf6e20fd5bf675d976863df8c5ef8856107b4c6a1c1fc17d41",
+    "cd26be727931621bff49bca606828035a7c64a0d272db46dd1e634d305781e7c",
+    "4b66a968834a55ecde79cb59dd0ba6005a61fc77c0b7555d174f32b976d86882",
+    "f302d750115b212875ce7e60bd5b7599f0fd91b666409f4e0b3308f3f5dc9dd0",
+  ],
+  MST: [
+    "7c7b95722a5cb194863897bf16720919cd823cf8b619544264648d8de11b6a81",
+    "1b46bb78e13a8fcb94fc5cd82cfa45877e4ae1b0596c9cf67ee467e4e588e953",
+    "c3267cbd7151067fa61758c4e9fdfdac3c49a1b4ba97adc1b992d1ac716bbe38",
+    "075cbf1d4e3ae49e4dbe506b3f83198fe9f1128af3cda9e13ac44b4c4750cb67",
+    "bff286fa92c1490b29cb789142f5af98b2985a5a54d23f48cf4a9558cdf87a3f",
+    "112240e78228ef90249bb94a0da83eb7c33a892ca6273236f26692442971ea8a",
+    "b2f23f043ef097b2d2ffd4741f4a8d0681322b7063750de9eb6bec6203aed925",
+    "ec23d3739490101c9fa5bbf4da300ab297266a648fd7e828bcff55e28d44430f",
+    "f310b83ab5d14521ead3b36c23098dbc6671a0832e2ea5e89cb41b2d05f262f5",
+    "06ee4baaf21162897dd91cede8aaab5bb7eecc20fc2634aa23777cf846546943",
+    "494a7e69cfb29511881403f11a92fe7ad2548de22cd7f37b388d5c32f3c104a5",
+    "f518663431a73c1f77d7682bbf153d99353fe1c4ef698f31274c477a41868a45",
+    "5e3a581e4a2762c074ae8153801e142977c5d57e573d8c460681236ed11363a3",
+    "8d26ff60a0a339cb1163b03bb4e59d96b7437b7158d5c478ec0270c7ca6cc992",
+    "076389a229868d7d59dd768773be98484015f16326a386fee59198fc70c94483",
+    "86b78133fa608579996acf52b7e195f969e46d7d41da63d0c22d83a4d48b7e9f",
+    "30c573566079969dbd852c7e1cdc07a9ad3c21c92a3402c75fa57a8fab6d9c6d",
+    "926359e026924e261c242421f0ed951a25313cf5d1b98049c67e640c4c96634a",
+    "56766f7e6ce9246fc38b0330f4640a2fd1c0c28c55e04a3cdc22e4352b1f6183",
+    "62fc3b90c87888c11ebc92c93c294636d760248396fd6da051f0620c4ce3ee11",
+    "d434210e93881d3279ad479bb70f4f1a777075c8c6b0531862c30c4f88f749ee",
+    "7d7fbe5c6c7ae1afc63c51f96eb4cd9f46683ed86fe5d59b8355a04a09b44de3",
+    "313695701d4b6ebc56847b47bb449c8f8479d36ea5de492b7d4fa1aac62fa709",
+    "747b17338361dd93648f149d40eab32d012bf43c8f32917a06f16a49cbc8bac9",
+    "e5c999b7e7f0c28d387cb658cf87fd16666f8c25800e8be827f1ebc6b334f0b6",
+    "bbc57875f4729bd8b9a78ae045a8bb48f192a7aef204b6b41f112c080d21d9f0",
+    "eada05c46c3e8b0160a1e2b686f621e25d9d748fdc4005630ae0789b55ec1550",
+    "15933e77f3b6b55e386ce2f2f471956d94ed0added4b12935a03e2af28d62073",
+    "e5e6490c4fedc57b09f8814a151cfa6d3cae6d809ed883e7d5a545cc1b36bd6d",
+    "8895d9156a27be9f0f57d31859496c7c46fa9c6baef5ef6ee5ea28a04b4c9c6a",
+    "c3d817d3a69916af78256eefd99242acbcf6307108bbe09f6c3b160022b9a432",
+    "a13866de5cb9a8de0de8ad94d72d33a18519db46ebbbc28679e44c450e4c391b",
+    "8c425061c9a145f471bdf93e955877859dd56871857f36aed8aa2feccb1ae961",
+    "a8f5bec658126c894771c4a7f0ccfd3c078301e4bff4b360ba1b64017f24a34a",
+    "8aad08ac550907c355321a2f82898c79db7e7d2f533a74e711db56dd2b051656",
+    "aa3554f9bb2213f1f41c17e2dc54c50fcfe31452c170d2aa4cc7551f53297737",
+    "55579f59e869f1054fdf2d606d546445e04089db992a6576e52dda1dc56d572c",
+    "f37415f34052f63cadba253b00f4c29cca2fa378b28840c36801f7360542fb3e",
+    "049459d5a6e829a337496399a3cb49483a95654bcc8f6f7b73dbe116635ef7b3",
+    "c00c99e4c8ace950c941ff058313312358669787c4ee5d45054a80db55dc7587",
+    "1ed6365dbd6e485dfd93d40539aefac3bd3c733dc4e631f9f4d274949202be6c",
+    "4417e2c6442d49db5352229d05cc9c4323028a7e3eb095662e9b4bc7f5f0b23e",
+    "edbe1e529768454d3506ed97e78eabae17d9a5a2e85387cf1fe6024f34c7c8d6",
+    "292ce38c2c64221bbb1c070c9ab3258c3ae45b785b08fdfa7d4ea575c2bd22fa",
+    "7d3a2cbdb5a6663b538291edb2169926cffa14cd6639b998014ced4c78d58d0a",
+    "57f5c78b2ebe1778cef58055094c8555de9910d2891994b0c00d450f9af04ee0",
+    "c64482cbb4aac9a865be4b16a0cb7cca7ecab22257bcd8767fbc7500cefc30f3",
+    "6088402f2def3b7e71927aa94a10ea4a9a3d3accd7bb88a706bad66b7964505f",
+    "969854bab59501423efba3aac8df5b2e024a411ab7fe0372ca7a80cf395907f9",
+    "393d6b60992f6fe8d065782df975b45c292ffc1ded45afa3426805feb7767ce2",
+    "44978b72eb8a6123b37115413e35aaf5fee8cc125cb02f4be0925c207ee50e7c",
+    "bce8d33ce452614f730884c6befa36d8f3fbc980b7de01fc24ca0183d894570b",
+    "749f725d0e3799a3197241b8e423c927dac18b117d510b182cdd6aec161ed083",
+    "208792ff0fd4a9601a065ac479af968936bcbf0f8949319d6519735ea1ba340c",
+    "d26703db71ac3349e371a0b5f2bfce5d1e5a2314767334a102f78502a9610076",
+    "308d308109601a540dc85b4790943b48fd7c37f6571c0870e34bac2c4629f8dd",
+    "786185ee093a451bddc1614548444bfd0ebbedfba1f5e07104322ac0dc71c68d",
+    "b505593c0a9666ea76da81f0fb423b3d7de66c1e340b07ee01cda499953437f7",
+    "57a26d5cfc0330d27dd5348459d9ff51e648a13f6a574665c59e2e3531e6f682",
+    "b42b0404fcf9aafd914ec3a179353f4bd2c8d1f26a008e27218901428e1a2b69",
+    "8d032b1a9deed712cdf0a86416f7d8235d632e0d9b0cef898ba8d4dd5cd7a87a",
+    "fa66765b3b798197cfeb8c7ef6da0caf6e4511309e5a91311607370c7df612ec",
+    "c087017201d4dc474c100485e265a9adb3e16dac0d79c9166041f13adafc4564",
+    "438028c5581475cc95e2e1fa8885494115496f49d04ae128ba089c5a006b574c",
+    "2127bc255766d4bfa9248be94cd83d3c3cac6ac1fc9176bb575d10ebf9117dc8",
+    "0b0f12f0fc9de77d20663d9a0ec5acf86e954b02752df549e45735800aaf73ea",
+    "9b7272a3aed7dbdcb8be45430b991aa8d488e24d53e3d6bb1318085650f7e5c8",
+    "aae89c48bff5424da1285dea7a072906a4825d2a49ec00513325d35e5a45a3f5",
+    "908b3441a0fea596624df39e887fda9a3307d9cdd2b657f73816ece2d84c4f42",
+    "58d9b2fbed4c9349a0c1a0e041a1785cbd371809444849aed9457414b15585a3",
+    "fcc8dd9ab1edf7624ef59a6e51ee06fd76b5dec6b691ed65e1942cfda3bc45ca",
+    "b891fdac0a8bdf246ec2e7b65786c67e8737cfdc4505c40eefcb180f1faa386a",
+    "1c21f8d4e17dae26bfd63d2dca9bce9dfb817a036d45e7628454e7aa0196a98c",
+    "c8641ac7df203027438346ac728d518b573d4a30b2be39cc535fd0c83920be3f",
+    "9aa8cd8827ac1a22cdfc86658e0c4e290398d868b50b48335d962c1a2a0085d6",
+    "f99c0733b1518a93d007d797365f48ab69864de748acdf8be9ea88fb83a2b2e2",
+    "ccc51ac69dfddf4fb0905915359cacfb7739e3cdacdb583b0a9203bd04f21439",
+    "3bf5a5d882ca4aa4d82a57ebcaaf341b4129f18b1b96539248be35e2073c1cbf",
+    "f024f251ec50c096528bb9be8d55d16ab0e2b68a1a5792574a932a78008fb04c",
+    "133742f80a4da7b9f17f5af2ec85833e4cf841c3e3b7423b0f6bb242ba344815",
+    "b2f667a0be7357e227f98cdc4071c83a4384029f103f1cdd543894cff15e6601",
+    "ae1da87552ca79816a233846426b74a0808e96b31855057b07001f8863d2c2ff",
+    "c56d57e79248b563df13566d1aa78a5f890dd719ba513b47d3cbe0416e278baa",
+    "ff7443e9b6f43421357481c1266774ed7140042ed429ab7ea58e1dcf8b26dcf4",
+    "02b6c9e236153b1c7e04fb0b3817ee714bc6db600368eca5631ad89b67102fe0",
+    "a53afdea5626a5036d35670fb78dcb8ad9fc29dea6f7133c695576fedae5d3c4",
+    "f476d375b1ba542b3ce4f1ae24f588167b7991d2c4013cea91529138729c2b13",
+    "699da1cba4f2734a7acf01b13b5a6089053042206765e94335353dc0e0342736",
+    "795062a53e7bf69244ab623b668310744ac8307b1ec476a8c0e434a425e0e160",
+    "5483f809a4509980455a3bd6fb2fd018bd97881010c09456a339cdc849c0e252",
+    "994f3f641a5bdf7c97b4cd42459c31aec69c1e84b970fcc049a366177eb19daa",
+    "dc6390c0ef84cd785b8d16463890600e95c45e0faee41b67c3911075375a2ce4",
+    "f67123bcaf26f989162eb06dce782ba8128f79226338a969dc0ede90e19bd0cf",
+    "f7d85fdba4c434914857b772534153d559a2d70027a841652442190115e27773",
+    "f303fd5091d5bffda68473e524522a8e22a731698baa2abf3aca2707af7fb62c",
+    "ee48f472a031f6be69b88fd8f833de796b2115d64f3cda9428bbbb7aa3784c1c",
+    "98b81140942700002fcd29c9b4d8d79faf9bf536c33433f737060632be911f14",
+    "545c831ac43f1b9b208c59e2730900f64f24881c54d64e39ec4370a36b564014",
+    "f7a6afb47968dc0064955a0bf3af2342473319443b2ba9b8317998f2f5333183",
+    "82591b9f1427c788b7b877b451dc80fbcb5e7110309cef500aab5a37f3afa16f",
+    "5a5cd93e2636867058f02ca8125669092015bc64092a751a197ac477ddcefc49",
+    "8ef9d10f215103965e60805a0ace741faa78fee49df7d1377a6dd680c3ef449c",
+    "2a78407645cc0f3e76b4679815fb4e096e2a217ad9d93c97620fbe98b0001923",
+    "a8ad0752583835153f1979ab23e7e0853d65d23e314faa9673c5f0f25e42c2f5",
+    "6e95b8a409675c14d1e73fcfa96f2091a43e01c708e5d4416363fc4b978002c8",
+    "d908616475fb828975c8727217198d7f22c65cbce57ca5db7eb9bbc9969a998b",
+    "bb52f8b543b3ee3747d944704960876601b9a3de97b7c4f75a1e9a8c35d7c26a",
+    "b74a473ed9c043fb8314cfe646e203486c462181dcf0a4bd9e73d0d5fa6c6643",
+    "db36492284714d261c13e59f1199ad39d1a1605c6aac2a1aec21dd56cc74a9fb",
+    "c9972eab0051c50200a767f3ee5cf718d285bc74b6197bdca46c816a3622d7a3",
+    "8301bf512d9a941c242877394de20e992fcebfe5749189cb53b26c5eaf3e841f",
+    "13ad9e48876775cce4cd052f567e352d1dd234a243c10c3c353758c5698f96be",
+    "bdc34dd1465ff6c38b484f0f44eea04cb3188b2f5740c528a766e31a94c08fbe",
+    "e03b25d5a34f3683f1bc4246607bd69b5c9a61efac6b291672674c87ced2cf32",
+    "26299dab373d2756b75145d95eb7e10fbf43886b52421a3ddb17720e4d36ff53",
+    "c8358c3d3640e759a34712823f28da2a47b6fe3b3b214607b3be2ecbd990a8ae",
+    "1265f8789ba002e6d3bccec6675ebc18246f50a723662ae3b1d2e0962d56a006",
+    "1f29e9930acbe59210cf9013400d8d2cd14155eeb640577e11c44589fbd113e9",
+    "0336a09826aecad4ebb6d5ac0b923c6b3684238c10fe8a750890f2ae507d54c2",
+    "531ee93d40f3b40e2b148168e8f5b1fc092a486f8c76b615b91f33f192a96c3e",
+    "980989de3f815438021cb1c662bbefb73fd7b091285105010223aeab816a895a",
+    "c0fdfaee97e2964ac816e9c44397d3952d912f6016e839baecf13977155e5ee7",
+    "cd5a7d87d1e14c50d29601a36b1d1869a9abdb5b1f2270c6a065328d4ae3058f",
+    "431d2412cb261c6f6d23f4b133497a57d87ae314b1397db0969ffc3c89e82896",
+    "cda65fad87c638cff020eadc76a5c486b851d289bc81be26a77ab8c1cd749813",
+    "740b0fa962909b79f751317c44ed416ffc9465a7fe2b87d0e12fccf0d5991a90",
+    "dd235e45443fb6b5b2caa3a35d572903085a349eddea2ab8211828fe70b47407",
+    "7d1a8b00e07db9f41ce6c194ace0d3b84c8c9d40c73749abcc86e75a8f9fd8b2",
+    "a7e61b6af7fbf4ba8dd66285cd50e4d6583e6eeb374fb0dc3850b268ae482cf3",
+    "ba6f28c383c7cdb69b711f65aed2a6df3886799c67a88a60ec1ea3317fb544bf",
+    "b47618c348e0241784208c18c9e187f9e94a27eba2ec0faed24f5f156d671478",
+    "5c8c1b871c19fe454db99ccf2a453089028a68d8b27a373e0226cf9886cccf21",
+    "aeec54eeed1c01f23320ebade92a2532d480253762ad6579237efae885d9456a",
+    "e7c35f7e07bcb04f15be322039508105d6101f4046c8b200a7eecbf3456f8b41",
+    "342e50e55788d601e2a6988262662603cbbac16c96b920b7b72e1641d05b9db6",
+    "0869d8c409d9fdc643d9ff7c918ec8c780367979be4dc2133c54c373c7011afc",
+    "35ee38adb1739b9a78a32b0586dc8b7fb3221761743000d50be408fc337b53ea",
+    "9ede603a4130b4ab4c416ad2e7320c9ca9f7a73fe899bdf83bb611448f83399c",
+    "d4de5d155fed7305ba8915562b2bea8140cc68bc7d19b93b41091d91dbd76a90",
+    "39e54bf54949de9b0ceb8e295b753fa9dd877dff6ee68eb68e51e829e6c8917f",
+    "b0d9c72ef21cc8a46f8a27726cdb2c5252354b466778d3b98ba2e4bfc493232e",
+    "63d04939eeefba9072b3aa622c602779a338382b2599f9ef84d4527d6f55684b",
+    "0736caa4ee42eb01f223e5325d829cc92eac46c18d7169d42aaafe7e04aae9e2",
+    "8b7584bcf185b327b65f69e8677a63f30ed40bdf17dc175c2f60baadfbe3d178",
+    "9ac4e986f7d2617ddd10bcc862aafaf8f8b1c2c5d1eb75bbafe95faf689ee399",
+    "50ec1388f4d20cc27bc060897e8c1f22d7d4e9c511d6aecadcd09032856d8b4f",
+    "69bc6b525cd3bf01e72b5aafc25d30a9a8e32e5920ecc5318fa49c09db0135be",
+    "fd3019b58e19755a1fbb7a3c7b95842cd9173f709396ef87e09bf3a083cd782e",
+    "4f09af117e4f5b2f3e83d38a0632ac1e01e039a3b8e7d7f1e277d480f34c920e",
+    "4145527c2f7f218f7b6eac314e42aec8f212f8921f18cb560a47510817d523c0",
+    "822c9ae410c5a61fd723e55ca0e789d305d4929881930821b1fab22368793067",
+    "6fcc4bc3449690f9557c1273c537a5e5993fadeaec96105518a3de1b90d8640b",
+    "1083f02663fa09bdecd059f6c18dfbe4bbc152e9c1e0c3ff780a5097a3145a8d",
+    "090f4eaa006953dfcc803ca6a3e97ba1ecc4d0fe78146c79b610b5ea4e9b05b5",
+    "5e043be3d2c1971e7904fd36d0e7334df1fd6a561f2319d1fc53e5f68c05601b",
+    "1363e7131b3b6683a66caa682aadc93d6ccb4abb44f8d5a69ee52b1e757fa94e",
+    "39ea0a51a80be2649eb5a14ca8fcd0967349c99954b256be533b60fb9627c6af",
+    "1d8cfc8e000dff73899ddaac2f4c553e381d56698b2cf6822c6ff1882e63de42",
+    "6ab139163fbecc9f949f962fe42a62e7547b1a6d621dd863218f25419034da47",
+    "657fa2b0e11173fb3f7e2af13b1a57d457b70e2aa5452a80540310159e6094c7",
+    "849c0858bbe78302ce655315676adba9ae6bda0a1e82e8704f1322db66e6033d",
+    "7fb34f6d9049f37b30db95377a02c8c18382201d445c208259d5d66d27507523",
+    "4593321d3292912431e061bbda77f7008f0f32230bdd46d64e482ab18cf768ce",
+    "76df80c53e8df2e55ffbd9d0ba48466d4a4b4e0c7fbea38caac0a0ee972ed9fc",
+    "32ccefedfb329d17a1ac0ea6932a63f16fa63ad06f937355f3ff3c949ddba0e6",
+    "50e0ec72b4b2ddda78e5a12feaee3847a7b560d5e869c5c7ead0746e2861dc8e",
+    "623b5a7475f84d65750a7aab99826b1b6843a3ae0978a7c027fdb9d3146f438f",
+    "e63b27a6f91e97ce003e6ea6048cbde5da31497a450f52de7ae00ae70da698a1",
+    "a68d8ba63a9671fdd0d6b873937c461364a8e08b2d2f6e86b0ba814570ea0146",
+    "e28aee22ecf73cfa24531694b011570d2160f40dd1dd18122730b62fd18f013b",
+    "c5a3be4428d952f5080cac8075d1de2940645b8668a76efdad110daa3bc57bf0",
+    "218f093bdb38e29323ce9f029715b98e891fc71106b3f1dfccf2d13992aab1ec",
+    "f6638eb9596560471f20d62182128d2a867e939bcf2c18f7e0e1140e338248ed",
+    "72c6571d514f79ce19bb97877241dc5d3d22401be18f0ce253850fb093552bfd",
+    "3f2f79362540ec614da4d14505d1d6706bb1e3a3bd93b35aa4be7bbaa91b7432",
+    "4fe4fff36fe5a9bd647908bd9642b9305bd846def433be97076fd22c9b9b9812",
+    "1ea76ac0b5f256f83ebc85c38161f60ee0fc0f0a86f72414dc8c02d0729574cb",
+    "83e0886f54815336999c30565d42ca6d22eb78a8edc16581f2fee98c7c923286",
+    "a43d2a00ea87175bf02ad89b1a4a6b989326cf2f638fa32fdb964862d5f23276",
+    "9c2b83a834d826a4f2d0365a747f1bbbf5054bcef92d62a34c7a70881d5ee13d",
+    "7d5e6d8cb103b9a1a46116b0163355cfe7a1915243104a336a7262f52e0775bf",
+    "6895604a781b25fde0069405450baf5321814bee2e9d97f84166f335985a7230",
+    "d14a59d4df80acd0c6ed534453bc7a85eb5cb140c64e10b4cb786e6a651408d6",
+    "d5db4e0c5fcfd2b4a3302de156db57ea187c045a471d53141f286bb10d9ec482",
+    "374b31dc142bff0431ca9a5d10ed051bdc7286c54447b711115550e025875e61",
+    "f421a0c9780f683fec7ec6f8acd9fa99323da8ab7ceb041fb6e8ddc239ec8bb4",
+    "92c88a34686f64bd85109095484038a61879c28274cd17891195807746d80276",
+    "12d1029eab4fb714124394ced04aeb965ff61603de3bca8ef3ae1dd8fadd07e7",
+    "35f2193865776dd24ed2a28c0b9eca93aab1043a67637b6937dc653f20b5ec3d",
+    "10c91d8053b3a7b9b88cd13877c1e8c3fd99be4374b715731c4a10f97927753f",
+    "8d07a6753bbe13327baa767ad9778888f02459ceccc861de32e4786083a01f8b",
+    "220ea2b59a475af614389240bcd986f1989d8d00f3c33fffe4a32b4bd0e18fed",
+    "154e8650d68bfe3fddc459e523e044204ffbf22e27f2d24f0ce81487a40dd366",
+    "acdff514076ff6ab00bf9646ce4d7500df6b73c81789657b7004ad01174ac59d",
+    "bbc2f375d5bb4e168020fa2ebfa13788394ba45c4650496ccd7b292e7010f0a5",
+    "4fc90587e5df740d3e484fa5eb65ff83ea67024625225bcbdab7a98f7968db32",
+    "1e9a4d9500bffc81ac8c2a0527534299c84d5bb14406843113444d094ac212c6",
+    "780b7f6df242c92d73249b5a8dc8e552b6c693435361122f3a163f6d2b56b2f0",
+    "b60bb6992ec336b7b49f4f5eee1406ef455134bd71f29f767fb07807a028b250",
+    "587012afe48536322b1592fcb62ca1c25f5fc532922bd4aae9063a6457b92cdb",
+  ],
+};
+
+const _lfs = typeof require!=='undefined' ? require('fs') : null;
+const _lpath = typeof require!=='undefined' ? require('path') : null;
+const _los = typeof require!=='undefined' ? require('os') : null;
+function _licenseDir(){
+  if(!_lfs||!_lpath||!_los) return null;
+  const d = _lpath.join(_los.homedir(),'Library','Application Support','Tic Tac Toe');
+  try{ _lfs.mkdirSync(d,{recursive:true}); }catch(e){}
+  return d;
+}
+function _sha256(s){
+  try{ const crypto=require('crypto'); return crypto.createHash('sha256').update(s).digest('hex'); }catch(e){ return ''; }
+}
+function _loadLicense(){
+  const dir = _licenseDir(); if(!dir) return {activated:[]};
+  try{ return JSON.parse(_lfs.readFileSync(_lpath.join(dir,'license.json'),'utf8')); }catch(e){ return {activated:[]}; }
+}
+function _saveLicense(lic){
+  const dir = _licenseDir(); if(!dir) return;
+  try{ _lfs.writeFileSync(_lpath.join(dir,'license.json'),JSON.stringify(lic)); }catch(e){}
+}
+let LICENSE = _loadLicense();
+function isUnlocked(){
+  if(!LICENSE.activated||!LICENSE.activated.length) return false;
+  return LICENSE.activated.some(h =>
+    (LICENSE_HASHES.TTT && LICENSE_HASHES.TTT.includes(h)) ||
+    (LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(h))
+  );
+}
+function activateLicenseKey(input){
+  const k = (input||'').trim().toUpperCase();
+  if(!k) return {ok:false, msg:'Enter a key'};
+  const h = _sha256(k);
+  let matched = false;
+  for(const pfx of Object.keys(LICENSE_HASHES)){
+    if(LICENSE_HASHES[pfx].includes(h)){ matched = true; break; }
+  }
+  if(!matched) return {ok:false, msg:'Invalid key — check for typos'};
+  if(!LICENSE.activated) LICENSE.activated = [];
+  if(LICENSE.activated.includes(h)) return {ok:false, msg:'This key is already activated'};
+  LICENSE.activated.push(h);
+  LICENSE.date = Date.now();
+  _saveLicense(LICENSE);
+  return {ok:true};
+}
+function renderLockScreen(){
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = '';
+  // Remove any operator/audience div left over
+  document.querySelectorAll('#operator,#audience,#lobby').forEach(n=>n.remove());
+  const wrap = document.createElement('div');
+  Object.assign(wrap.style,{position:'fixed',inset:'0',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at 50% 0%,#1a0e00 0%,#030304 60%)',gap:'18px',padding:'40px',zIndex:'9999'});
+  const icon = document.createElement('div'); icon.textContent = '🔒'; icon.style.cssText='font-size:60px;opacity:.6;'; wrap.appendChild(icon);
+  const title = document.createElement('div'); title.textContent='TIC TAC TOE';
+  title.style.cssText = "font-family:'Black Ops One',sans-serif;font-size:clamp(28px,6vw,52px);letter-spacing:5px;color:#fbbf24;text-shadow:0 0 40px rgba(245,158,11,.5);";
+  wrap.appendChild(title);
+  const sub = document.createElement('div'); sub.textContent='Enter your registration key to unlock';
+  sub.style.cssText='font-size:13px;color:#666;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;text-align:center;';
+  wrap.appendChild(sub);
+  const card = document.createElement('div');
+  card.style.cssText='background:#0a0a0c;border:1px solid #1a1a1e;border-radius:16px;padding:28px;width:min(420px,95vw);display:flex;flex-direction:column;gap:14px;';
+  const inp = document.createElement('input'); inp.type='text';
+  inp.placeholder='TTT-XXXX-XXXX-XXXX';
+  inp.autofocus=true;
+  inp.style.cssText='width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fbbf24;font-size:16px;font-family:"Barlow Condensed",sans-serif;letter-spacing:3px;text-align:center;text-transform:uppercase;outline:none;';
+  card.appendChild(inp);
+  const err = document.createElement('div'); err.style.cssText='font-size:13px;color:#ef4444;text-align:center;min-height:18px;letter-spacing:1px;font-family:"Barlow Condensed",sans-serif;font-weight:700;'; card.appendChild(err);
+  const btn = document.createElement('button'); btn.textContent='🔓 UNLOCK';
+  btn.style.cssText='padding:14px;background:linear-gradient(135deg,#fbbf24,#d97706);color:#000;font-family:"Black Ops One",sans-serif;font-size:14px;letter-spacing:3px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,.3);';
+  function tryAct(){
+    const r = activateLicenseKey(inp.value);
+    if(r.ok){ LICENSE = _loadLicense(); wrap.remove(); render(); }
+    else { err.textContent = r.msg; }
+  }
+  btn.addEventListener('click', tryAct);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') tryAct(); });
+  card.appendChild(btn);
+  const help = document.createElement('div'); help.innerHTML='Don\'t have a key? Purchase at <span style="color:#888;">livefrenzy.com</span>';
+  help.style.cssText='font-size:11px;color:#444;letter-spacing:1px;text-align:center;margin-top:8px;font-family:"Barlow Condensed",sans-serif;';
+  card.appendChild(help);
+  wrap.appendChild(card);
+  document.body.appendChild(wrap);
+}
+
+
+// ── CONSTANTS ──
+const QS_KEY='ttt_questions';
+const APP_VERSION='1.0.0';
+const WIN_LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+const DEFAULT_QUESTIONS=[
+  {q:'What is the first book of the Bible?',a:'Genesis'},
+  {q:'How many disciples did Jesus have?',a:'12'},
+  {q:'Who built the ark?',a:'Noah'},
+  {q:'What is the shortest verse in the Bible?',a:'Jesus wept'},
+  {q:'Who was swallowed by a big fish?',a:'Jonah'},
+  {q:'How many days did God take to create the world?',a:'6 (rested on 7th)'},
+  {q:'What did God create on the first day?',a:'Light'},
+  {q:'Who was the first king of Israel?',a:'Saul'},
+  {q:'What are the two greatest commandments?',a:'Love God, Love your neighbor'},
+  {q:'Where was Jesus born?',a:'Bethlehem'},
+];
+
+const THEMES={
+  rocket:{e:'🚀',a:'#60a5fa',f:'#060e1a',t:'#3b82f6'},
+  train:{e:'🚂',a:'#f59e0b',f:'#1a0e00',t:'#d97706'},
+  trophy:{e:'🏆',a:'#fbbf24',f:'#1a1200',t:'#f59e0b'},
+  arcade:{e:'🕹️',a:'#4ade80',f:'#021008',t:'#16a34a'},
+  surf:{e:'🏄',a:'#22d3ee',f:'#001a1a',t:'#0891b2'},
+  portal:{e:'🌌',a:'#a855f7',f:'#0e0718',t:'#7c3aed'},
+  surge:{e:'⚡',a:'#eab308',f:'#100d00',t:'#ca8a04'},
+  neon:{e:'🌃',a:'#e879f9',f:'#0d0014',t:'#c026d3'},
+  guitar:{e:'🎸',a:'#f43f5e',f:'#1a000a',t:'#be123c'},
+  gem:{e:'💎',a:'#38bdf8',f:'#001018',t:'#0284c7'},
+};
+const THEME_ORDER=Object.keys(THEMES);
+
+// ── HELPERS ──
+function el(tag,props,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(props||{})){if(k==='style'&&typeof v==='object')Object.assign(e.style,v);else if(k==='onClick')e.addEventListener('click',v);else if(k==='onInput')e.addEventListener('input',v);else if(k==='onKeydown')e.addEventListener('keydown',v);else if(k==='className')e.className=v;else if(k==='disabled')e.disabled=!!v;else if(k==='placeholder')e.placeholder=v;else if(k==='value'&&tag==='input')e.value=v;else if(k==='type')e.type=v;}kids.flat().forEach(k=>{if(k!=null&&k!==false)e.appendChild(typeof k==='string'?document.createTextNode(k):k);});return e;}
+function mk(s){const d=document.createElement('div');Object.assign(d.style,s);return d;}
+function copy(x){return JSON.parse(JSON.stringify(x));}
+function rgba(h,a){h=h.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;}
+
+// ── STORAGE (filesystem for Electron, localStorage fallback) ──
+const _fs=typeof require!=='undefined'?require('fs'):null;
+const _path=typeof require!=='undefined'?require('path'):null;
+const _dataDir=(function(){if(!_fs||!_path)return null;const d=_path.join(require('os').homedir(),'Library','Application Support','Tic Tac Toe');try{_fs.mkdirSync(d,{recursive:true});}catch(e){}return d;})();
+function loadQuestions(){if(_fs&&_dataDir){try{return JSON.parse(_fs.readFileSync(_path.join(_dataDir,'questions.json'),'utf8'));}catch(e){}}try{const s=localStorage.getItem(QS_KEY);if(s)return JSON.parse(s);}catch(e){}return null;}
+function saveQuestions(list){if(_fs&&_dataDir){try{_fs.writeFileSync(_path.join(_dataDir,'questions.json'),JSON.stringify(list));}catch(e){}}try{localStorage.setItem(QS_KEY,JSON.stringify(list));}catch(e){}}
+
+// ── ELECTRON IPC ──
+const ipc=(typeof require!=='undefined')?require('electron').ipcRenderer:null;
+
+// ── ROLE (from URL hash) ──
+let ROLE=(window.location.hash||'').replace('#','').trim()||null;
+let ROOM='LOCAL';
+let STATE={
+  screen:'setup',
+  questions:copy(loadQuestions()||DEFAULT_QUESTIONS),
+  board:[null,null,null,null,null,null,null,null,null],
+  currentTeam:'X',
+  activeCell:null,
+  activeQuestion:null,
+  winner:null,
+  winLine:null,
+  themeId:'portal',
+};
+let editQuestions=copy(loadQuestions()||DEFAULT_QUESTIONS);
+let inputQ='',inputA='';
+let dbUnsubscribe=null;
+
+function setState(patch){STATE=Object.assign({},STATE,patch);pushState();render();}
+
+// ── IPC SYNC (Electron) ──
+function pushState(){if(ipc)ipc.send('ttt-state',STATE);}
+
+function subscribeRoom(){
+  if(!ipc)return;
+  ipc.on('ttt-state',(event,s)=>{if(s)handleRemoteState(s);});
+  ipc.on('ttt-request',()=>{if(ROLE==='operator')pushState();});
+  if(ROLE==='audience')ipc.send('ttt-request');
+}
+
+let _prevBoard=null,_prevWinner=null,_prevActiveCell=null;
+function handleRemoteState(s){
+  if(!s)return;
+  const pb=_prevBoard,pw=_prevWinner,pac=_prevActiveCell;
+  _prevBoard=s.board?[...s.board]:null;_prevWinner=s.winner;_prevActiveCell=s.activeCell;
+  STATE=s;
+  if(ROLE==='audience'){
+    // Detect new X or O placed
+    if(pb&&s.board){for(let i=0;i<9;i++){if(!pb[i]&&s.board[i])soundCorrect();}}
+    // Detect wrong answer (cell was active, now not, but cell still empty)
+    if(pac!==null&&s.activeCell===null&&pb&&s.board&&!s.board[pac])soundWrong();
+    // Detect win
+    if(s.winner&&s.winner!=='draw'&&!pw){soundWin();setTimeout(spawnConfetti,300);}
+    if(s.winner==='draw'&&!pw)soundDraw();
+  }
+  render();
+}
+
+// ── SOUNDS ──
+let _ctx=null;
+function ac(){if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();if(_ctx.state==='suspended')_ctx.resume();return _ctx;}
+function tone(c,type,freq,t0,t1,pk,fd){const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(pk,t0+.015);g.gain.setValueAtTime(pk,fd||t0+.015);g.gain.exponentialRampToValueAtTime(.001,t1);o.start(t0);o.stop(t1+.01);}
+
+function soundSelect(){try{const c=ac(),n=c.currentTime;tone(c,'sine',660,n,n+.12,.15,n+.03);tone(c,'sine',880,n+.06,n+.15,.1,n+.08);}catch(e){}}
+
+function soundCorrect(){try{const c=ac(),n=c.currentTime;[[523,0],[659,.1],[784,.2],[1047,.35]].forEach(([f,t])=>{tone(c,'square',f,n+t,n+t+.3,.12,n+t+.06);tone(c,'sine',f,n+t,n+t+.35,.18,n+t+.08);});}catch(e){}}
+
+function soundWrong(){try{const c=ac(),n=c.currentTime;const o1=c.createOscillator(),g1=c.createGain();o1.connect(g1);g1.connect(c.destination);o1.type='sawtooth';o1.frequency.setValueAtTime(311,n);o1.frequency.exponentialRampToValueAtTime(233,n+.45);g1.gain.setValueAtTime(.2,n);g1.gain.exponentialRampToValueAtTime(.001,n+.5);o1.start(n);o1.stop(n+.55);const o2=c.createOscillator(),g2=c.createGain();o2.connect(g2);g2.connect(c.destination);o2.type='sawtooth';o2.frequency.setValueAtTime(233,n+.55);o2.frequency.exponentialRampToValueAtTime(147,n+1.3);g2.gain.setValueAtTime(.2,n+.55);g2.gain.exponentialRampToValueAtTime(.001,n+1.4);o2.start(n+.55);o2.stop(n+1.45);}catch(e){}}
+
+function soundWin(){try{const c=ac(),n=c.currentTime;[[392,0],[523,.15],[659,.3],[784,.48],[880,.63],[1047,.82]].forEach(([f,t],i)=>{const v=.12+i*.03;tone(c,'square',f,n+t,n+t+.5,v*.6,n+t+.1);tone(c,'sine',f,n+t,n+t+.6,v,n+t+.12);tone(c,'sine',f*2,n+t+.02,n+t+.45,v*.3,n+t+.08);});[1047,1319,1568].forEach(f=>{tone(c,'sine',f,n+1.0,n+2.2,.1,n+1.3);});}catch(e){}}
+
+function soundDraw(){try{const c=ac(),n=c.currentTime;tone(c,'triangle',440,n,n+.6,.15,n+.1);tone(c,'triangle',349,n+.3,n+.9,.12,n+.4);}catch(e){}}
+
+// ── CONFETTI ──
+function spawnConfetti(){
+  if(document.querySelector('.conf'))return;
+  const colors=STATE.winner==='X'?['#22d3ee','#06b6d4','#fff','#67e8f9','#0891b2','#a5f3fc']:['#f59e0b','#d97706','#fff','#fbbf24','#b45309','#fde68a'];
+  const l=mk({position:'fixed',top:'0',left:'0',width:'100%',height:'100%',pointerEvents:'none',overflow:'hidden',zIndex:'999'});
+  l.className='conf';
+  for(let i=0;i<80;i++){const s=(6+Math.random()*14)+'px';l.appendChild(mk({position:'absolute',left:Math.floor(Math.random()*100)+'%',top:'-25px',width:s,height:s,background:colors[i%colors.length],borderRadius:Math.random()>.5?'50%':'2px',animation:`confFall ${2+Math.random()*2.5}s ${Math.random()*2}s ease-in forwards`}));}
+  document.getElementById('app').appendChild(l);
+  setTimeout(()=>l.remove(),6000);
+}
+
+// ── WIN CHECK ──
+function checkWin(board){
+  for(const[a,b,c]of WIN_LINES){if(board[a]&&board[a]===board[b]&&board[b]===board[c])return{winner:board[a],line:[a,b,c]};}
+  if(board.every(cell=>cell!==null))return{winner:'draw',line:null};
+  return null;
+}
+
+// ── RENDER ──
+function render(){
+  if(ROLE==='operator' && !isUnlocked()){ renderLockScreen(); return; }
+
+  const app=document.getElementById('app');app.innerHTML='';
+  if(ROLE==='operator')app.appendChild(buildOperator());
+  else if(ROLE==='audience')app.appendChild(buildAudience());
+  else app.appendChild(buildOperator());
+}
+
+// ── LOBBY ──
+function buildLobby(){
+  const wrap=mk({});wrap.id='lobby';
+  const title=mk({});title.className='lobby-title';title.textContent='TIC TAC TOE';
+  const sub=mk({});sub.className='lobby-sub';sub.textContent='Trivia Team Battle';
+  wrap.appendChild(title);wrap.appendChild(sub);
+  const card=mk({});card.className='lobby-card';
+  const createLabel=mk({});createLabel.className='lobby-label';createLabel.textContent='Start a new game as Operator';
+  const createBtn=el('button',{className:'btn-primary',onClick:async()=>{ac();ROOM=makeCode();ROLE='operator';await pushState();subscribeRoom();render();}});
+  createBtn.textContent='▶ CREATE ROOM';
+  card.appendChild(createLabel);card.appendChild(createBtn);
+  const div=mk({});div.className='lobby-divider';div.textContent='OR';card.appendChild(div);
+  const joinLabel=mk({});joinLabel.className='lobby-label';joinLabel.textContent='Join as Audience Screen';
+  let joinCode='';
+  const joinInput=el('input',{className:'lobby-input',placeholder:'ENTER ROOM CODE',type:'text',onInput:e=>{joinCode=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);joinInput.value=joinCode;},onKeydown:e=>{if(e.key==='Enter')doJoin();}});
+  const joinBtn=el('button',{className:'btn-secondary',onClick:doJoin});joinBtn.textContent='JOIN AUDIENCE';
+  function doJoin(){if(joinCode.length<4)return;ac();ROOM=joinCode;ROLE='audience';subscribeRoom();render();}
+  card.appendChild(joinLabel);card.appendChild(joinInput);card.appendChild(joinBtn);
+  wrap.appendChild(card);return wrap;
+}
+
+// ── OPERATOR ──
+function buildOperator(){
+  const wrap=mk({});wrap.id='operator';
+
+  if(STATE.screen==='setup'){
+    // Top bar
+    const topbar=mk({});topbar.className='op-topbar';
+    const left=mk({display:'flex',flexDirection:'column'});
+    const titleEl=mk({});titleEl.className='op-title';titleEl.textContent='TIC TAC TOE';
+    const roomEl=mk({});roomEl.className='op-room';roomEl.textContent='v'+APP_VERSION;
+    left.appendChild(titleEl);left.appendChild(roomEl);
+    const topBtns=mk({});topBtns.className='op-topbtns';
+    const greenBtn=el('button',{className:'op-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}});greenBtn.textContent='🟢';topBtns.appendChild(greenBtn);
+    const redBtn=el('button',{className:'op-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}});redBtn.textContent='🔴';topBtns.appendChild(redBtn);
+    topbar.appendChild(left);topbar.appendChild(topBtns);wrap.appendChild(topbar);
+
+    const scroll=mk({});scroll.className='op-scroll';
+
+    // Theme picker
+    const themeLabel=mk({});themeLabel.className='section-label';themeLabel.textContent='Theme';scroll.appendChild(themeLabel);
+    const themeBar=mk({});themeBar.className='theme-bar';
+    THEME_ORDER.forEach(tid=>{const t=THEMES[tid],active=STATE.themeId===tid;const chip=el('button',{className:'theme-chip'+(active?' active':''),onClick:()=>setState({themeId:tid})});chip.textContent=t.e;themeBar.appendChild(chip);});
+    scroll.appendChild(themeBar);
+
+    // Question list
+    const qLabel=mk({});qLabel.className='section-label';qLabel.textContent=`Questions (${editQuestions.length})`;scroll.appendChild(qLabel);
+    const list=mk({});list.className='q-list';
+    editQuestions.forEach((q,i)=>{
+      const row=mk({});row.className='q-row';
+      const info=mk({});info.className='q-info';
+      const qt=mk({});qt.className='q-text';qt.textContent=q.q;info.appendChild(qt);
+      const qa=mk({});qa.className='q-answer';qa.textContent='Answer: '+q.a;info.appendChild(qa);
+      const del=el('button',{className:'del-btn',onClick:()=>{editQuestions.splice(i,1);saveQuestions(editQuestions);render();}});del.textContent='✕';
+      row.appendChild(info);row.appendChild(del);list.appendChild(row);
+    });
+    scroll.appendChild(list);
+
+    // Add question
+    const addWrap=mk({display:'flex',flexDirection:'column',gap:'8px'});
+    const qi=el('input',{className:'add-input',placeholder:'Type a question...',type:'text',onInput:e=>{inputQ=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addQ();}});qi.value=inputQ;
+    const ai=el('input',{className:'add-input ans-input',placeholder:'Answer',type:'text',onInput:e=>{inputA=e.target.value;},onKeydown:e=>{if(e.key==='Enter')addQ();}});ai.value=inputA;
+    function addQ(){if(!inputQ.trim()||!inputA.trim())return;editQuestions.push({q:inputQ.trim(),a:inputA.trim()});saveQuestions(editQuestions);inputQ='';inputA='';render();}
+    const addBtns=mk({display:'flex',gap:'8px'});
+    const addBtn=el('button',{className:'add-btn',onClick:addQ});addBtn.textContent='+ Add';
+    addBtns.appendChild(addBtn);addWrap.appendChild(qi);addWrap.appendChild(ai);addWrap.appendChild(addBtns);
+    scroll.appendChild(addWrap);
+
+    // Start button
+    const startBtn=el('button',{className:'start-btn',onClick:()=>{
+      if(editQuestions.length<5){alert('Add at least 5 questions.');return;}
+      saveQuestions(editQuestions);
+      // Shuffle questions and assign to cells
+      const shuffled=copy(editQuestions);for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+      setState({screen:'game',questions:copy(editQuestions),board:[null,null,null,null,null,null,null,null,null],currentTeam:'X',activeCell:null,activeQuestion:null,winner:null,winLine:null,_shuffledQs:shuffled,_qIndex:0});
+    }});
+    startBtn.textContent='▶ START GAME';scroll.appendChild(startBtn);
+    wrap.appendChild(scroll);return wrap;
+  }
+
+  // ── GAME SCREEN ──
+  const{board,currentTeam,activeCell,activeQuestion,winner}=STATE;
+  const xCount=board.filter(c=>c==='X').length;
+  const oCount=board.filter(c=>c==='O').length;
+
+  // Top bar
+  const topbar=mk({});topbar.className='op-topbar';
+  const left=mk({display:'flex',flexDirection:'column'});
+  const titleEl=mk({});titleEl.className='op-title';titleEl.textContent='TIC TAC TOE';
+  const roomEl=mk({});roomEl.className='op-room';roomEl.textContent=`X: ${xCount}  ·  O: ${oCount}`;
+  left.appendChild(titleEl);left.appendChild(roomEl);
+  const btns=mk({});btns.className='op-topbtns';
+  const greenBtn2=el('button',{className:'op-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}});greenBtn2.textContent='🟢';btns.appendChild(greenBtn2);
+  const redBtn2=el('button',{className:'op-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}});redBtn2.textContent='🔴';btns.appendChild(redBtn2);
+  const setupBtn=el('button',{className:'op-btn',onClick:()=>setState({screen:'setup',board:[null,null,null,null,null,null,null,null,null],currentTeam:'X',activeCell:null,activeQuestion:null,winner:null,winLine:null})});
+  setupBtn.textContent='⚙ Setup';btns.appendChild(setupBtn);
+  topbar.appendChild(left);topbar.appendChild(btns);wrap.appendChild(topbar);
+
+  // Team indicator
+  if(!winner){
+    const teamInd=mk({});teamInd.className='team-indicator team-'+currentTeam;
+    teamInd.textContent=activeCell!==null?`TEAM ${currentTeam} IS ANSWERING...`:`TEAM ${currentTeam}'S TURN`;
+    wrap.appendChild(teamInd);
+  }
+
+  // Active question display
+  if(activeCell!==null&&activeQuestion){
+    const qBox=mk({});qBox.className='op-question';
+    const qText=mk({});qText.className='op-q-text';qText.textContent='Q: '+activeQuestion.q;qBox.appendChild(qText);
+    const aText=mk({});aText.className='op-a-text';aText.textContent='A: '+activeQuestion.a;qBox.appendChild(aText);
+
+    const ctrl=mk({});ctrl.className='ctrl-bar';
+    const correctBtn=el('button',{className:'ctrl-btn correct',onClick:()=>{
+      const newBoard=[...board];newBoard[activeCell]=currentTeam;
+      const result=checkWin(newBoard);
+      const nextTeam=currentTeam==='X'?'O':'X';
+      soundCorrect();
+      if(result){
+        if(result.winner!=='draw'){soundWin();setTimeout(spawnConfetti,300);}else soundDraw();
+        setState({board:newBoard,activeCell:null,activeQuestion:null,winner:result.winner,winLine:result.line});
+      }else{
+        setState({board:newBoard,activeCell:null,activeQuestion:null,currentTeam:nextTeam});
+      }
+    }});correctBtn.textContent='✅ CORRECT';ctrl.appendChild(correctBtn);
+    const wrongBtn=el('button',{className:'ctrl-btn wrong',onClick:()=>{
+      soundWrong();
+      const nextTeam=currentTeam==='X'?'O':'X';
+      setState({activeCell:null,activeQuestion:null,currentTeam:nextTeam});
+    }});wrongBtn.textContent='❌ WRONG';ctrl.appendChild(wrongBtn);
+    wrap.appendChild(qBox);wrap.appendChild(ctrl);
+  }
+
+  // Scroll area
+  const scroll=mk({});scroll.className='op-scroll';
+
+  // Winner display
+  if(winner){
+    const winBox=mk({textAlign:'center',padding:'20px',marginBottom:'16px'});
+    const winText=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'28px',letterSpacing:'4px'});
+    if(winner==='draw'){winText.textContent='DRAW!';winText.style.color='#888';}
+    else{winText.textContent=`TEAM ${winner} WINS!`;winText.style.color=winner==='X'?'var(--teamX)':'var(--teamO)';}
+    winBox.appendChild(winText);
+    const newGameBtn=el('button',{className:'start-btn',style:{marginTop:'12px'},onClick:()=>{
+      const shuffled=copy(STATE.questions);for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+      setState({board:[null,null,null,null,null,null,null,null,null],currentTeam:'X',activeCell:null,activeQuestion:null,winner:null,winLine:null,_shuffledQs:shuffled,_qIndex:0});
+    }});newGameBtn.textContent='🔄 NEW GAME';winBox.appendChild(newGameBtn);
+    scroll.appendChild(winBox);
+  }
+
+  // Grid
+  const grid=mk({});grid.className='op-grid';
+  for(let i=0;i<9;i++){
+    const cell=board[i];
+    const isActive=activeCell===i;
+    const cellEl=el('button',{
+      className:'op-cell'+(cell?' taken-'+cell:'')+(isActive?' active-cell':''),
+      disabled:!!cell||!!winner||activeCell!==null,
+      onClick:()=>{
+        if(cell||winner||activeCell!==null)return;
+        soundSelect();
+        // Pick next question from shuffled list
+        const sqs=STATE._shuffledQs||copy(STATE.questions);
+        let qi=(STATE._qIndex||0)%sqs.length;
+        const q=sqs[qi];
+        setState({activeCell:i,activeQuestion:q,_qIndex:qi+1});
+      }
+    });
+    cellEl.textContent=cell||String(i+1);
+    grid.appendChild(cellEl);
+  }
+  scroll.appendChild(grid);
+  wrap.appendChild(scroll);return wrap;
+}
+
+// ── AUDIENCE ──
+function buildAudience(){
+  const wrap=mk({});wrap.id='audience';
+  const glow=mk({});glow.className='aud-glow';wrap.appendChild(glow);
+
+  if(STATE.screen==='setup'||!STATE.board){
+    const w=mk({});w.className='waiting';
+    const label=mk({});label.className='waiting-label';label.textContent='TIC TAC TOE';
+    const code=mk({});code.className='waiting-code';code.textContent='✕◯';code.style.fontSize='clamp(48px,12vw,96px)';
+    const sub=mk({});sub.className='waiting-label';sub.textContent='Waiting for game to start...';
+    w.appendChild(label);w.appendChild(code);w.appendChild(sub);
+    wrap.appendChild(w);return wrap;
+  }
+
+  const{board,currentTeam,activeCell,activeQuestion,winner,winLine}=STATE;
+  const winSet=new Set(winLine||[]);
+
+  // Question overlay
+  if(activeCell!==null&&activeQuestion&&!winner){
+    const overlay=mk({});overlay.className='aud-question-overlay';
+    const qText=mk({});qText.className='aud-q-text';qText.textContent=activeQuestion.q;
+    const teamText=mk({});teamText.className='aud-q-team';
+    teamText.textContent=`TEAM ${currentTeam} IS ANSWERING...`;
+    teamText.style.color=currentTeam==='X'?'var(--teamX)':'var(--teamO)';
+    overlay.appendChild(qText);overlay.appendChild(teamText);
+    wrap.appendChild(overlay);
+    return wrap;
+  }
+
+  // Win overlay
+  if(winner){
+    // Still show grid behind
+    const gridWrap=mk({position:'relative',zIndex:'1'});
+    gridWrap.appendChild(buildAudGrid(board,winSet));
+    wrap.appendChild(gridWrap);
+
+    const overlay=mk({});overlay.className='win-overlay';
+    const winText=mk({});winText.className='win-text';
+    if(winner==='draw'){winText.textContent='DRAW!';winText.style.color='#888';}
+    else{winText.textContent=`TEAM ${winner} WINS!`;winText.style.color=winner==='X'?'var(--teamX)':'var(--teamO)';winText.style.textShadow=`0 0 40px ${winner==='X'?'rgba(34,211,238,.6)':'rgba(245,158,11,.6)'}`;}
+    overlay.appendChild(winText);
+    wrap.appendChild(overlay);
+    return wrap;
+  }
+
+  // Team indicator
+  const teamInd=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(18px,4vw,32px)',letterSpacing:'4px',marginBottom:'clamp(12px,2vw,24px)',textAlign:'center'});
+  teamInd.textContent=`TEAM ${currentTeam}'S TURN`;
+  teamInd.style.color=currentTeam==='X'?'var(--teamX)':'var(--teamO)';
+  teamInd.style.textShadow=`0 0 20px ${currentTeam==='X'?'rgba(34,211,238,.4)':'rgba(245,158,11,.4)'}`;
+  wrap.appendChild(teamInd);
+
+  // Grid
+  wrap.appendChild(buildAudGrid(board,winSet));
+  return wrap;
+}
+
+function buildAudGrid(board,winSet){
+  const grid=mk({});grid.className='aud-grid';
+  for(let i=0;i<9;i++){
+    const cell=board[i];
+    const isWin=winSet.has(i);
+    const cellEl=mk({});
+    cellEl.className='aud-cell'+(cell?' '+cell:' number')+(isWin?' win-cell':'')+(STATE.activeCell===i?' active-q':'');
+    if(cell){
+      cellEl.textContent=cell;
+      cellEl.style.animation='cellReveal .5s cubic-bezier(.34,1.4,.64,1) forwards';
+      if(isWin){
+        cellEl.style.boxShadow=cell==='X'?'0 0 30px rgba(34,211,238,.6),inset 0 0 20px rgba(34,211,238,.2)':'0 0 30px rgba(245,158,11,.6),inset 0 0 20px rgba(245,158,11,.2)';
+      }
+    }else{
+      cellEl.textContent=String(i+1);
+    }
+    grid.appendChild(cellEl);
+  }
+  return grid;
+}
+
+// ── INIT ──
+function init(){
+  subscribeRoom();
+  render();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+name: Build Phrase Frenzy (Mac + Windows)
+
+on:
+  push:
+    tags:
+      - 'phrase-frenzy-v*'
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: source/phrase-frenzy
+        run: npm install
+      - name: Build Mac DMG
+        working-directory: source/phrase-frenzy
+        run: npx electron-builder --mac --arm64 --publish=never
+      - name: Upload Mac artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phrase-frenzy-mac-dmg
+          path: source/phrase-frenzy/dist/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: source/phrase-frenzy
+        run: npm install
+      - name: Build Windows installer
+        working-directory: source/phrase-frenzy
+        run: npx electron-builder --win --x64 --publish=never
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phrase-frenzy-windows-exe
+          path: source/phrase-frenzy/dist/*.exe
+
+  release:
+    needs: [build-mac, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: phrase-frenzy-mac-dmg
+          path: ./release
+      - uses: actions/download-artifact@v4
+        with:
+          name: phrase-frenzy-windows-exe
+          path: ./release
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./release/*.dmg
+            ./release/*.exe
+          tag_name: ${{ github.ref_name }}
+          name: Phrase Frenzy ${{ github.ref_name }}
+          generate_release_notes: true

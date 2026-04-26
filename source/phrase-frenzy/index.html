@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phrase Frenzy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;900&family=Barlow+Condensed:wght@700;900&family=Black+Ops+One&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:'Nunito',sans-serif;overflow:hidden;}
+#app{width:100%;height:100%;}
+
+.btn{cursor:pointer;border:none;font-family:'Nunito',sans-serif;font-weight:700;border-radius:7px;transition:transform .1s,filter .1s;}
+.btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.2);}
+.btn:active:not(:disabled){transform:scale(.95);}
+.btn:disabled{opacity:.28;cursor:default;}
+
+.ltr{cursor:pointer;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:20px;width:46px;height:46px;transition:transform .1s,filter .1s;}
+.ltr:hover:not(:disabled){transform:scale(1.15);filter:brightness(1.3);}
+.ltr:active:not(:disabled){transform:scale(.9);}
+.ltr:disabled{cursor:default;}
+
+input{outline:none;font-family:'Nunito',sans-serif;}
+input:focus{border-color:#555!important;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:#0a0a0a;}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+
+/* ── Shared dark stage background ── */
+.stage {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.015) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(255,255,255,.008) 0%, transparent 50%),
+    #040406;
+}
+
+@keyframes breathe    { 0%,100%{opacity:.3} 50%{opacity:.85} }
+@keyframes winFlash   { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.8) saturate(2)} }
+@keyframes confFall   { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+@keyframes modalIn    { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes wrongShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-14px)} 40%{transform:translateX(14px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(8px)} }
+@keyframes rotateSlow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes pulse3d    { 0%,100%{box-shadow:var(--frame-shadow)} 50%{box-shadow:var(--frame-shadow-pulse)} }
+@keyframes scanH      { 0%{top:-4px} 100%{top:calc(100% + 4px)} }
+@keyframes neonBlink  { 0%,94%,96%,100%{opacity:1} 95%{opacity:.35} }
+@keyframes marqueeGlow{ 0%,100%{opacity:.6} 50%{opacity:1} }
+@keyframes sheen      { 0%{transform:translateX(-200%) skewX(-20deg)} 100%{transform:translateX(300%) skewX(-20deg)} }
+
+@keyframes thruster{0%,100%{opacity:.7;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.25)}}
+@keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes steamPuff{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(2.5)}}
+@keyframes bulbPulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes sheen{0%{transform:translateX(-200%) skewX(-20deg)}100%{transform:translateX(300%) skewX(-20deg)}}
+@keyframes portalSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// LICENSE GATE — registration key required (PF or MST prefix keys)
+// ══════════════════════════════════════════════════════════════════════════════
+const LICENSE_HASHES = {
+  PF: [
+    "59ddebf333891e17aea2e3a2fa2d8827c4207ceedbff7014c2e71f2984dd3548",
+    "4457bc72981c0b08d9898dab78125b145ae428a112e5c0c4f97f9f165ca1903c",
+    "267c098293e57cf9716aed10e5f105ba16803bea2c9072b26f3ac01274c3baa3",
+    "e5976780d1a159b809949cdd064dc104d8c679ba958656794fea2024023237a4",
+    "607190df4c679fbfed2653bbe81339a2b0bfdc8a84790135386d5c9f0586c07b",
+    "8a6f4bf5900c3421fa0b0da2cb8917caf1efa6610244b4562806de3e57661613",
+    "f7fa2c54a574a11f1feb652d2de350c625fb4089396e65772c7e323e2fac42af",
+    "4fe861e439337c681092f76da0af5283c2ade57600639d62b07fdbb1a74b76ea",
+    "0ed331314557f2867436874a7f19d0c537f59fbb06dd08afa9eac85bf75bb03d",
+    "24cd5b2297ab241bcabca963c89f33d1a62adfe63e2e093147d77e548676e532",
+    "da8b02402f7e65e273831a0df86b73ca4b773f6157002ce1d2739f564cff7639",
+    "4da0a59ad7126d8c85735db16acc01bbc2a13897b31335183a079bbc27e61901",
+    "74a28409f957d5a47fff1134da1d4f9c35d6cb920743639980f34b1089b96e95",
+    "052aec49d38ce6de84281ad01edb8429f1d7e824f07906f337280fbe6b2c2392",
+    "3054a0ae31759e95beac81c1418fa2dc123ed76ccb2eac1629625e045783412b",
+    "46921da79fdc4ea4c70239c29b577509c85f2c7a22032163eeb9ddbe52edb3cf",
+    "7197431655c0c837bccad4de67fa04a596cb8963900d2534dbf312a0727bbdb6",
+    "1a7b0e21619ceab78d474f65b4a0f3400059d8d9075f233d2deac5ddaae7a358",
+    "7a7d5819e1b99e4042b873a17208c4e1bac755a44f46d4aa0c6a0e29f58e1c83",
+    "2a962940834bf125b9820c2f6a4ec52ef4e20505996a011a1b447d4b2df20fc9",
+    "f4930e5f08c1980d63e80e0f23d358216f273e150fb198be3c6f297ac7d96833",
+    "423abf4d63937d62e912c6fad6f9bf3236be18e4c6625c14a56e03fe622b005c",
+    "7ba72ac415a01d92723dd2efb285706c67384969c1ece0174f99efedf28f816e",
+    "4ff11c8ea5d93f8d27b5e45926a126a9874791e280fe0f596f9dec495fc78460",
+    "949409665436059e7cfeeeb39cd4bcac9899d48aa09c8644d9637ad78ab95e03",
+    "f724466f1909373c36e23106422b611df8853648f81cd3a72c595952c6ad9f66",
+    "a6cca598b8f7d568b384ec9256831762cc7ff4395d4614330f7a4c2504c061e8",
+    "ffdb3f34d8a7021d39ab822a2744e3388df337fd40e71e16cfdb73797213650e",
+    "ec8d7d8437f0ad2c33e62f93839bc2829ab7bdffd87dabe232e491a8677ce53a",
+    "b8c56fb43f63dcdf4591a7df989c958edf06ee9c3d14af90cbd9221c27578b4d",
+    "ebc4aa448898dffebf1be49fa158cc774953ca9e939805c5e96b9f0fa666fc67",
+    "5b3a1a46866004cb5dfa6aa52156ffbb1729611e99ec85aa5fa82758eae16f36",
+    "cdfc7406bd226336ee0705f45f464d7c6c8eea3de5d65f25cb0d9a99ff113834",
+    "b4343deb71e323bb53f3f4606c891c8230b859b0b8b41cdfb06963559e1a4cb6",
+    "ada1d389decfe3ca1367a8f15dade94e02d94d4ca7b6b4e53a00bdeaf2370f0d",
+    "d6f5338ae1c011c627e833c3e0f2909d69442e011a36daebae971e29c28fa4e4",
+    "5f799b817754afca582df3f7ae824d8ba35fac477e3bc31ca206eda359ff0eca",
+    "9b62b08dd199950ede1ba1e68089450c3d17dd158f188916f1ea77d478b8733d",
+    "2b50710e8850c86f3a73c7319ba004051f61621f452e33e1e9806d48642caa8e",
+    "2f6a5f7dc327af45bc212396c65cf9b6553701edee4f74664388fb920874f8c3",
+    "a35c20dbe71bfcbbcf312ecd81c9e7488b4124fd4f099be960996420bee9088a",
+    "d3f719eb77b83b0e6b01758b4e25badb68643bd87dae3e16cc5a16ee9c0fec51",
+    "b9556ff9522e1335fb2916246f0e3cf4bd87147c466aeaef0420d4312d418d86",
+    "cef94caebe02db77b447da1a4e89f9ab032a5f9894fe4603f389a4d26e33fdd7",
+    "1e1834806765a5b40f4157e7ee96b58aabd9876ff1399631617f5fb564dac368",
+    "c6b60281cac4f29ee0ea75f5d59d88f878286b308cae7926be7892aa7daa97c7",
+    "feac0f3894b349629cc3865e1b611ce20f58911bf0cf5823bac3b09766eeabc1",
+    "c23557508a0bb6bf7133e2602c9411389d7a8e7caac4853c29e2aba126b80312",
+    "56f3b72753a7658cd860d006f5ac618e80b90a343251aca3fe6017fc5b231510",
+    "3f8480bb92ce074352b775aed02dab614142a80516ac1f1f376b601128553ba8",
+    "352b8d33b8dbdf530dcc583a1be2c480aefe5c01ff778ae70c6b8beff7037742",
+    "c2aabf6f7c7d522d7b5c0a1238a8da60de53966ae261ef16e84238089f4c4be1",
+    "ec104744cb5df595bd1b138c5b679f0398e58d59e5955dbf7c89c5192199f647",
+    "b24a3834f332d6c9cc1637d5f71e4db01f0b03695ec707bc09ab14153413cb4e",
+    "0087d484326c9cf4b331e6bee7c4cac3aac516d162fbd3861b36aed59fac6aad",
+    "be289c51707b87c9639a97cd198d3aecd3394b667123cae6065671881d6f773c",
+    "cc88d4b1d91493c9dc4c971bccef0bdb6d68fc5248d634897519dde39ab7a21b",
+    "f68771e9cc9af06cb840e38d6cd2c05a133d6c8d7eeeaf96ba1b48abece4c10b",
+    "684aae9d4f8d9db819fc52b5a03e8e49cfc5302e69dbcdae81f2f94d3820c8a7",
+    "2417b31cc7ce9db75ed4f2848a717923e77922b3c6c9b1b3c38c61e6b8dda2f2",
+    "faa3c13d93bd888a1d8cc043b818c83afa4d9d6ba30b74b6bafd3f65d97fd83a",
+    "761060a0b3c1ad34299a3621e3dd6ebd06d1006e1b190ff27aa7257ab100b071",
+    "1dd8ea11b111777591c2ec22dbee44a242318fde4ae2d9a0e97eda33b3e2093e",
+    "c3c37112269652a9ee0bbd15ae1275e4d47fb5aa1e782e629db417b61d86ed86",
+    "a31566b1dd3ddf03d5002fcc3f3430b92e0cf7f72e5be25726044ddcf53e1f42",
+    "68c74e1ff6bee33ac2caf9690ed00fb6fa7fc73bcef6b0729fd65cffc955ba78",
+    "ae6ea4e6d3e76cc2259e68a678509bde452769e4d82f0564c5ad5fabcc653f7a",
+    "0f635cda8ca66c571c630c302a177e6e95b3971503939738937a261556f2779a",
+    "8543b2ea8b6bc18ee3b6d4f7a8b6985c2e7cb68cf48f7eb1353d927d52c32150",
+    "0822da09b92fb7823582a9aa0c1e2a149beabe3dec8aca9935a419b2231f6f9c",
+    "af48b6c30e66cb926ba9d6f3249b9c5046d515bfbfb42b31720c7f71fbd76b35",
+    "5905330154c6e07fb306923eef3096c71e6636a705ba4a0aac6290e569e70cc7",
+    "bc90373347eb783221d4797d7b433c132a0f3ce5f0b559408d5a778ef5645f2f",
+    "7d85e1b04b33181f9218d08fb4f67af83d750c4877d8a627c42fe200c3fe6169",
+    "aaabeb7bcf4cbac6a16c2a9af46616e08136e724f6b33e4a4133baee5f47db46",
+    "1d8a664d214814b33ce601ef69954a384b8ba898a8db3c284591318c6859d33a",
+    "732374eec5c1344c0397fdfee7a2da7f525ea839129270f26175c8547f2bb083",
+    "575082f857be1645e04b90caa530814552f49b916c1660cde583436845c6d5f8",
+    "14f95f1ae9a6da14c120def73a92fee3b2266e3ca25462a97b0c4e95eee1ca55",
+    "02bd532e4d0531d199942ffb6fa176079d3a3489223d1ab62ea8263152781102",
+    "2de61238f726f5b9c509919e7a265fa4745e3c4ef09f3b0d601eb56670a5f9c7",
+    "906eb662f119a14d076e82eefd77231b37082d52cca2d68e5db23be3099f6d30",
+    "6ae8076626553a21d1d1456facba472280b94eb1ea6cc4b066a9e76137e36a9f",
+    "cf799fa3932170b16357c6114d54db0d8cb5b26c651343b4a1b17543ad9c13c4",
+    "95fdffc9fd8421e93a3a969fa880de3448f2656d95ada9571baaa5d56ac9814e",
+    "af185ed74a902b7fb2f289a9b7940f2a263e5c210a678665c72788c17e263e07",
+    "fdcddbca34a25b11fde29fd738d53481c94c02405bcd53181af7ed19210a35a5",
+    "589f609956e3b9a5677b04046262631568ec31020595c4f14bee222f294336fb",
+    "17955e673190d978f97d827f4ea86313732e62a96a7be3954e53338b9cf2b785",
+    "f66451a1709af1924e74c7c622fa53fdf7e009275209fbd253105d275b8eb54b",
+    "622d6929bae1ba144ec478f1b8382e7a6bfa98eaf282d989a9161d6831e57a6f",
+    "3c5a747a45440d3ad782ad0b7f1b55190360bd239bf3a96aa3c1ced828ca08f5",
+    "e76dc67f9a7a72006535bf70f53fca7b4b59f5656a542e9bab21e7d80a5c1e82",
+    "73e9b3d043416d1cb4a682d7cd569c8afe96bf3ccb887bd4f39ec24a0fe28ad7",
+    "ce4dbd7597fd79b6318287ce27a057dff7f5a85bf3f153b4652d65fe714e0822",
+    "4e0eaffb2c50dd1c271db8ecc88ed2d914047f90b0034ae7c42ca8334546b4bd",
+    "1033663c85854369e9c3c1f70666b3e913842be2b45f6f17fb1f3d6287470b7a",
+    "bb18ae20acc092da73a809ff9bda4218f4ed3861c2338576e79ecc19cc18f615",
+    "44006e6afb573e1a26662b196df479273eee0584d94f2d85e078d5e62efd351a",
+    "c513ba0179d56a4663a38499f00ec9946d1cf5f366b0c412940f51a41948966c",
+    "b6406ca9ef52aca0c9ad5cf4f7ce06c3aa4a20fa0e7a92ee2465e95d8c5befba",
+    "2157be37b3d22c5679ef6a431ddce2558d0b503e33523ff3a809361008c3b949",
+    "84ad5c55b27a88415718086f17245f85668e5efece79ffe8ee14042e401c3402",
+    "1368cb61f877c17563e2cf7dada67d0b39966357aa4ab2f71b5b1689c6675247",
+    "9e53161a74893d91ef5f5a03214db25ebe2d8543b2442c761eecb51137d9f371",
+    "7bef3631792575f8b2ae6cc26f5488bc02d3986e3bf6212571bcfd007b2ea685",
+    "b51ae45f1caf293bca26ff098ef71984cb008d78bb79fa0a0214c6b624d9d0eb",
+    "4592d858449b4c47a6d6dd2d16826954347186940b469a58980a71bee604c916",
+    "8ffc3ffbd37b7a83cded84123c11b2c0376598d45878f19f3554d48a25f2d64c",
+    "5c06535d4901f2789aafe9abad2dc4d410ecd1d04d5358de0e70500ae170d164",
+    "adc125fcca5ede302dbb38ebdc6f67d15a9d1bf628e688d44a3e98f6be4cf216",
+    "73e8d54fe417095863f57abeb106661f4fe29127db226535c0e657399014c0a5",
+    "5abadb56e5e91d4ad068b7c0eddfbe67f7333dfab93090565cd4e4643499a924",
+    "4f2238aca55a6bc9062ad98390e2b89f3110da4967da51fe2267fc2bebc20d15",
+    "c60d34409361d0c39dd221c2ce0471d3324713bda06a705cf277aebb7d32f774",
+    "923b8c8c02b3997fdb27c417d50db637bd07d9cb5200f98d80de00a1e2f57f00",
+    "7afbe75744a7f716d703b4a775479ee837ac67015102a1855c4aae776151ec2e",
+    "8f9232941f82bbb517b56f6b850f520036daae90c735c313fde7ddee0e4e0bf8",
+    "d31c1c6becc55767d71b31a266e992623deeeefa69749af9185f36d786dbecc7",
+    "4643a0607708400e8b8d66942c98122685cf5c85d808aa1b44cc3f5fdb746f98",
+    "5701781a0190cea361a6d9c38a2adf29d93d46dd3b837a7e5922ec8df5f96510",
+    "4f583fc2de37ac3d57211f26390e8c79bb5bf7d0992a818fa138f79bf8bd28f0",
+    "1db2748c0bc23e09d5b3bf77caaa0332ae8c6cd5997d0c2b5aaffc5502cad8ff",
+    "3aea56a21a709afe94eac4b5e6e85b96b28a9362748ebd9c008293eab9e30f70",
+    "3c8b038ed2be45130f0c93f414a653706e8681a7920b9b4eb838b47db0ed533f",
+    "b3dd77c66354c650ef63863f8e469e7391abd0283f16a822241907fc77cb31f5",
+    "ba52af7dc2d846e6e5527a6e5424426593659396987289c3d910df855d841102",
+    "af7125a74a4b30373ba6d4a8787330eef74b7ef3162448bc3bc1bad82421b32d",
+    "c733767e9b794aa4d0bb1bb744956d7eeb7a346ff24044e108d7b4935f30d072",
+    "09a8c1924c15390d911020090d6692013e6ad4dec23d942cb3ed52431e3a5837",
+    "b221cf8875c39286607e5d923f60f6a0ae897d563c8d820a308a4d9de5a15a5b",
+    "08743dd4010075a42cf76485cc0e7cc3cbf1491f155fb8a671842df3eac58af8",
+    "78ef0c3e165028b25eeba4b30704430e1f940703a6b9aab39dfa700fd101faa7",
+    "b6826642af1e3e1bc6d395bc8e110acce7814352991a059077b38112c67945ad",
+    "55dfe998e07eddb175a8f83ccd85f533054d8930dbe5f864e70ef0d01749f3d9",
+    "f1b08a3e2dfca91038e807c25717453f1c8c83efb6c8410d1f4c678e021959f0",
+    "74994b9248fde1d07ad0e5c36568f8391a5f855f0e7a6519407688d8f0a61b57",
+    "5ce4932e6df63b7a41e1ca0cd83b688737a8c33b0b80ddab92402fd0b9aa2a2d",
+    "eeccfaa76769b8a396dfb6cda857f1104c73ffb1143db35b0b21c2ea2a302152",
+    "fa5afa297c5df13b51cf79bb6ba5db12c2dcbf24ac0279392850ad2932044990",
+    "344f292432befe43dc0fb9b4ad49da9c1724db39f75166fc48f20aaa5342ace6",
+    "39659666a90c7e3cfe9e1efeb3f653da05eb42fa9997d02638b618b5cc48ad26",
+    "2a4958638543b2ab5a564e5a3ff47de75bbe59f4b1b7c2020300a4b46acf8d39",
+    "88098207f4c656641795353c2778c8e24174dd2509a20c91a4966a2cf138cc8f",
+    "8ac2fed494af5ead8ec4defc93bd309838d42abf37af26650b063b365fc331c0",
+    "8d4f89d29aa62d13603a5dc9a075e9e4b20de4ea2ffd723d1b1532266716be25",
+    "bece1048e0203ac2f6af811b86b8fe12ce92d60cc87c031c4d1c31149e0e7438",
+    "66a5d4cbb86e4726f8db0aa1ac094af2d22529b0a17a96f8c52c304e6a8fee03",
+    "fa38c66cb20d2de8db080719b0a48df6ffe1ad37bf133c517b957fba565ee9c1",
+    "d964af911028c952ef763e1b772e8d86f6b5a38814dc5c602f4ff9faef8c17b6",
+    "3e1eb005cbe8f21ff044f43c2cae39a0189666404fc23a0d96162d8962e0b2c1",
+    "85c58945677010178af3dce84424dfd4fb95168c6fe19cc8d6ac74444c2b6923",
+    "77292f6f62a5de3b5d6f6f285b309336c847fe5af943ac82824ebae8e2c90d04",
+    "20df665b98f7246666080fccb0512c150433b6335aea59aa9408b372e55883d9",
+    "5fb0886fc46e67d9fe99be12c8267b88e2f6db19e29c9ec247964594d7f5237e",
+    "c845100398753ca590f4b7bc66ac95707f361aabe89a230ad147dab46a80348c",
+    "e7431acce07e8daf70a973839b4ad43a24f22530476884552ff6af5e8db7295a",
+    "12c53c497a473118be2ff53f3ac4e8a1e82bafbd9a02d9e97539a3334a1c7d76",
+    "7a6e9160bc8b440f6b0780f77fce961c63869d070e785a9cfb0204b32ec7cb6b",
+    "3807e6b8bd6fe037850b59ec53f7bbd07e685b28ada4d9b184bc50981d087dd7",
+    "81c2c2d4afdee9e90997860f120bfa5dc0c2afffbd2337e94dbddd584837d33a",
+    "342013d96ef1bf76e458021ee95c2c863b55716a01ab854dc82b41220bd9e4e2",
+    "4b8e0db85485605ba0d223aca0bfd65cd7b71616f0b04f66b244c78cb8406324",
+    "3edc8f267d114a426510a36475a8913cd3c0e837520e0eed4a3a7e625f53ff68",
+    "996f09f32d3aa872a37b1eef779d3e17d279348e72231d7ebbc412ccdc7324c6",
+    "d70bd751a13b044e1ba84cbeed8a8d6ae30b736650a41eb7c8b3eef5d72bb2a2",
+    "84901339801f0ec8c6446cc12bf7e633f7cf14ecbbc9d94dcb0175091f76a598",
+    "7d1e32af3cbb44ae171ea928f1182f9d32ce9f26a372fbe82e57738884ec4ca4",
+    "4746d3b953d6a1b1528ff0fabad162dd2defbdcbdb355b39b0d4b55e12a29573",
+    "50e0ef866ae73ebd49ed608cbd87c096abae4d7417aaf26f3045c15f02292323",
+    "aedd07c30ccf80142c6828af051132fd09bcbeb6713c4c1765675d4034d9035a",
+    "3ac9994a1742542bbf7d10e26bdd37ff4d08458846516bb1c05765c50100b882",
+    "5ba3ee547aeac6b53d0bc844941b090b1004b7b44b8de5e7ac819b4b4b7d4595",
+    "7816e213d21440f1e1fc1f8d5086c442d9f1426b5fa751339953d51f8dc44835",
+    "24c00f051d1d0e79d6ac15215baa36b4691ed9d58537fb1e4a546f3b8dbb0e74",
+    "594ea557ae9686f37d45f539a4626dbc1e59749b794f42e69d7f93e8f4345ff6",
+    "11cdc505ae66bdb32566cb02b2bc7bb6d29867e9c1db1120cc9ef4b87ab331bd",
+    "4c4e11285e467191a88f9887e1ce83914d0f435a9aba695f84fa1f30fef093af",
+    "8b79116765f9b4fd85effce40a402f9d8e673f91ebda3d3d441fea10ca3054e5",
+    "2db0e99e5096070e9f8d661b8122084d89b5d469695c2b6e37d9d3d710c59067",
+    "5a5b672f81bda174b88627a15a11e8b8e18859f2420e400b17bd0080a3ed930e",
+    "5b3fae618b3fd5c4e104616a22b28acb015681e0b1b5a489c440bbebfaf4dc7c",
+    "488b661e87212b85e1f2d60e499c80b624911752d68fb9c4abe7500fa8ad3f49",
+    "9feb9e1f9702a8aecbf10a397dbf430066a96a3de07710e293985a85f0fb90f4",
+    "de83516b94765bc116efbf659960f91b0f7ff4de36a845472c6423799b6023ff",
+    "4a4e234c8b5e46a440528380e3dbf76b3d3c88985f5d8005c961942493b844c8",
+    "6523e42b280d49f1ee1ec7720190bf745bb48a886fdfbc6ff2621a1cbb2d27b8",
+    "e907e27365a5c22ef1549ddc922a22668aea855ea37873817a2cbcc1e4f75aa8",
+    "db1d99f8c7f11da5d3e2a0018e28559f36498c1633354ece2a727e191c3a4e4f",
+    "c89dbfb3ecdee36461368a583d7590abc82c94b29e1e4b3b7b75fdeafd1ec733",
+    "21c565c5e58785dfe0483e47c1a40f9652c2eda435eefd416878527bc0fa42bb",
+    "303ca14823382bb647ae6c702cee3b85b040384d6600f9afaab87229c919a876",
+    "2dd4ec3ee9a92b8148409a48d5148218993f5cc263cdca28413c73bffa5d855e",
+    "104281af702f9040e5d94c704c8857fb66d19cc4259018755d9d5fdac1f044ba",
+    "e429bbdedafcabacb78029765b5b9032592cd1851d59ab349f79ce22c4c15d78",
+    "b58071b1368aaaac48d8701284bfeea7f862134d8f0cb2025403bf406519c150",
+    "9e2d973854ef7679da1a589f84b283aa36617c63ab6d1a7c04ffe0fc8a64f2a4",
+    "97b4d0126d55f988e43b6c53625175b5d0f6c23f42c84d47c38ac6162b60b8da",
+    "844294b79b7c00f445076c67c41f401a1ef73300628d76a06a61f89e8721b765",
+    "6aff8d37458389749719a89e361ba9b818be0bae2638414e03bc8e0f01c6947a",
+  ],
+  MST: [
+    "7c7b95722a5cb194863897bf16720919cd823cf8b619544264648d8de11b6a81",
+    "1b46bb78e13a8fcb94fc5cd82cfa45877e4ae1b0596c9cf67ee467e4e588e953",
+    "c3267cbd7151067fa61758c4e9fdfdac3c49a1b4ba97adc1b992d1ac716bbe38",
+    "075cbf1d4e3ae49e4dbe506b3f83198fe9f1128af3cda9e13ac44b4c4750cb67",
+    "bff286fa92c1490b29cb789142f5af98b2985a5a54d23f48cf4a9558cdf87a3f",
+    "112240e78228ef90249bb94a0da83eb7c33a892ca6273236f26692442971ea8a",
+    "b2f23f043ef097b2d2ffd4741f4a8d0681322b7063750de9eb6bec6203aed925",
+    "ec23d3739490101c9fa5bbf4da300ab297266a648fd7e828bcff55e28d44430f",
+    "f310b83ab5d14521ead3b36c23098dbc6671a0832e2ea5e89cb41b2d05f262f5",
+    "06ee4baaf21162897dd91cede8aaab5bb7eecc20fc2634aa23777cf846546943",
+    "494a7e69cfb29511881403f11a92fe7ad2548de22cd7f37b388d5c32f3c104a5",
+    "f518663431a73c1f77d7682bbf153d99353fe1c4ef698f31274c477a41868a45",
+    "5e3a581e4a2762c074ae8153801e142977c5d57e573d8c460681236ed11363a3",
+    "8d26ff60a0a339cb1163b03bb4e59d96b7437b7158d5c478ec0270c7ca6cc992",
+    "076389a229868d7d59dd768773be98484015f16326a386fee59198fc70c94483",
+    "86b78133fa608579996acf52b7e195f969e46d7d41da63d0c22d83a4d48b7e9f",
+    "30c573566079969dbd852c7e1cdc07a9ad3c21c92a3402c75fa57a8fab6d9c6d",
+    "926359e026924e261c242421f0ed951a25313cf5d1b98049c67e640c4c96634a",
+    "56766f7e6ce9246fc38b0330f4640a2fd1c0c28c55e04a3cdc22e4352b1f6183",
+    "62fc3b90c87888c11ebc92c93c294636d760248396fd6da051f0620c4ce3ee11",
+    "d434210e93881d3279ad479bb70f4f1a777075c8c6b0531862c30c4f88f749ee",
+    "7d7fbe5c6c7ae1afc63c51f96eb4cd9f46683ed86fe5d59b8355a04a09b44de3",
+    "313695701d4b6ebc56847b47bb449c8f8479d36ea5de492b7d4fa1aac62fa709",
+    "747b17338361dd93648f149d40eab32d012bf43c8f32917a06f16a49cbc8bac9",
+    "e5c999b7e7f0c28d387cb658cf87fd16666f8c25800e8be827f1ebc6b334f0b6",
+    "bbc57875f4729bd8b9a78ae045a8bb48f192a7aef204b6b41f112c080d21d9f0",
+    "eada05c46c3e8b0160a1e2b686f621e25d9d748fdc4005630ae0789b55ec1550",
+    "15933e77f3b6b55e386ce2f2f471956d94ed0added4b12935a03e2af28d62073",
+    "e5e6490c4fedc57b09f8814a151cfa6d3cae6d809ed883e7d5a545cc1b36bd6d",
+    "8895d9156a27be9f0f57d31859496c7c46fa9c6baef5ef6ee5ea28a04b4c9c6a",
+    "c3d817d3a69916af78256eefd99242acbcf6307108bbe09f6c3b160022b9a432",
+    "a13866de5cb9a8de0de8ad94d72d33a18519db46ebbbc28679e44c450e4c391b",
+    "8c425061c9a145f471bdf93e955877859dd56871857f36aed8aa2feccb1ae961",
+    "a8f5bec658126c894771c4a7f0ccfd3c078301e4bff4b360ba1b64017f24a34a",
+    "8aad08ac550907c355321a2f82898c79db7e7d2f533a74e711db56dd2b051656",
+    "aa3554f9bb2213f1f41c17e2dc54c50fcfe31452c170d2aa4cc7551f53297737",
+    "55579f59e869f1054fdf2d606d546445e04089db992a6576e52dda1dc56d572c",
+    "f37415f34052f63cadba253b00f4c29cca2fa378b28840c36801f7360542fb3e",
+    "049459d5a6e829a337496399a3cb49483a95654bcc8f6f7b73dbe116635ef7b3",
+    "c00c99e4c8ace950c941ff058313312358669787c4ee5d45054a80db55dc7587",
+    "1ed6365dbd6e485dfd93d40539aefac3bd3c733dc4e631f9f4d274949202be6c",
+    "4417e2c6442d49db5352229d05cc9c4323028a7e3eb095662e9b4bc7f5f0b23e",
+    "edbe1e529768454d3506ed97e78eabae17d9a5a2e85387cf1fe6024f34c7c8d6",
+    "292ce38c2c64221bbb1c070c9ab3258c3ae45b785b08fdfa7d4ea575c2bd22fa",
+    "7d3a2cbdb5a6663b538291edb2169926cffa14cd6639b998014ced4c78d58d0a",
+    "57f5c78b2ebe1778cef58055094c8555de9910d2891994b0c00d450f9af04ee0",
+    "c64482cbb4aac9a865be4b16a0cb7cca7ecab22257bcd8767fbc7500cefc30f3",
+    "6088402f2def3b7e71927aa94a10ea4a9a3d3accd7bb88a706bad66b7964505f",
+    "969854bab59501423efba3aac8df5b2e024a411ab7fe0372ca7a80cf395907f9",
+    "393d6b60992f6fe8d065782df975b45c292ffc1ded45afa3426805feb7767ce2",
+    "44978b72eb8a6123b37115413e35aaf5fee8cc125cb02f4be0925c207ee50e7c",
+    "bce8d33ce452614f730884c6befa36d8f3fbc980b7de01fc24ca0183d894570b",
+    "749f725d0e3799a3197241b8e423c927dac18b117d510b182cdd6aec161ed083",
+    "208792ff0fd4a9601a065ac479af968936bcbf0f8949319d6519735ea1ba340c",
+    "d26703db71ac3349e371a0b5f2bfce5d1e5a2314767334a102f78502a9610076",
+    "308d308109601a540dc85b4790943b48fd7c37f6571c0870e34bac2c4629f8dd",
+    "786185ee093a451bddc1614548444bfd0ebbedfba1f5e07104322ac0dc71c68d",
+    "b505593c0a9666ea76da81f0fb423b3d7de66c1e340b07ee01cda499953437f7",
+    "57a26d5cfc0330d27dd5348459d9ff51e648a13f6a574665c59e2e3531e6f682",
+    "b42b0404fcf9aafd914ec3a179353f4bd2c8d1f26a008e27218901428e1a2b69",
+    "8d032b1a9deed712cdf0a86416f7d8235d632e0d9b0cef898ba8d4dd5cd7a87a",
+    "fa66765b3b798197cfeb8c7ef6da0caf6e4511309e5a91311607370c7df612ec",
+    "c087017201d4dc474c100485e265a9adb3e16dac0d79c9166041f13adafc4564",
+    "438028c5581475cc95e2e1fa8885494115496f49d04ae128ba089c5a006b574c",
+    "2127bc255766d4bfa9248be94cd83d3c3cac6ac1fc9176bb575d10ebf9117dc8",
+    "0b0f12f0fc9de77d20663d9a0ec5acf86e954b02752df549e45735800aaf73ea",
+    "9b7272a3aed7dbdcb8be45430b991aa8d488e24d53e3d6bb1318085650f7e5c8",
+    "aae89c48bff5424da1285dea7a072906a4825d2a49ec00513325d35e5a45a3f5",
+    "908b3441a0fea596624df39e887fda9a3307d9cdd2b657f73816ece2d84c4f42",
+    "58d9b2fbed4c9349a0c1a0e041a1785cbd371809444849aed9457414b15585a3",
+    "fcc8dd9ab1edf7624ef59a6e51ee06fd76b5dec6b691ed65e1942cfda3bc45ca",
+    "b891fdac0a8bdf246ec2e7b65786c67e8737cfdc4505c40eefcb180f1faa386a",
+    "1c21f8d4e17dae26bfd63d2dca9bce9dfb817a036d45e7628454e7aa0196a98c",
+    "c8641ac7df203027438346ac728d518b573d4a30b2be39cc535fd0c83920be3f",
+    "9aa8cd8827ac1a22cdfc86658e0c4e290398d868b50b48335d962c1a2a0085d6",
+    "f99c0733b1518a93d007d797365f48ab69864de748acdf8be9ea88fb83a2b2e2",
+    "ccc51ac69dfddf4fb0905915359cacfb7739e3cdacdb583b0a9203bd04f21439",
+    "3bf5a5d882ca4aa4d82a57ebcaaf341b4129f18b1b96539248be35e2073c1cbf",
+    "f024f251ec50c096528bb9be8d55d16ab0e2b68a1a5792574a932a78008fb04c",
+    "133742f80a4da7b9f17f5af2ec85833e4cf841c3e3b7423b0f6bb242ba344815",
+    "b2f667a0be7357e227f98cdc4071c83a4384029f103f1cdd543894cff15e6601",
+    "ae1da87552ca79816a233846426b74a0808e96b31855057b07001f8863d2c2ff",
+    "c56d57e79248b563df13566d1aa78a5f890dd719ba513b47d3cbe0416e278baa",
+    "ff7443e9b6f43421357481c1266774ed7140042ed429ab7ea58e1dcf8b26dcf4",
+    "02b6c9e236153b1c7e04fb0b3817ee714bc6db600368eca5631ad89b67102fe0",
+    "a53afdea5626a5036d35670fb78dcb8ad9fc29dea6f7133c695576fedae5d3c4",
+    "f476d375b1ba542b3ce4f1ae24f588167b7991d2c4013cea91529138729c2b13",
+    "699da1cba4f2734a7acf01b13b5a6089053042206765e94335353dc0e0342736",
+    "795062a53e7bf69244ab623b668310744ac8307b1ec476a8c0e434a425e0e160",
+    "5483f809a4509980455a3bd6fb2fd018bd97881010c09456a339cdc849c0e252",
+    "994f3f641a5bdf7c97b4cd42459c31aec69c1e84b970fcc049a366177eb19daa",
+    "dc6390c0ef84cd785b8d16463890600e95c45e0faee41b67c3911075375a2ce4",
+    "f67123bcaf26f989162eb06dce782ba8128f79226338a969dc0ede90e19bd0cf",
+    "f7d85fdba4c434914857b772534153d559a2d70027a841652442190115e27773",
+    "f303fd5091d5bffda68473e524522a8e22a731698baa2abf3aca2707af7fb62c",
+    "ee48f472a031f6be69b88fd8f833de796b2115d64f3cda9428bbbb7aa3784c1c",
+    "98b81140942700002fcd29c9b4d8d79faf9bf536c33433f737060632be911f14",
+    "545c831ac43f1b9b208c59e2730900f64f24881c54d64e39ec4370a36b564014",
+    "f7a6afb47968dc0064955a0bf3af2342473319443b2ba9b8317998f2f5333183",
+    "82591b9f1427c788b7b877b451dc80fbcb5e7110309cef500aab5a37f3afa16f",
+    "5a5cd93e2636867058f02ca8125669092015bc64092a751a197ac477ddcefc49",
+    "8ef9d10f215103965e60805a0ace741faa78fee49df7d1377a6dd680c3ef449c",
+    "2a78407645cc0f3e76b4679815fb4e096e2a217ad9d93c97620fbe98b0001923",
+    "a8ad0752583835153f1979ab23e7e0853d65d23e314faa9673c5f0f25e42c2f5",
+    "6e95b8a409675c14d1e73fcfa96f2091a43e01c708e5d4416363fc4b978002c8",
+    "d908616475fb828975c8727217198d7f22c65cbce57ca5db7eb9bbc9969a998b",
+    "bb52f8b543b3ee3747d944704960876601b9a3de97b7c4f75a1e9a8c35d7c26a",
+    "b74a473ed9c043fb8314cfe646e203486c462181dcf0a4bd9e73d0d5fa6c6643",
+    "db36492284714d261c13e59f1199ad39d1a1605c6aac2a1aec21dd56cc74a9fb",
+    "c9972eab0051c50200a767f3ee5cf718d285bc74b6197bdca46c816a3622d7a3",
+    "8301bf512d9a941c242877394de20e992fcebfe5749189cb53b26c5eaf3e841f",
+    "13ad9e48876775cce4cd052f567e352d1dd234a243c10c3c353758c5698f96be",
+    "bdc34dd1465ff6c38b484f0f44eea04cb3188b2f5740c528a766e31a94c08fbe",
+    "e03b25d5a34f3683f1bc4246607bd69b5c9a61efac6b291672674c87ced2cf32",
+    "26299dab373d2756b75145d95eb7e10fbf43886b52421a3ddb17720e4d36ff53",
+    "c8358c3d3640e759a34712823f28da2a47b6fe3b3b214607b3be2ecbd990a8ae",
+    "1265f8789ba002e6d3bccec6675ebc18246f50a723662ae3b1d2e0962d56a006",
+    "1f29e9930acbe59210cf9013400d8d2cd14155eeb640577e11c44589fbd113e9",
+    "0336a09826aecad4ebb6d5ac0b923c6b3684238c10fe8a750890f2ae507d54c2",
+    "531ee93d40f3b40e2b148168e8f5b1fc092a486f8c76b615b91f33f192a96c3e",
+    "980989de3f815438021cb1c662bbefb73fd7b091285105010223aeab816a895a",
+    "c0fdfaee97e2964ac816e9c44397d3952d912f6016e839baecf13977155e5ee7",
+    "cd5a7d87d1e14c50d29601a36b1d1869a9abdb5b1f2270c6a065328d4ae3058f",
+    "431d2412cb261c6f6d23f4b133497a57d87ae314b1397db0969ffc3c89e82896",
+    "cda65fad87c638cff020eadc76a5c486b851d289bc81be26a77ab8c1cd749813",
+    "740b0fa962909b79f751317c44ed416ffc9465a7fe2b87d0e12fccf0d5991a90",
+    "dd235e45443fb6b5b2caa3a35d572903085a349eddea2ab8211828fe70b47407",
+    "7d1a8b00e07db9f41ce6c194ace0d3b84c8c9d40c73749abcc86e75a8f9fd8b2",
+    "a7e61b6af7fbf4ba8dd66285cd50e4d6583e6eeb374fb0dc3850b268ae482cf3",
+    "ba6f28c383c7cdb69b711f65aed2a6df3886799c67a88a60ec1ea3317fb544bf",
+    "b47618c348e0241784208c18c9e187f9e94a27eba2ec0faed24f5f156d671478",
+    "5c8c1b871c19fe454db99ccf2a453089028a68d8b27a373e0226cf9886cccf21",
+    "aeec54eeed1c01f23320ebade92a2532d480253762ad6579237efae885d9456a",
+    "e7c35f7e07bcb04f15be322039508105d6101f4046c8b200a7eecbf3456f8b41",
+    "342e50e55788d601e2a6988262662603cbbac16c96b920b7b72e1641d05b9db6",
+    "0869d8c409d9fdc643d9ff7c918ec8c780367979be4dc2133c54c373c7011afc",
+    "35ee38adb1739b9a78a32b0586dc8b7fb3221761743000d50be408fc337b53ea",
+    "9ede603a4130b4ab4c416ad2e7320c9ca9f7a73fe899bdf83bb611448f83399c",
+    "d4de5d155fed7305ba8915562b2bea8140cc68bc7d19b93b41091d91dbd76a90",
+    "39e54bf54949de9b0ceb8e295b753fa9dd877dff6ee68eb68e51e829e6c8917f",
+    "b0d9c72ef21cc8a46f8a27726cdb2c5252354b466778d3b98ba2e4bfc493232e",
+    "63d04939eeefba9072b3aa622c602779a338382b2599f9ef84d4527d6f55684b",
+    "0736caa4ee42eb01f223e5325d829cc92eac46c18d7169d42aaafe7e04aae9e2",
+    "8b7584bcf185b327b65f69e8677a63f30ed40bdf17dc175c2f60baadfbe3d178",
+    "9ac4e986f7d2617ddd10bcc862aafaf8f8b1c2c5d1eb75bbafe95faf689ee399",
+    "50ec1388f4d20cc27bc060897e8c1f22d7d4e9c511d6aecadcd09032856d8b4f",
+    "69bc6b525cd3bf01e72b5aafc25d30a9a8e32e5920ecc5318fa49c09db0135be",
+    "fd3019b58e19755a1fbb7a3c7b95842cd9173f709396ef87e09bf3a083cd782e",
+    "4f09af117e4f5b2f3e83d38a0632ac1e01e039a3b8e7d7f1e277d480f34c920e",
+    "4145527c2f7f218f7b6eac314e42aec8f212f8921f18cb560a47510817d523c0",
+    "822c9ae410c5a61fd723e55ca0e789d305d4929881930821b1fab22368793067",
+    "6fcc4bc3449690f9557c1273c537a5e5993fadeaec96105518a3de1b90d8640b",
+    "1083f02663fa09bdecd059f6c18dfbe4bbc152e9c1e0c3ff780a5097a3145a8d",
+    "090f4eaa006953dfcc803ca6a3e97ba1ecc4d0fe78146c79b610b5ea4e9b05b5",
+    "5e043be3d2c1971e7904fd36d0e7334df1fd6a561f2319d1fc53e5f68c05601b",
+    "1363e7131b3b6683a66caa682aadc93d6ccb4abb44f8d5a69ee52b1e757fa94e",
+    "39ea0a51a80be2649eb5a14ca8fcd0967349c99954b256be533b60fb9627c6af",
+    "1d8cfc8e000dff73899ddaac2f4c553e381d56698b2cf6822c6ff1882e63de42",
+    "6ab139163fbecc9f949f962fe42a62e7547b1a6d621dd863218f25419034da47",
+    "657fa2b0e11173fb3f7e2af13b1a57d457b70e2aa5452a80540310159e6094c7",
+    "849c0858bbe78302ce655315676adba9ae6bda0a1e82e8704f1322db66e6033d",
+    "7fb34f6d9049f37b30db95377a02c8c18382201d445c208259d5d66d27507523",
+    "4593321d3292912431e061bbda77f7008f0f32230bdd46d64e482ab18cf768ce",
+    "76df80c53e8df2e55ffbd9d0ba48466d4a4b4e0c7fbea38caac0a0ee972ed9fc",
+    "32ccefedfb329d17a1ac0ea6932a63f16fa63ad06f937355f3ff3c949ddba0e6",
+    "50e0ec72b4b2ddda78e5a12feaee3847a7b560d5e869c5c7ead0746e2861dc8e",
+    "623b5a7475f84d65750a7aab99826b1b6843a3ae0978a7c027fdb9d3146f438f",
+    "e63b27a6f91e97ce003e6ea6048cbde5da31497a450f52de7ae00ae70da698a1",
+    "a68d8ba63a9671fdd0d6b873937c461364a8e08b2d2f6e86b0ba814570ea0146",
+    "e28aee22ecf73cfa24531694b011570d2160f40dd1dd18122730b62fd18f013b",
+    "c5a3be4428d952f5080cac8075d1de2940645b8668a76efdad110daa3bc57bf0",
+    "218f093bdb38e29323ce9f029715b98e891fc71106b3f1dfccf2d13992aab1ec",
+    "f6638eb9596560471f20d62182128d2a867e939bcf2c18f7e0e1140e338248ed",
+    "72c6571d514f79ce19bb97877241dc5d3d22401be18f0ce253850fb093552bfd",
+    "3f2f79362540ec614da4d14505d1d6706bb1e3a3bd93b35aa4be7bbaa91b7432",
+    "4fe4fff36fe5a9bd647908bd9642b9305bd846def433be97076fd22c9b9b9812",
+    "1ea76ac0b5f256f83ebc85c38161f60ee0fc0f0a86f72414dc8c02d0729574cb",
+    "83e0886f54815336999c30565d42ca6d22eb78a8edc16581f2fee98c7c923286",
+    "a43d2a00ea87175bf02ad89b1a4a6b989326cf2f638fa32fdb964862d5f23276",
+    "9c2b83a834d826a4f2d0365a747f1bbbf5054bcef92d62a34c7a70881d5ee13d",
+    "7d5e6d8cb103b9a1a46116b0163355cfe7a1915243104a336a7262f52e0775bf",
+    "6895604a781b25fde0069405450baf5321814bee2e9d97f84166f335985a7230",
+    "d14a59d4df80acd0c6ed534453bc7a85eb5cb140c64e10b4cb786e6a651408d6",
+    "d5db4e0c5fcfd2b4a3302de156db57ea187c045a471d53141f286bb10d9ec482",
+    "374b31dc142bff0431ca9a5d10ed051bdc7286c54447b711115550e025875e61",
+    "f421a0c9780f683fec7ec6f8acd9fa99323da8ab7ceb041fb6e8ddc239ec8bb4",
+    "92c88a34686f64bd85109095484038a61879c28274cd17891195807746d80276",
+    "12d1029eab4fb714124394ced04aeb965ff61603de3bca8ef3ae1dd8fadd07e7",
+    "35f2193865776dd24ed2a28c0b9eca93aab1043a67637b6937dc653f20b5ec3d",
+    "10c91d8053b3a7b9b88cd13877c1e8c3fd99be4374b715731c4a10f97927753f",
+    "8d07a6753bbe13327baa767ad9778888f02459ceccc861de32e4786083a01f8b",
+    "220ea2b59a475af614389240bcd986f1989d8d00f3c33fffe4a32b4bd0e18fed",
+    "154e8650d68bfe3fddc459e523e044204ffbf22e27f2d24f0ce81487a40dd366",
+    "acdff514076ff6ab00bf9646ce4d7500df6b73c81789657b7004ad01174ac59d",
+    "bbc2f375d5bb4e168020fa2ebfa13788394ba45c4650496ccd7b292e7010f0a5",
+    "4fc90587e5df740d3e484fa5eb65ff83ea67024625225bcbdab7a98f7968db32",
+    "1e9a4d9500bffc81ac8c2a0527534299c84d5bb14406843113444d094ac212c6",
+    "780b7f6df242c92d73249b5a8dc8e552b6c693435361122f3a163f6d2b56b2f0",
+    "b60bb6992ec336b7b49f4f5eee1406ef455134bd71f29f767fb07807a028b250",
+    "587012afe48536322b1592fcb62ca1c25f5fc532922bd4aae9063a6457b92cdb",
+  ],
+};
+
+const _lfs = typeof require!=='undefined' ? require('fs') : null;
+const _lpath = typeof require!=='undefined' ? require('path') : null;
+const _los = typeof require!=='undefined' ? require('os') : null;
+function _licenseDir(){
+  if(!_lfs||!_lpath||!_los) return null;
+  const d = _lpath.join(_los.homedir(),'Library','Application Support','Phrase Frenzy');
+  try{ _lfs.mkdirSync(d,{recursive:true}); }catch(e){}
+  return d;
+}
+function _sha256(s){
+  try{ const crypto=require('crypto'); return crypto.createHash('sha256').update(s).digest('hex'); }catch(e){ return ''; }
+}
+function _loadLicense(){
+  const dir = _licenseDir(); if(!dir) return {activated:[]};
+  try{ return JSON.parse(_lfs.readFileSync(_lpath.join(dir,'license.json'),'utf8')); }catch(e){ return {activated:[]}; }
+}
+function _saveLicense(lic){
+  const dir = _licenseDir(); if(!dir) return;
+  try{ _lfs.writeFileSync(_lpath.join(dir,'license.json'),JSON.stringify(lic)); }catch(e){}
+}
+let LICENSE = _loadLicense();
+function isUnlocked(){
+  if(!LICENSE.activated||!LICENSE.activated.length) return false;
+  return LICENSE.activated.some(h =>
+    (LICENSE_HASHES.PF && LICENSE_HASHES.PF.includes(h)) ||
+    (LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(h))
+  );
+}
+function activateLicenseKey(input){
+  const k = (input||'').trim().toUpperCase();
+  if(!k) return {ok:false, msg:'Enter a key'};
+  const h = _sha256(k);
+  let matched = false;
+  for(const pfx of Object.keys(LICENSE_HASHES)){
+    if(LICENSE_HASHES[pfx].includes(h)){ matched = true; break; }
+  }
+  if(!matched) return {ok:false, msg:'Invalid key — check for typos'};
+  if(!LICENSE.activated) LICENSE.activated = [];
+  if(LICENSE.activated.includes(h)) return {ok:false, msg:'This key is already activated'};
+  LICENSE.activated.push(h);
+  LICENSE.date = Date.now();
+  _saveLicense(LICENSE);
+  return {ok:true};
+}
+function renderLockScreen(){
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = '';
+  // Remove any operator/audience div left over
+  document.querySelectorAll('#operator,#audience,#lobby').forEach(n=>n.remove());
+  const wrap = document.createElement('div');
+  Object.assign(wrap.style,{position:'fixed',inset:'0',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at 50% 0%,#1a0e00 0%,#030304 60%)',gap:'18px',padding:'40px',zIndex:'9999'});
+  const icon = document.createElement('div'); icon.textContent = '🔒'; icon.style.cssText='font-size:60px;opacity:.6;'; wrap.appendChild(icon);
+  const title = document.createElement('div'); title.textContent='PHRASE FRENZY';
+  title.style.cssText = "font-family:'Black Ops One',sans-serif;font-size:clamp(28px,6vw,52px);letter-spacing:5px;color:#fbbf24;text-shadow:0 0 40px rgba(245,158,11,.5);";
+  wrap.appendChild(title);
+  const sub = document.createElement('div'); sub.textContent='Enter your registration key to unlock';
+  sub.style.cssText='font-size:13px;color:#666;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;text-align:center;';
+  wrap.appendChild(sub);
+  const card = document.createElement('div');
+  card.style.cssText='background:#0a0a0c;border:1px solid #1a1a1e;border-radius:16px;padding:28px;width:min(420px,95vw);display:flex;flex-direction:column;gap:14px;';
+  const inp = document.createElement('input'); inp.type='text';
+  inp.placeholder='PF-XXXX-XXXX-XXXX';
+  inp.autofocus=true;
+  inp.style.cssText='width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fbbf24;font-size:16px;font-family:"Barlow Condensed",sans-serif;letter-spacing:3px;text-align:center;text-transform:uppercase;outline:none;';
+  card.appendChild(inp);
+  const err = document.createElement('div'); err.style.cssText='font-size:13px;color:#ef4444;text-align:center;min-height:18px;letter-spacing:1px;font-family:"Barlow Condensed",sans-serif;font-weight:700;'; card.appendChild(err);
+  const btn = document.createElement('button'); btn.textContent='🔓 UNLOCK';
+  btn.style.cssText='padding:14px;background:linear-gradient(135deg,#fbbf24,#d97706);color:#000;font-family:"Black Ops One",sans-serif;font-size:14px;letter-spacing:3px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,.3);';
+  function tryAct(){
+    const r = activateLicenseKey(inp.value);
+    if(r.ok){ LICENSE = _loadLicense(); wrap.remove(); render(); }
+    else { err.textContent = r.msg; }
+  }
+  btn.addEventListener('click', tryAct);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') tryAct(); });
+  card.appendChild(btn);
+  const help = document.createElement('div'); help.innerHTML='Don\'t have a key? Purchase at <span style="color:#888;">livefrenzy.com</span>';
+  help.style.cssText='font-size:11px;color:#444;letter-spacing:1px;text-align:center;margin-top:8px;font-family:"Barlow Condensed",sans-serif;';
+  card.appendChild(help);
+  wrap.appendChild(card);
+  document.body.appendChild(wrap);
+}
+
+
+'use strict';
+let ipc=null;
+try{ipc=require('electron').ipcRenderer;}catch(_){}
+
+// ─── VERSION & REMOTE CONFIG ─────────────────────────────────────────────────
+const APP_VERSION = '1.0.0';
+// Point these at your GitHub repo raw files — push changes there to instantly
+// update all running copies without anyone reinstalling the app.
+const UPDATE_CHECK_URL  = 'https://raw.githubusercontent.com/thepointe/phrase-frenzy/main/updates.json';
+const REMOTE_THEMES_URL = 'https://raw.githubusercontent.com/thepointe/phrase-frenzy/main/themes.json';
+let updateInfo = null;
+let remoteThemesLoaded = false;
+
+const ALPHA='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+const DEFAULT_PHRASES=[
+  {phrase:'PAID IN FULL',hint:'Easter Message'},
+  {phrase:'FAITH IN ACTION',hint:'1 Corinthians Series'},
+  {phrase:'BOUGHT WITH A PRICE',hint:'1 Corinthians 6:20'},
+  {phrase:'THE PERFECT PLACE FOR IMPERFECT PEOPLE',hint:'The Pointe Church'},
+  {phrase:'LOVE ONE ANOTHER',hint:'John 13:34'},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FRAME THEMES — each one is a physical 3-D border around the board
+//  The dark stage background stays constant. The frame IS the theme.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function mk(styles){const d=document.createElement('div');Object.assign(d.style,styles);return d;}
+function mkSlot(bW,bH,R,bg){
+  bg=bg||'#060608';
+  return mk({width:bW+'px',height:bH+'px',background:bg,borderRadius:Math.max(4,R-4)+'px',
+    boxShadow:'inset 0 4px 20px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.04)',
+    display:'flex',alignItems:'center',justifyContent:'center',
+    flexShrink:'0',position:'relative',zIndex:'5',overflow:'visible'});
+}
+function addSheen(el,c){
+  c=c||'rgba(255,255,255,';
+  var sh=mk({position:'absolute',inset:'0',overflow:'hidden',pointerEvents:'none',borderRadius:'inherit',zIndex:'5'});
+  var b=mk({position:'absolute',top:'0',left:'0',width:'35%',height:'100%',
+    background:'linear-gradient(90deg,transparent,'+c+'.16),transparent)',
+    animation:'sheen 4s 1s ease-in-out infinite',pointerEvents:'none'});
+  sh.appendChild(b);el.appendChild(sh);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// THEMES — board lives INSIDE a 3-D shaped object. Dark stage bg stays constant.
+// Each theme: deco {top,bottom,left,right,ring} + make(bW,bH,err)→{wrap,slot}
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── Simple theme factory ─────────────────────────────────────────────────────
+function makeSimpleTheme(emoji,label,accent,frame,tile){
+  function lhex(h,p){h=h.replace('#','');var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);r=Math.min(255,r+p);g=Math.min(255,g+p);b=Math.min(255,b+p);return '#'+[r,g,b].map(function(x){return x.toString(16).padStart(2,'0')}).join('');}
+  function dhex(h,p){return lhex(h,-p);}
+  function rgba(h,a){h=h.replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';}
+  var lum=parseInt(tile.replace('#','').slice(0,2),16)*0.299+parseInt(tile.replace('#','').slice(2,4),16)*0.587+parseInt(tile.replace('#','').slice(4,6),16)*0.114;
+  return{
+    emoji:emoji,label:label,accent:accent,
+    tileReveal:'linear-gradient(150deg,'+lhex(tile,60)+','+tile+','+dhex(tile,40)+')',
+    tileText:lum>140?'#000':'#fff',tileGlow:rgba(accent,0.75),
+    usedHit:accent,usedMiss:'#ef4444',
+    confetti:[accent,lhex(accent,60),'#fff',tile,lhex(tile,80),dhex(accent,30)],
+    deco:{top:20,bottom:20,left:20,right:20,ring:24},
+    make:function(bW,bH,err){
+      var R=24,fw=bW+R*2,fh=bH+R*2,border=16,TW=fw+border*2,TH=fh+border*2;
+      var wrap=mk({position:'relative',width:TW+'px',height:TH+'px',flexShrink:'0'});
+      wrap.appendChild(mk({position:'absolute',inset:'-10px',borderRadius:'28px',boxShadow:'0 0 70px '+rgba(accent,0.22)+', 0 0 140px '+rgba(accent,0.08),pointerEvents:'none',zIndex:'0'}));
+      var fr=mk({position:'absolute',top:border+'px',left:border+'px',width:fw+'px',height:fh+'px',borderRadius:'18px',background:err?'#3f0a0a':frame,boxShadow:'inset 0 4px 0 rgba(255,255,255,.25),inset 0 -4px 0 rgba(0,0,0,.5)',zIndex:'4',animation:err?'wrongShake .4s ease':'none'});
+      fr.appendChild(mk({position:'absolute',top:'0',left:'0',right:'0',height:'6px',borderRadius:'18px 18px 0 0',background:accent,boxShadow:'0 0 18px '+rgba(accent,0.8)}));
+      fr.appendChild(mk({position:'absolute',bottom:'0',left:'0',right:'0',height:'6px',borderRadius:'0 0 18px 18px',background:accent,boxShadow:'0 0 18px '+rgba(accent,0.8)}));
+      var slot=mk({position:'absolute',top:R+'px',left:R+'px',width:bW+'px',height:bH+'px',borderRadius:'8px',background:'#030305',boxShadow:'inset 0 6px 24px rgba(0,0,0,.99),inset 0 0 0 2px '+rgba(accent,0.12),display:'flex',alignItems:'center',justifyContent:'center',overflow:'visible',zIndex:'5'});
+      fr.appendChild(slot);wrap.appendChild(fr);
+      return{wrap:wrap,slot:slot};
+    }
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+const THEMES={
+rocket:   makeSimpleTheme('🚀','Space Ranger',  '#60a5fa','#060e1a','#3b82f6'),
+train:    makeSimpleTheme('🚂','Wonder Junction','#f59e0b','#1a0e00','#d97706'),
+wagon:    makeSimpleTheme('🤠','Covered Wagon',  '#fb923c','#1a0800','#ea580c'),
+trophy:   makeSimpleTheme('🏆','Gold Trophy',    '#fbbf24','#1a1200','#f59e0b'),
+arcade:   makeSimpleTheme('🕹️','Arcade Cabinet', '#4ade80','#021008','#16a34a'),
+surf:     makeSimpleTheme('🏄','Surfboard',      '#22d3ee','#001a1a','#0891b2'),
+portal:   makeSimpleTheme('🌌','Space Portal',   '#a855f7','#0e0718','#7c3aed'),
+scoreboard:makeSimpleTheme('🏟️','Scoreboard',    '#f43f5e','#1a0008','#e11d48'),
+surge:    makeSimpleTheme('⚡','Surge',          '#eab308','#100d00','#ca8a04'),
+neon:     makeSimpleTheme('🌃','Neon City',      '#e879f9','#0d0014','#c026d3'),
+film:     makeSimpleTheme('🎬','Hollywood',      '#f97316','#120700','#c2410c'),
+guitar:   makeSimpleTheme('🎸','Electric Guitar','#f43f5e','#1a000a','#be123c'),
+gem:      makeSimpleTheme('💎','Diamond',        '#38bdf8','#001018','#0284c7')
+};
+
+const THEME_ORDER=['rocket','train','wagon','trophy','arcade','surf','portal','scoreboard','surge','neon','film','guitar','gem'];
+
+
+
+
+
+
+// ─── TILE BOARD ───────────────────────────────────────────────────────────────
+function buildBoard(phrase,guessed,sz,theme,layout){
+  var gs=new Set(guessed);
+  var fs=Math.floor(sz*.55)+'px';
+  var gap=layout?layout.g:Math.max(3,Math.floor(sz*.09));
+  var wg=layout?layout.wg:Math.max(6,Math.floor(sz*.45));
+  var rg=layout?layout.rg+'px':Math.max(5,Math.floor(sz*.13))+'px';
+  var rad=Math.max(4,Math.floor(sz*.1))+'px';
+  var bw=Math.max(2,Math.floor(sz/26));
+  var th=Math.round(sz*1.16)+'px';
+  var lines=layout?layout.lines:phrase.toUpperCase().split(' ').map(function(w){return[w];});
+
+  var board=el('div',{style:{display:'flex',flexDirection:'column',gap:rg,alignItems:'center'}});
+
+  lines.forEach(function(lineWords){
+    var row=el('div',{style:{display:'flex',gap:gap+'px',alignItems:'center'}});
+    lineWords.forEach(function(word,wi){
+      // spacer between words on same line
+      if(wi>0){
+        var sp=mk({width:Math.round(wg*.5)+'px',height:th,flexShrink:'0'});
+        row.appendChild(sp);
+      }
+      word.split('').forEach(function(ch){
+        var rev=gs.has(ch);
+        row.appendChild(el('div',{style:{
+          width:sz+'px',height:th,flexShrink:'0',
+          background:rev?theme.tileReveal:'rgba(255,255,255,.05)',
+          border:bw+'px solid '+(rev?'transparent':'rgba(255,255,255,.08)'),
+          borderRadius:rad,display:'flex',alignItems:'center',justifyContent:'center',
+          fontSize:fs,fontFamily:'"Black Ops One",sans-serif',
+          color:rev?theme.tileText:'transparent',
+          boxShadow:rev?'0 0 '+Math.round(sz*.28)+'px '+theme.tileGlow+',0 3px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.25)':'inset 0 2px 10px rgba(0,0,0,.8)',
+          transition:'all .38s cubic-bezier(.34,1.4,.64,1)',
+          transform:rev?'scale(1.05) translateY(-2px)':'scale(1)',
+          userSelect:'none',letterSpacing:'1px',
+        }},ch));
+      });
+    });
+    board.appendChild(row);
+  });
+  return board;
+}
+
+// ─── CONFETTI ────────────────────────────────────────────────────────────────
+function spawnConfetti(){
+  if(document.querySelector('.conf'))return;
+  var colors=(THEMES[STATE.themeId]||THEMES.rocket).confetti;
+  var l=el('div',{style:{position:'fixed',top:'0',left:'0',width:'100%',height:'100%',pointerEvents:'none',overflow:'hidden',zIndex:'999'}});
+  l.className='conf';
+  for(var i=0;i<100;i++){
+    var s=(6+Math.random()*14)+'px';
+    l.appendChild(el('div',{style:{position:'absolute',left:Math.floor(Math.random()*100)+'%',top:'-25px',width:s,height:s,background:colors[i%colors.length],borderRadius:Math.random()>.5?'50%':'2px',animation:'confFall '+(2+Math.random()*2.5)+'s '+(Math.random()*2)+'s ease-in forwards'}}));
+  }
+  document.getElementById('app').appendChild(l);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  AUDIENCE SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function buildAudience(){
+  var st=STATE,theme=THEMES[st.themeId]||THEMES.rocket;
+  var cur=st.phrases[st.index]||st.phrases[0]||DEFAULT_PHRASES[0];
+  var phrase=(cur.phrase||'').toUpperCase();
+  var gs=new Set(st.guessed);
+
+  var wrap=el('div',{style:{width:'100vw',height:'100vh',background:'#030304',overflow:'hidden',display:'flex',flexDirection:'column',position:'relative'}});
+
+  // Floor glow
+  var floor=mk({position:'fixed',bottom:'0',left:'0',width:'100%',height:'30%',
+    background:'radial-gradient(ellipse at 50% 100%,'+theme.tileGlow.replace('.7','.05').replace('.75','.05').replace('.8','.05')+' 0%,transparent 70%)',
+    pointerEvents:'none',zIndex:'0'});
+  wrap.appendChild(floor);
+
+  // ── WAITING ──
+  if(st.screen==='setup'){
+    var c=mk({position:'relative',zIndex:'5',flex:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'});
+    var tt=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(36px,8vw,88px)',letterSpacing:'6px',color:theme.accent,textShadow:'0 0 40px '+theme.tileGlow+',0 0 80px '+theme.tileGlow,textAlign:'center',lineHeight:'1'});
+    tt.textContent='PHRASE FRENZY';
+    var ss=mk({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'clamp(14px,2.5vw,22px)',letterSpacing:'6px',color:theme.accent,opacity:'.5',animation:'breathe 2.2s ease-in-out infinite',textAlign:'center'});
+    ss.textContent='WAITING FOR OPERATOR';
+    c.appendChild(tt);c.appendChild(ss);wrap.appendChild(c);
+    return wrap;
+  }
+
+  // ── COMPACT HEADER ──
+  var hdr=mk({position:'relative',zIndex:'5',flexShrink:'0',padding:'0 28px',height:'38px',
+    display:'flex',alignItems:'center',justifyContent:'space-between',
+    background:'rgba(0,0,0,.7)',backdropFilter:'blur(10px)',
+    borderBottom:'1px solid rgba(255,255,255,.04)'});
+  var te=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'15px',letterSpacing:'5px',color:theme.accent,
+    textShadow:'0 0 12px '+theme.tileGlow,animation:st.won?'winFlash 1s ease-in-out infinite':'none'});
+  te.textContent='PHRASE FRENZY';
+  var he=mk({fontSize:'12px',fontFamily:'"Barlow Condensed",sans-serif',fontWeight:'700',letterSpacing:'1px',
+    maxWidth:'55%',textAlign:'right',transition:'all .4s',
+    color:st.hint&&cur.hint?theme.accent:'rgba(255,255,255,.1)',
+    overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'});
+  he.textContent=st.hint&&cur.hint?'💡 '+cur.hint:cur.hint?'CATEGORY HIDDEN':'';
+  hdr.appendChild(te);hdr.appendChild(he);wrap.appendChild(hdr);
+
+  // ── BOARD AREA ──
+  var boardArea=mk({flex:'1',display:'flex',alignItems:'center',justifyContent:'center',
+    padding:'12px',position:'relative',zIndex:'5',overflow:'visible'});
+
+  var d=theme.deco;
+  var vw=window.innerWidth,vh=window.innerHeight;
+  var avW=vw-60-d.left-d.right-d.ring*2;
+  var avH=vh-38-42-d.top-d.bottom-d.ring*2-20;
+  var words=phrase.split(' ');
+
+  // Word-wrap sizing: find largest tile size where wrapped lines fit avW × avH
+  function computeLayout(sz){
+    var g=Math.max(3,Math.floor(sz*.09));
+    var wg=Math.max(6,Math.floor(sz*.45)); // gap between words on same line
+    var lines=[],cur=[],curW=0;
+    words.forEach(function(w){
+      var ww=w.length*sz+Math.max(0,w.length-1)*g;
+      var need=cur.length>0?wg+ww:ww;
+      if(cur.length>0&&curW+need>avW){lines.push(cur);cur=[w];curW=ww;}
+      else{cur.push(w);curW+=need;}
+    });
+    if(cur.length)lines.push(cur);
+    var maxW=0;
+    lines.forEach(function(line){
+      var lw=0;
+      line.forEach(function(w,i){lw+=(i>0?wg:0)+w.length*sz+Math.max(0,w.length-1)*g;});
+      if(lw>maxW)maxW=lw;
+    });
+    var rg=Math.max(5,Math.floor(sz*.13));
+    var th=Math.round(sz*1.16);
+    var bH=lines.length*th+Math.max(0,lines.length-1)*rg;
+    return{lines:lines,bW:maxW,bH:bH,g:g,wg:wg,rg:rg,th:th};
+  }
+
+  var sz=140,layout;
+  while(sz>=36){
+    layout=computeLayout(sz);
+    if(layout.bW<=avW&&layout.bH<=avH)break;
+    sz-=2;
+  }
+  sz=Math.max(sz,36);
+  layout=computeLayout(sz);
+  var bW=layout.bW,bH=layout.bH;
+
+  // Build themed object
+  var obj=theme.make(bW,bH,st.solveWrong);
+  obj.slot.appendChild(buildBoard(phrase,st.guessed,sz,theme,layout));
+  boardArea.appendChild(obj.wrap);
+  wrap.appendChild(boardArea);
+
+  // ── WIN BANNER ──
+  if(st.won){
+    var wb=mk({position:'relative',zIndex:'5',flexShrink:'0',height:'36px',
+      display:'flex',alignItems:'center',justifyContent:'center',
+      background:'linear-gradient(90deg,transparent,'+theme.tileGlow.replace('.7','.1').replace('.75','.1').replace('.8','.1')+',transparent)'});
+    var wt=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(14px,3vw,26px)',letterSpacing:'6px',color:theme.accent,textShadow:'0 0 20px '+theme.tileGlow,animation:'winFlash 1s ease-in-out infinite'});
+    wt.textContent='🎉 PHRASE SOLVED!';
+    wb.appendChild(wt);wrap.appendChild(wb);
+  }
+
+  // ── USED LETTERS ──
+  var strip=mk({flexShrink:'0',padding:'5px 24px 7px',height:'42px',
+    background:'rgba(0,0,0,.6)',backdropFilter:'blur(8px)',
+    borderTop:'1px solid rgba(255,255,255,.03)',
+    display:'flex',gap:'4px',alignItems:'center',justifyContent:'center',
+    flexWrap:'nowrap',overflow:'hidden',position:'relative',zIndex:'5'});
+  ALPHA.forEach(function(l){
+    if(!gs.has(l))return;
+    var hit=phrase.includes(l);
+    var chip=mk({width:'26px',height:'26px',borderRadius:'4px',flexShrink:'0',
+      background:hit?theme.accent+'15':'rgba(239,68,68,.07)',
+      border:'1px solid '+(hit?theme.accent+'44':'rgba(239,68,68,.2)'),
+      display:'flex',alignItems:'center',justifyContent:'center',
+      fontFamily:'"Bebas Neue",sans-serif',fontSize:'15px',
+      color:hit?theme.usedHit:theme.usedMiss});
+    chip.textContent=l;strip.appendChild(chip);
+  });
+  wrap.appendChild(strip);
+  return wrap;
+}
+
+// ─── SOUNDS ──────────────────────────────────────────────────────────────────
+let _ctx=null;
+function ac(){if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();if(_ctx.state==='suspended')_ctx.resume();return _ctx;}
+function tone(c,type,freq,t0,t1,pk,fd){
+  const o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;
+  o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(pk,t0+.015);
+  g.gain.setValueAtTime(pk,fd||t0+.015);g.gain.exponentialRampToValueAtTime(.001,t1);
+  o.start(t0);o.stop(t1+.01);
+}
+function soundCorrect(){try{const c=ac(),n=c.currentTime;[[523,0,.28],[659,.09,.26],[784,.18,.3],[1047,.3,.35]].forEach(([f,t,g])=>{tone(c,'square',f,n+t,n+t+.55,g*.5,n+t+.15);tone(c,'sine',f,n+t,n+t+.55,g,n+t+.1);tone(c,'sine',f/2,n+t,n+t+.55,g*.3,n+t+.2);});tone(c,'sine',2093,n+.3,n+.85,.12,n+.45);}catch(e){}}
+function soundWrong(){try{const c=ac(),n=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';o.frequency.setValueAtTime(200,n);o.frequency.exponentialRampToValueAtTime(60,n+.7);g.gain.setValueAtTime(.45,n);g.gain.exponentialRampToValueAtTime(.001,n+.75);o.start(n);o.stop(n+.78);tone(c,'square',110,n,n+.35,.3,n+.05);tone(c,'square',73,n,n+.35,.25,n+.05);const buf=c.createBuffer(1,Math.floor(c.sampleRate*.08),c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const src=c.createBufferSource(),ng=c.createGain();src.buffer=buf;src.connect(ng);ng.connect(c.destination);ng.gain.setValueAtTime(.6,n);ng.gain.exponentialRampToValueAtTime(.001,n+.08);src.start(n);tone(c,'sine',45,n+.1,n+1,.15,n+.3);}catch(e){}}
+function soundSolve(){try{const c=ac(),n=c.currentTime;[[392,0],[392,.12],[392,.24],[523,.38],[392,.62],[523,.74],[659,.88],[784,1.1],[784,1.28],[784,1.46],[1047,1.65]].forEach(([f,t])=>{tone(c,'square',f,n+t,n+t+.28,.16,n+t+.08);tone(c,'sine',f,n+t,n+t+.35,.22,n+t+.1);tone(c,'sine',f*1.5,n+t,n+t+.28,.08,n+t+.12);});[[196,0],[196,.38],[196,.88],[196,1.65]].forEach(([f,t])=>{tone(c,'sine',f,n+t,n+t+.45,.35,n+t+.15);tone(c,'triangle',f,n+t,n+t+.45,.2,n+t+.2);});[261,330,392,523].forEach((f,i)=>tone(c,'sine',f,n+.5,n+2.5,.12+i*.02,n+1.2));const buf=c.createBuffer(1,Math.floor(c.sampleRate*.15),c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length)*.8;const src=c.createBufferSource(),ng=c.createGain();src.buffer=buf;src.connect(ng);ng.connect(c.destination);ng.gain.setValueAtTime(.4,n);ng.gain.exponentialRampToValueAtTime(.001,n+.15);src.start(n);}catch(e){}}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let STATE={screen:'setup',phrases:copy(DEFAULT_PHRASES),index:0,guessed:[],hint:false,won:false,solveWrong:false,themeId:'gold'};
+let ROLE=(window.location.hash||'').replace('#','').trim();
+var _saved=loadPhrases();let editPhrases=_saved?copy(_saved):copy(DEFAULT_PHRASES),inputPhrase='',inputHint='';
+let showSolveModal=false,solveInput='';
+
+function copy(x){return JSON.parse(JSON.stringify(x));}
+function rnd(n){return Math.floor(Math.random()*n);}
+function mk(styles){const d=document.createElement('div');Object.assign(d.style,styles);return d;}
+
+// ─── MESSAGING ───────────────────────────────────────────────────────────────
+function send(s){if(ipc)ipc.send('pc-state',s);else if(window._bc)window._bc.postMessage({type:'state',s});}
+function req(){if(ipc)ipc.send('pc-request');else if(window._bc)window._bc.postMessage({type:'request'});}
+function onIn(s){const ww=STATE.won,sw=STATE.solveWrong;STATE=s;if(ROLE==='audience'){if(s.won&&!ww){soundSolve();setTimeout(spawnConfetti,100);}if(s.solveWrong&&!sw)soundWrong();}render();}
+if(ipc){ipc.on('pc-state',(_,s)=>onIn(s));ipc.on('pc-request',()=>{if(ROLE==='operator')send(STATE);});}
+else{try{window._bc=new BroadcastChannel('phrase-frenzy');window._bc.onmessage=e=>{if(e.data.type==='state')onIn(e.data.s);if(e.data.type==='request'&&ROLE==='operator')send(STATE);};}catch(_){}}
+function setState(p){STATE=Object.assign({},STATE,p);send(STATE);render();}
+
+// ─── DOM HELPERS ─────────────────────────────────────────────────────────────
+function el(tag,props,...kids){
+  const e=document.createElement(tag);
+  for(const[k,v]of Object.entries(props||{})){
+    if(k==='style'&&typeof v==='object')Object.assign(e.style,v);
+    else if(k==='onClick')e.addEventListener('click',v);
+    else if(k==='onInput')e.addEventListener('input',v);
+    else if(k==='onKeydown')e.addEventListener('keydown',v);
+    else if(k==='className')e.className=v;
+    else if(k==='disabled')e.disabled=!!v;
+    else if(k==='placeholder')e.placeholder=v;
+    else if(k==='value'&&tag==='input')e.value=v;
+    else if(k==='autofocus'&&v)setTimeout(()=>e.focus(),60);
+  }
+  kids.flat().forEach(k=>{if(k!=null&&k!==false)e.appendChild(typeof k==='string'?document.createTextNode(k):k);});
+  return e;
+}
+const D=(s,...k)=>el('div',{style:s},...k);
+const S=(s,t)=>el('span',{style:s},t);
+const B=(s,fn,t,dis)=>el('button',{className:'btn',style:s,onClick:fn,disabled:!!dis},t);
+
+function render(){
+  if(ROLE==='operator' && !isUnlocked()){ renderLockScreen(); return; }
+
+  const app=document.getElementById('app');app.innerHTML='';
+  try{
+    if(ROLE==='audience')app.appendChild(buildAudience());
+    else if(ROLE==='operator')app.appendChild(buildOperator());
+    else app.appendChild(buildPicker());
+  }catch(err){
+    app.innerHTML=`<div style="padding:40px;color:#f87171;font-family:monospace;font-size:12px;white-space:pre-wrap;">ERROR: ${err.message}\n\n${err.stack}</div>`;
+  }
+}
+
+// ─── PICKER ──────────────────────────────────────────────────────────────────
+function buildPicker(){
+  const w=D({minHeight:'100vh',background:'#040406',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'32px',padding:'24px'});
+  w.appendChild(D({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(40px,8vw,72px)',letterSpacing:'6px',color:'#f59e0b',textShadow:'0 0 40px rgba(245,158,11,.5)',textAlign:'center'},'PHRASE FRENZY'));
+  const row=D({display:'flex',gap:'20px',flexWrap:'wrap',justifyContent:'center'});
+  [['🎛','OPERATOR','Controls the game','#f59e0b'],['📺','AUDIENCE','The big screen','#38bdf8']].forEach(([icon,title,desc,color],i)=>{
+    row.appendChild(el('button',{className:'btn',style:{padding:'28px 44px',background:`${color}0a`,border:`2px solid ${color}30`,borderRadius:'14px',cursor:'pointer',textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:'8px'},onClick:()=>{ROLE=i===0?'operator':'audience';if(i===1)setTimeout(req,200);render();}},
+      D({fontSize:'44px'},icon),
+      D({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'28px',letterSpacing:'4px',color},title),
+      D({color:'#333',fontSize:'13px'},desc)));
+  });
+  w.appendChild(row);return w;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  OPERATOR SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function buildOperator(){return STATE.screen==='setup'?buildSetup():buildGame();}
+
+function buildSetup(){
+  const wrap=D({minHeight:'100vh',background:'#040406',padding:'20px',overflowY:'auto'});
+  const inner=D({maxWidth:'640px',margin:'0 auto'});
+  var setupHeader=D({display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'18px'});
+  setupHeader.appendChild(D({fontFamily:'"Black Ops One",sans-serif',fontSize:'22px',letterSpacing:'4px',color:'#f59e0b'},'🎛 PHRASE FRENZY — SETUP'));
+  // Version + update button
+  setupHeader.appendChild(D({fontSize:'10px',color:'#333',letterSpacing:'1px'},'v'+APP_VERSION));
+  inner.appendChild(setupHeader);
+  inner.appendChild(opSection(`Phrases (${editPhrases.length})`,buildPhraseEditor()));
+  inner.appendChild(B({width:'100%',marginTop:'16px',padding:'15px',background:'linear-gradient(135deg,#f59e0b,#d97706)',color:'#000',fontSize:'18px',fontFamily:'"Black Ops One",sans-serif',letterSpacing:'4px',borderRadius:'9px',boxShadow:'0 4px 20px rgba(245,158,11,.3)',display:'block'},()=>{
+    const v=editPhrases.filter(p=>p.phrase&&p.phrase.trim());
+    if(!v.length){alert('Add at least one phrase first.');return;}
+    savePhrases(editPhrases);setState({screen:'game',phrases:copy(v),index:0,guessed:[],won:false,hint:false,solveWrong:false});
+  },'▶ START GAME'));
+  wrap.appendChild(inner);return wrap;
+}
+
+// ─── CUSTOM THEME STORAGE ────────────────────────────────────────────────────
+// Saves/loads custom themes via Electron userData OR localStorage fallback
+var CUSTOM_THEMES_KEY = 'pf_custom_themes';
+
+function loadCustomThemes() {
+  try {
+    if(typeof require !== 'undefined') {
+      var fs = require('fs'), path = require('path');
+      var app = require('electron').remote ? require('electron').remote.app : null;
+      if(!app) { var {app} = require('@electron/remote') || {}; }
+      // Try to get userData path
+      var base = (app && app.getPath) ? app.getPath('userData') : null;
+      if(base) {
+        var fp = path.join(base, 'custom-themes.json');
+        if(fs.existsSync(fp)) return JSON.parse(fs.readFileSync(fp,'utf8'));
+      }
+    }
+  } catch(e) {}
+  // Fallback: localStorage
+  try { return JSON.parse(localStorage.getItem(CUSTOM_THEMES_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function saveCustomThemes(themes) {
+  try {
+    if(typeof require !== 'undefined') {
+      var fs = require('fs'), path = require('path');
+      try {
+        var {app} = require('electron');
+        // In renderer with nodeIntegration, use process to find userData
+      } catch(e2) {}
+      // Use homedir fallback
+      var os = require('os');
+      var dir = path.join(os.homedir(), 'Library', 'Application Support', 'Phrase Frenzy');
+      if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true});
+      fs.writeFileSync(path.join(dir, 'custom-themes.json'), JSON.stringify(themes, null, 2));
+      return;
+    }
+  } catch(e) {}
+  try { localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(themes)); } catch(e) {}
+}
+
+// ─── PHRASE STORAGE ──────────────────────────────────────────────────────────
+var PHRASES_KEY = 'pf_phrases';
+
+function loadPhrases() {
+  try {
+    if(typeof require !== 'undefined') {
+      var fs = require('fs'), path = require('path'), os = require('os');
+      var fp = path.join(os.homedir(), 'Library', 'Application Support', 'Phrase Frenzy', 'phrases.json');
+      if(fs.existsSync(fp)) return JSON.parse(fs.readFileSync(fp,'utf8'));
+    }
+  } catch(e) {}
+  try { var s=localStorage.getItem(PHRASES_KEY); if(s) return JSON.parse(s); } catch(e) {}
+  return null; // null means "use defaults"
+}
+
+function savePhrases(list) {
+  try {
+    if(typeof require !== 'undefined') {
+      var fs = require('fs'), path = require('path'), os = require('os');
+      var dir = path.join(os.homedir(), 'Library', 'Application Support', 'Phrase Frenzy');
+      if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true});
+      fs.writeFileSync(path.join(dir, 'phrases.json'), JSON.stringify(list, null, 2));
+      return;
+    }
+  } catch(e) {}
+  try { localStorage.setItem(PHRASES_KEY, JSON.stringify(list)); } catch(e) {}
+}
+
+// Load custom themes on boot and merge into THEMES
+var customThemeList = loadCustomThemes();
+function applyCustomThemes() {
+  customThemeList.forEach(function(ct) {
+    THEMES[ct.id] = makeCustomTheme(ct);
+    if(THEME_ORDER.indexOf(ct.id) === -1) THEME_ORDER.push(ct.id);
+  });
+}
+
+function makeCustomTheme(ct) {
+  // Custom themes use a bold styled-rectangle frame (no shaped object)
+  var accent = ct.accent || '#22d3ee';
+  var frameColor = ct.frameColor || '#1a1a3a';
+  var tileFill = ct.tileFill || accent;
+  return {
+    emoji: ct.emoji || '🎨',
+    label: ct.name || 'Custom',
+    accent: accent,
+    tileReveal: 'linear-gradient(150deg, '+lighten(tileFill)+', '+tileFill+', '+darken(tileFill)+')',
+    tileText: isDark(tileFill) ? '#fff' : '#000',
+    tileGlow: hexToRgba(accent, 0.75),
+    usedHit: accent, usedMiss: '#ef4444',
+    confetti: [accent, lighten(accent), '#fff', frameColor, lighten(frameColor), darken(accent)],
+    deco:{top:20,bottom:20,left:20,right:20,ring:28},
+    make: function(bW,bH,err) {
+      var R=28, fw=bW+R*2, fh=bH+R*2;
+      var border=20, TW=fw+border*2, TH=fh+border*2;
+      var wrap=mk({position:'relative',width:TW+'px',height:TH+'px',flexShrink:'0'});
+      // Glow halo
+      wrap.appendChild(mk({position:'absolute',inset:'-8px',borderRadius:'26px',
+        boxShadow:'0 0 60px '+hexToRgba(accent,0.25)+', 0 0 120px '+hexToRgba(accent,0.1),
+        pointerEvents:'none',zIndex:'0'}));
+      // Outer shadow
+      wrap.appendChild(mk({position:'absolute',top:(border-4)+'px',left:(border-4)+'px',
+        width:(fw+8)+'px',height:(fh+8)+'px',borderRadius:'20px',
+        boxShadow:'0 12px 50px rgba(0,0,0,.95)',zIndex:'2'}));
+      // Frame face with custom color + bevel
+      var frame=mk({position:'absolute',top:border+'px',left:border+'px',
+        width:fw+'px',height:fh+'px',borderRadius:'16px',
+        background:err?'linear-gradient(145deg,#450a0a,#7f1d1d)':frameColor,
+        boxShadow:'inset 0 4px 0 rgba(255,255,255,.3),inset 4px 0 0 rgba(255,255,255,.15),inset 0 -4px 0 rgba(0,0,0,.5),inset -4px 0 0 rgba(0,0,0,.3)',
+        zIndex:'4',animation:err?'wrongShake .4s ease':'none'});
+      addSheen(frame);
+      // Accent stripe
+      var stripe=mk({position:'absolute',top:'0',left:'0',right:'0',height:'5px',
+        borderRadius:'16px 16px 0 0',
+        background:accent,boxShadow:'0 0 14px '+hexToRgba(accent,0.7)});
+      frame.appendChild(stripe);
+      var stripeB=mk({position:'absolute',bottom:'0',left:'0',right:'0',height:'5px',
+        borderRadius:'0 0 16px 16px',
+        background:accent,boxShadow:'0 0 14px '+hexToRgba(accent,0.7)});
+      frame.appendChild(stripeB);
+      // Board inset
+      var bezel=mk({position:'absolute',top:R+'px',left:R+'px',width:bW+'px',height:bH+'px',
+        borderRadius:'8px',background:'rgba(0,0,0,.85)',
+        boxShadow:'inset 0 5px 20px rgba(0,0,0,.99),inset 0 0 0 3px '+hexToRgba(accent,0.1),
+        padding:'3px',zIndex:'5'});
+      var slot=mk({width:'100%',height:'100%',borderRadius:'6px',background:'#030305',
+        display:'flex',alignItems:'center',justifyContent:'center',overflow:'visible'});
+      bezel.appendChild(slot);frame.appendChild(bezel);wrap.appendChild(frame);
+      return {wrap:wrap,slot:slot};
+    }
+  };
+}
+
+// Color utility helpers
+function hexToRgba(hex, a) {
+  hex = hex.replace('#','');
+  if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function lighten(hex) {
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=Math.min(255,parseInt(hex.substr(0,2),16)+60),
+      g=Math.min(255,parseInt(hex.substr(2,2),16)+60),
+      b=Math.min(255,parseInt(hex.substr(4,2),16)+60);
+  return '#'+[r,g,b].map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+}
+function darken(hex) {
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=Math.max(0,parseInt(hex.substr(0,2),16)-50),
+      g=Math.max(0,parseInt(hex.substr(2,2),16)-50),
+      b=Math.max(0,parseInt(hex.substr(4,2),16)-50);
+  return '#'+[r,g,b].map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+}
+function isDark(hex) {
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+  return (r*299+g*587+b*114)/1000 < 128;
+}
+
+// ─── THEME BUILDER UI ────────────────────────────────────────────────────────
+var newThemeDraft = {name:'', emoji:'🎨', accent:'#22d3ee', frameColor:'#0f172a', tileFill:'#22d3ee'};
+
+function buildThemeBuilder() {
+  var col = D({});
+
+  // ── Saved custom themes list ──────────────────────────────────────────────
+  function refreshCustomList() {
+    customList.innerHTML = '';
+    if(!customThemeList.length) {
+      customList.appendChild(D({fontSize:'11px',color:'#333',padding:'8px 0',fontStyle:'italic'},'No custom themes yet.'));
+    }
+    customThemeList.forEach(function(ct,i){
+      var row=D({display:'flex',gap:'8px',alignItems:'center',marginBottom:'7px'});
+      var sw=mk({width:'30px',height:'30px',borderRadius:'6px',background:ct.frameColor||'#1a1a3a',flexShrink:'0',
+        border:'3px solid '+(ct.accent||'#22d3ee'),boxShadow:'0 0 8px '+(ct.accent||'#22d3ee')+'66',
+        display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px'});
+      sw.textContent=ct.emoji||'🎨';
+      var info=D({flex:'1',padding:'5px 9px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'6px'});
+      info.appendChild(D({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'14px',color:ct.accent||'#22d3ee',letterSpacing:'2px'},ct.name||'Custom'));
+      var applyBtn=el('button',{className:'btn',style:{padding:'4px 9px',background:ct.accent+'22',color:ct.accent||'#22d3ee',border:'1px solid '+(ct.accent||'#22d3ee')+'44',fontSize:'11px'},
+        onClick:function(){setState({themeId:ct.id});}}, '▶ Apply');
+      var delBtn=el('button',{className:'btn',style:{padding:'4px 9px',background:'#1a0000',color:'#ef4444',border:'1px solid #330000',fontSize:'11px'},
+        onClick:function(){
+          customThemeList.splice(i,1);saveCustomThemes(customThemeList);
+          delete THEMES[ct.id];
+          var idx=THEME_ORDER.indexOf(ct.id);if(idx>-1)THEME_ORDER.splice(idx,1);
+          refreshCustomList();render();
+        }}, '✕');
+      var br=D({display:'flex',gap:'4px'});br.appendChild(applyBtn);br.appendChild(delBtn);
+      row.appendChild(sw);row.appendChild(info);row.appendChild(br);
+      customList.appendChild(row);
+    });
+  }
+  var customList=D({marginBottom:'12px',minHeight:'16px'});
+  refreshCustomList();
+  col.appendChild(customList);
+
+  // Browse online themes
+  col.appendChild(el('button',{className:'btn',style:{width:'100%',padding:'8px',marginBottom:'10px',
+    background:'rgba(56,189,248,.08)',color:'#38bdf8',border:'1px solid rgba(56,189,248,.22)',
+    fontSize:'12px',borderRadius:'7px'},onClick:function(){fetchRemoteThemes(true);}},
+    '🌐 Load Latest Themes'));
+
+  col.appendChild(D({fontSize:'9px',color:'#333',textTransform:'uppercase',letterSpacing:'1px',
+    marginBottom:'10px',borderTop:'1px solid #111',paddingTop:'10px'},'Create New Theme'));
+
+  // Draft state
+  var draft={name:'',emoji:'🎨',accent:'#22d3ee',frameColor:'#0f172a',tileFill:'#22d3ee'};
+
+  // Preview swatch
+  var prevRow=D({display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px',
+    padding:'8px 10px',background:'#0a0a0c',borderRadius:'8px',border:'1px solid #111'});
+  var prevSwatch=mk({width:'40px',height:'40px',borderRadius:'7px',flexShrink:'0',
+    background:draft.frameColor,border:'3px solid '+draft.accent,
+    boxShadow:'0 0 12px '+draft.accent+'55',
+    display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',transition:'all .25s'});
+  prevSwatch.textContent=draft.emoji;
+  var prevName=D({flex:'1',fontFamily:'"Barlow Condensed",sans-serif',fontSize:'15px',letterSpacing:'2px'},'My Theme');
+  prevRow.appendChild(prevSwatch);prevRow.appendChild(prevName);
+  col.appendChild(prevRow);
+
+  function updatePreview(){
+    prevSwatch.style.background=draft.frameColor;
+    prevSwatch.style.borderColor=draft.accent;
+    prevSwatch.style.boxShadow='0 0 12px '+draft.accent+'55';
+    prevSwatch.textContent=draft.emoji;
+    prevName.textContent=draft.name||'My Theme';
+  }
+
+  // Simple form — 2 columns
+  var grid=D({display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'10px'});
+
+  function field(label,type,val,key){
+    var wrap2=D({display:'flex',flexDirection:'column',gap:'3px'});
+    wrap2.appendChild(D({fontSize:'9px',color:'#555',textTransform:'uppercase',letterSpacing:'1px'},label));
+    var inp=el('input',{value:val,type:type,
+      style:{padding:'7px 9px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'6px',
+        color:'#fff',fontSize:'13px',width:'100%'},
+      onInput:function(e){draft[key]=e.target.value;updatePreview();}});
+    if(type==='color'){
+      var cr=D({display:'flex',gap:'5px',alignItems:'center'});
+      inp.style.width='36px';inp.style.height='32px';inp.style.padding='2px';inp.style.background='transparent';inp.style.border='none';
+      var hex=el('input',{value:val,
+        style:{flex:'1',padding:'7px 9px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'6px',color:'#fff',fontSize:'12px',fontFamily:'monospace'},
+        onInput:function(e){draft[key]=e.target.value;inp.value=e.target.value;updatePreview();}});
+      inp.addEventListener('input',function(e){draft[key]=e.target.value;hex.value=e.target.value;updatePreview();});
+      cr.appendChild(inp);cr.appendChild(hex);wrap2.appendChild(cr);
+    } else {
+      inp.style.width='100%';wrap2.appendChild(inp);
+    }
+    return wrap2;
+  }
+
+  grid.appendChild(field('Name','text','','name'));
+  grid.appendChild(field('Emoji','text','🎨','emoji'));
+  grid.appendChild(field('Accent color','color','#22d3ee','accent'));
+  grid.appendChild(field('Frame color','color','#0f172a','frameColor'));
+  grid.appendChild(field('Tile color','color','#22d3ee','tileFill'));
+  col.appendChild(grid);
+
+  // Save + Apply button
+  col.appendChild(el('button',{className:'btn',style:{width:'100%',padding:'10px',
+    background:'linear-gradient(135deg,#a855f7,#7e22ce)',color:'#fff',
+    fontSize:'13px',fontFamily:'"Black Ops One",sans-serif',letterSpacing:'3px',
+    borderRadius:'8px',boxShadow:'0 4px 14px rgba(168,85,247,.3)'},
+    onClick:function(){
+      if(!(draft.name||'').trim()){alert('Give your theme a name.');return;}
+      var id='custom_'+Date.now();
+      var ct={id:id,name:draft.name.trim(),emoji:draft.emoji||'🎨',
+        accent:draft.accent||'#22d3ee',frameColor:draft.frameColor||'#0f172a',tileFill:draft.tileFill||'#22d3ee'};
+      customThemeList.push(ct);saveCustomThemes(customThemeList);
+      THEMES[id]=makeCustomTheme(ct);THEME_ORDER.push(id);
+      refreshCustomList();setState({themeId:id});
+    }},'+ Save & Apply'));
+
+  return col;
+}
+
+function buildPhraseEditor(){
+  const col=D({});
+  const list=D({maxHeight:'240px',overflowY:'auto',marginBottom:'10px'});
+  function refreshList(){
+    list.innerHTML='';
+    editPhrases.forEach((p,i)=>{
+      const row=D({display:'flex',gap:'7px',alignItems:'center',marginBottom:'6px'});
+      const info=D({flex:'1',padding:'8px 12px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'7px'});
+      info.appendChild(D({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'16px',color:'#f59e0b',letterSpacing:'2px'},p.phrase));
+      if(p.hint)info.appendChild(D({fontSize:'11px',color:'#444',marginTop:'2px'},p.hint));
+      row.appendChild(info);
+      row.appendChild(B({width:'30px',height:'30px',background:'#1a0000',color:'#ef4444',fontSize:'13px'},()=>{editPhrases.splice(i,1);savePhrases(editPhrases);refreshList();},'✕'));
+      list.appendChild(row);
+    });
+  }
+  refreshList();col.appendChild(list);
+  const pi=el('input',{placeholder:'TYPE A NEW PHRASE...',value:inputPhrase,style:{width:'100%',padding:'10px 12px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'7px',color:'#f59e0b',fontFamily:'"Barlow Condensed",sans-serif',fontSize:'16px',letterSpacing:'2px',marginBottom:'7px'},onInput:e=>{inputPhrase=e.target.value.toUpperCase();pi.value=inputPhrase;},onKeydown:e=>{if(e.key==='Enter')add();}});
+  const hi=el('input',{placeholder:'Hint / category (optional)',value:inputHint,style:{flex:'1',padding:'10px 12px',background:'#0e0e10',border:'1px solid #1a1a1a',borderRadius:'7px',color:'#888',fontSize:'13px'},onInput:e=>{inputHint=e.target.value;},onKeydown:e=>{if(e.key==='Enter')add();}});
+  function add(){if(!inputPhrase.trim())return;editPhrases.push({phrase:inputPhrase.trim(),hint:inputHint.trim()});savePhrases(editPhrases);inputPhrase='';inputHint='';pi.value='';hi.value='';refreshList();}
+  col.appendChild(pi);
+  const hr=D({display:'flex',gap:'7px'});hr.appendChild(hi);
+  hr.appendChild(B({padding:'10px 15px',background:'#38bdf8',color:'#000',fontSize:'14px',fontWeight:'900'},add,'+ Add'));
+  col.appendChild(hr);return col;
+}
+
+function buildGame(){
+  const{phrases,index,guessed,hint,won,themeId}=STATE;
+  const gs=new Set(guessed),cur=phrases[index]||phrases[0];
+  const ph=(cur.phrase||'').toUpperCase();
+  const uniq=new Set(ph.replace(/[^A-Z]/g,'').split(''));
+  const wrongs=guessed.filter(l=>!ph.includes(l)).length;
+
+  const wrap=D({height:'100vh',display:'flex',flexDirection:'column',overflow:'hidden',background:'#040406'});
+
+  // Top bar
+  wrap.appendChild(D({display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 14px',background:'#030304',borderBottom:'1px solid #111',flexShrink:'0'},
+    D({display:'flex',alignItems:'center',gap:'8px'},
+      D({fontFamily:'"Black Ops One",sans-serif',fontSize:'15px',letterSpacing:'3px',color:'#f59e0b'},'PHRASE FRENZY'),
+      updateInfo?el('button',{className:'btn',style:{padding:'3px 8px',background:'#f59e0b22',color:'#f59e0b',border:'1px solid #f59e0b44',fontSize:'10px',letterSpacing:'1px',animation:'breathe 2s ease-in-out infinite'},onClick:function(){showUpdateDialog();}},'⬆ UPDATE'):null
+    ),
+    D({display:'flex',gap:'7px',alignItems:'center'},
+      D({color:'#333',fontSize:'11px'},`${index+1}/${phrases.length} · ${wrongs} wrong`),
+      B({padding:'5px 10px',background:'#0e0e10',color:'#444',border:'1px solid #111',fontSize:'11px'},()=>setState({screen:'setup',guessed:[],won:false}),'⚙ Setup'),
+      el('button',{className:'btn',title:'Open Audience Screen',
+        style:{width:'28px',height:'28px',borderRadius:'50%',border:'2.5px solid #16a34a',
+          background:'radial-gradient(circle at 38% 35%,#4ade80,#16a34a)',
+          boxShadow:'0 0 10px #4ade8066',cursor:'pointer',padding:'0',flexShrink:'0'},
+        onClick:function(){try{ipc.send('toggle-audience',true);}catch(e){}}}),
+      el('button',{className:'btn',title:'Close Audience Screen',
+        style:{width:'28px',height:'28px',borderRadius:'50%',border:'2.5px solid #7f1d1d',
+          background:'radial-gradient(circle at 38% 35%,#f87171,#991b1b)',
+          boxShadow:'0 0 10px #f8717166',cursor:'pointer',padding:'0',flexShrink:'0'},
+        onClick:function(){try{ipc.send('toggle-audience',false);}catch(e){}}}))));
+  // Answer preview
+  const ap=D({padding:'6px 14px',background:'#050505',borderBottom:'1px solid #0a0a0a',flexShrink:'0'});
+  ap.appendChild(D({fontSize:'9px',color:'#1a1a1a',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'2px'},'Answer — your eyes only'));
+  const ar=D({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'17px',letterSpacing:'3px',wordBreak:'break-all',lineHeight:'1.3'});
+  for(const ch of ph)ar.appendChild(S({color:ch===' '?'transparent':gs.has(ch)?'#f59e0b':'#222'},ch===' '?'·':ch));
+  ap.appendChild(ar);
+  if(cur.hint)ap.appendChild(D({fontSize:'9px',color:'#2a2a2a',marginTop:'2px'},'Category: '+cur.hint));
+  wrap.appendChild(ap);
+
+  // Controls row
+  const ctrl1=D({display:'flex',gap:'5px',padding:'6px 14px',background:'#040404',borderBottom:'1px solid #0a0a0a',flexShrink:'0',alignItems:'center',flexWrap:'wrap'});
+
+  // Hint
+  ctrl1.appendChild(B({padding:'5px 11px',background:hint?'rgba(56,189,248,.12)':'#0a0a0a',color:hint?'#38bdf8':'#333',border:`1px solid ${hint?'#38bdf822':'#111'}`,fontSize:'11px'},()=>setState({hint:!hint}),hint?'💡 Hide Hint':'💡 Show Hint'));
+
+  // Divider
+  ctrl1.appendChild(D({width:'1px',height:'18px',background:'#111',flexShrink:'0'}));
+
+  // Theme label
+  ctrl1.appendChild(D({fontSize:'9px',color:'#222',textTransform:'uppercase',letterSpacing:'1px',flexShrink:'0'},'Frame:'));
+
+  // Theme emoji buttons
+  THEME_ORDER.forEach(tid=>{
+    const t=THEMES[tid],active=themeId===tid;
+    ctrl1.appendChild(el('button',{className:'btn',style:{
+      padding:'2px 5px',fontSize:'15px',minWidth:'28px',height:'24px',
+      background:active?`${t.accent}18`:'transparent',
+      border:`1px solid ${active?t.accent+'44':'transparent'}`,
+      borderRadius:'5px',boxShadow:active?`0 0 8px ${(t.tileGlow||'rgba(245,158,11,.3)').replace('.7','.4').replace('.75','.4').replace('.8','.4')}`:'none',
+    },onClick:()=>setState({themeId:tid}),title:t.label},t.emoji));
+  });
+  wrap.appendChild(ctrl1);
+
+  // Alphabet
+  const scroll=D({flex:'1',overflowY:'auto',padding:'10px 14px',scrollbarWidth:'thin',scrollbarColor:'#222 transparent'});
+  scroll.appendChild(D({fontSize:'9px',color:'#1a1a1a',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'},'Tap to reveal  ·  🏆 Solve when player knows the full phrase'));
+
+  const grid=D({display:'flex',flexWrap:'wrap',gap:'4px',marginBottom:'10px'});
+  for(const letter of ALPHA){
+    const correct=gs.has(letter)&&ph.includes(letter);
+    const wrong  =gs.has(letter)&&!ph.includes(letter);
+    const used   =gs.has(letter);
+    const lb=el('button',{className:'ltr',disabled:used||won,style:{
+      background:correct?'linear-gradient(145deg,#f59e0b,#d97706)':wrong?'#100000':'#0e0e10',
+      color:correct?'#000':wrong?'#ef4444':used?'#111':'#666',
+      border:`1px solid ${correct?'#f59e0b':wrong?'#220000':'#111'}`,
+      opacity:(used&&!correct)?'.35':'1',
+      boxShadow:correct?'0 0 10px rgba(245,158,11,.4)':'none',
+    },onClick:()=>{
+      if(used||won)return;
+      const inP=ph.includes(letter),next=[...guessed,letter],done=[...uniq].every(l=>next.includes(l));
+      if(inP)soundCorrect();else soundWrong();
+      setState({guessed:next,won:done,solveWrong:false});
+      if(done){soundSolve();setTimeout(spawnConfetti,100);}
+    }},letter);
+    grid.appendChild(lb);
+  }
+  scroll.appendChild(grid);
+
+  const ctrls=D({display:'flex',gap:'6px',flexWrap:'wrap',alignItems:'center'});
+  ctrls.appendChild(B({padding:'8px 13px',background:'#0e0e10',color:'#444',border:'1px solid #111',fontSize:'12px'},()=>setState({index:(index-1+phrases.length)%phrases.length,guessed:[],won:false,hint:false,solveWrong:false}),'← Prev'));
+  ctrls.appendChild(B({padding:'8px 18px',background:won?'#080808':'linear-gradient(135deg,#a855f7,#7e22ce)',color:won?'#222':'#fff',fontSize:'13px',fontWeight:'900',boxShadow:won?'none':'0 4px 14px rgba(168,85,247,.35)'},()=>{if(won)return;soundSolve();setTimeout(spawnConfetti,100);setState({guessed:[...ALPHA],won:true,solveWrong:false});},won?'✅ Solved':'🏆 Solve',won));
+  ctrls.appendChild(B({padding:'8px 13px',background:'#0e0e10',color:'#444',border:'1px solid #111',fontSize:'12px'},()=>setState({guessed:[...ALPHA],won:true,solveWrong:false}),'Reveal All'));
+  ctrls.appendChild(B({padding:'8px 18px',background:'#0e0e10',color:'#38bdf8',border:'1px solid #38bdf822',fontSize:'12px',fontWeight:'900'},()=>setState({index:(index+1)%phrases.length,guessed:[],won:false,hint:false,solveWrong:false}),'Next →'));
+  if(won)ctrls.appendChild(D({fontFamily:'"Barlow Condensed",sans-serif',fontSize:'15px',color:'#f59e0b',letterSpacing:'2px',marginLeft:'4px'},'🎉 SOLVED!'));
+  scroll.appendChild(ctrls);
+  wrap.appendChild(scroll);
+  return wrap;
+}
+function doSolve(){
+  const cur=STATE.phrases[STATE.index]||STATE.phrases[0];
+  const ph=(cur.phrase||'').toUpperCase();
+  const norm=s=>s.toUpperCase().replace(/[^A-Z]/g,'');
+  if(norm(solveInput)===norm(ph)){showSolveModal=false;soundSolve();setTimeout(spawnConfetti,100);setState({guessed:[...ALPHA],won:true,solveWrong:false});}
+  else{soundWrong();showSolveModal=false;setState({solveWrong:true});setTimeout(()=>{STATE.solveWrong=false;send(STATE);render();},1600);}
+}
+
+function opSection(label,content){
+  const s=D({background:'#0a0a0c',borderRadius:'9px',padding:'13px',marginTop:'10px'});
+  s.appendChild(D({fontSize:'9px',color:'#38bdf8',fontWeight:'900',textTransform:'uppercase',letterSpacing:'2px',marginBottom:'10px'},label));
+  s.appendChild(content);return s;
+}
+
+// ─── UPDATE CHECK ────────────────────────────────────────────────────────────
+async function checkForUpdates(silent) {
+  try {
+    var r = await fetch(UPDATE_CHECK_URL + '?t=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) return;
+    var data = await r.json();
+    if (data.version && data.version !== APP_VERSION) {
+      updateInfo = data;
+      if (!silent) showUpdateDialog();
+      render(); // refresh header badge
+    } else if (!silent) {
+      alert('✅ You\'re up to date!\n\nPhrase Frenzy v' + APP_VERSION);
+    }
+  } catch(e) {
+    if (!silent) alert('Could not check for updates.\nMake sure you\'re connected to the internet.');
+  }
+}
+
+function showUpdateDialog() {
+  if (!updateInfo) return;
+  var msg = '🎉 Phrase Frenzy ' + updateInfo.version + ' is available!\n\n';
+  if (updateInfo.notes) msg += updateInfo.notes + '\n\n';
+  msg += 'Download the new version?';
+  if (confirm(msg)) {
+    try { require('electron').shell.openExternal(updateInfo.downloadUrl); }
+    catch(e) { window.open && window.open(updateInfo.downloadUrl); }
+  }
+}
+
+// ─── REMOTE THEMES ───────────────────────────────────────────────────────────
+async function fetchRemoteThemes(showFeedback) {
+  try {
+    var r = await fetch(REMOTE_THEMES_URL + '?t=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var data = await r.json();
+    var added = 0;
+    (data.themes || []).forEach(function(ct) {
+      if (!ct.id || !ct.name) return;
+      if (THEMES['remote_' + ct.id]) return; // already loaded
+      ct.id = 'remote_' + ct.id;
+      THEMES[ct.id] = makeCustomTheme(ct);
+      if (THEME_ORDER.indexOf(ct.id) === -1) THEME_ORDER.push(ct.id);
+      added++;
+    });
+    remoteThemesLoaded = true;
+    if (showFeedback) {
+      alert(added > 0
+        ? '✅ Loaded ' + added + ' new theme' + (added===1?'':'s') + '!'
+        : 'No new themes — you already have everything!');
+    }
+    render();
+  } catch(e) {
+    if (showFeedback) alert('Could not fetch themes. Check your internet connection.');
+  }
+}
+
+if(ROLE==='audience')setTimeout(req,500);
+applyCustomThemes();
+// Silent background checks on launch
+setTimeout(function(){ checkForUpdates(true); }, 2000);
+setTimeout(function(){ fetchRemoteThemes(false); }, 2500);
+render();
+</script>
+</body>
+</html>

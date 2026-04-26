@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Scoreboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Barlow+Condensed:wght@700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#f59e0b;--cyan:#22d3ee;--purple:#a855f7;--red:#ef4444;--green:#4ade80;--bg:#030304;--surface:#0a0a0c;--border:#1a1a1e;}
+html,body{width:100%;height:100%;background:var(--bg);color:#fff;font-family:'Nunito',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;}
+input{outline:none;font-family:inherit;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+
+/* ── LOBBY ── */
+#lobby{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:radial-gradient(ellipse at 50% 0%,#1a1a00 0%,#030304 60%);z-index:100;}
+.lobby-title{font-family:'Black Ops One',sans-serif;font-size:clamp(32px,8vw,72px);letter-spacing:6px;color:var(--gold);text-shadow:0 0 40px rgba(245,158,11,.5),0 0 80px rgba(245,158,11,.2);margin-bottom:8px;}
+.lobby-sub{font-size:clamp(11px,2.5vw,14px);color:#444;letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;}
+.lobby-card{background:#0a0a0c;border:1px solid #1a1a1e;border-radius:20px;padding:32px;width:min(420px,90vw);display:flex;flex-direction:column;gap:16px;}
+.lobby-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+.lobby-input{width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fff;font-size:18px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-transform:uppercase;}
+.lobby-input::placeholder{color:#333;letter-spacing:2px;}
+.lobby-divider{display:flex;align-items:center;gap:12px;color:#222;font-size:11px;}
+.lobby-divider::before,.lobby-divider::after{content:'';flex:1;height:1px;background:#1a1a1e;}
+.btn-primary{padding:15px;background:linear-gradient(135deg,var(--gold),#d97706);color:#000;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;box-shadow:0 4px 20px rgba(245,158,11,.3);}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{padding:15px;background:transparent;color:#444;border:1px solid #1a1a1e;font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:3px;border-radius:10px;}
+
+/* ── OPERATOR ── */
+#operator{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;}
+.op-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#030304;border-bottom:1px solid #111;flex-shrink:0;min-height:52px;}
+.op-title{font-family:'Black Ops One',sans-serif;font-size:15px;letter-spacing:3px;color:var(--gold);}
+.op-room{font-size:11px;color:#333;letter-spacing:2px;}
+.op-topbtns{display:flex;gap:8px;align-items:center;}
+.op-btn{padding:6px 12px;background:#0e0e10;color:#555;border:1px solid #111;border-radius:7px;font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;font-weight:700;}
+.op-scroll{flex:1;overflow-y:auto;padding:12px 14px;}
+.section-label{font-size:9px;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;margin-top:16px;}
+
+/* Team cards (operator) */
+.team-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.team-card{display:flex;align-items:center;gap:10px;padding:14px;background:#0a0a0c;border:2px solid #1a1a1e;border-radius:12px;transition:border-color .2s;}
+.team-color{width:16px;height:40px;border-radius:6px;flex-shrink:0;}
+.team-name-display{flex:1;font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:2px;}
+.team-score-display{font-family:'Black Ops One',sans-serif;font-size:28px;letter-spacing:2px;min-width:60px;text-align:right;}
+.team-btns{display:flex;gap:4px;flex-shrink:0;}
+.pts-btn{width:44px;height:44px;border-radius:8px;font-family:'Black Ops One',sans-serif;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .1s;}
+.pts-btn:active{transform:scale(.9);}
+.pts-btn.add{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.2);}
+.pts-btn.sub{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.15);}
+.pts-btn.big-add{background:rgba(74,222,128,.25);color:var(--green);border:1px solid rgba(74,222,128,.3);font-size:11px;}
+
+/* Setup */
+.setup-team{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.setup-team input{flex:1;padding:10px 14px;background:#0e0e10;border:1px solid #1a1a1e;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;font-weight:700;}
+.del-btn{width:32px;height:32px;background:#1a0000;color:var(--red);border:1px solid #2a0000;border-radius:7px;font-size:14px;flex-shrink:0;}
+.add-btn{padding:11px;background:var(--gold);color:#000;font-family:'Black Ops One',sans-serif;font-size:14px;letter-spacing:2px;border-radius:8px;width:100%;}
+.start-btn{width:100%;margin-top:12px;padding:17px;background:linear-gradient(135deg,var(--gold),#d97706);color:#000;font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:4px;border-radius:10px;box-shadow:0 4px 20px rgba(245,158,11,.3);}
+
+/* Point increment selector */
+.inc-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.inc-btn{padding:6px 14px;background:#0e0e10;color:#555;border:1px solid #1a1a1e;border-radius:7px;font-family:'Black Ops One',sans-serif;font-size:13px;letter-spacing:1px;transition:all .2s;}
+.inc-btn.active{background:rgba(245,158,11,.12);color:var(--gold);border-color:rgba(245,158,11,.3);}
+
+/* ── AUDIENCE ── */
+#audience{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;}
+.aud-glow{position:fixed;bottom:0;left:0;width:100%;height:40%;background:radial-gradient(ellipse at 50% 100%,rgba(245,158,11,.04) 0%,transparent 70%);pointer-events:none;}
+
+/* Leaderboard */
+.leaderboard{display:flex;flex-direction:column;gap:clamp(16px,4vw,40px);width:96vw;max-width:1400px;}
+.lb-row{display:flex;align-items:center;gap:clamp(20px,4vw,48px);padding:clamp(32px,6vw,80px) clamp(36px,5vw,80px);background:#0a0a0c;border:1px solid #141416;border-radius:clamp(20px,3vw,36px);transition:all .6s cubic-bezier(.34,1.2,.64,1);position:relative;overflow:hidden;}
+.lb-rank{font-family:'Black Ops One',sans-serif;font-size:clamp(40px,8vw,100px);min-width:clamp(60px,10vw,130px);text-align:center;opacity:.4;}
+.lb-rank.first{opacity:1;color:var(--gold);text-shadow:0 0 40px rgba(245,158,11,.7);}
+.lb-color{width:clamp(12px,2vw,28px);height:clamp(60px,10vw,140px);border-radius:clamp(6px,1vw,14px);flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-family:'Black Ops One',sans-serif;font-size:clamp(36px,8vw,90px);letter-spacing:5px;}
+.lb-score{font-family:'Black Ops One',sans-serif;font-size:clamp(48px,10vw,110px);letter-spacing:8px;min-width:clamp(100px,18vw,280px);text-align:right;}
+.lb-bar{position:absolute;bottom:0;left:0;height:8px;border-radius:0 8px 0 0;transition:width .8s cubic-bezier(.34,1.2,.64,1);}
+.lb-row.shifting{animation:lbShift .5s cubic-bezier(.34,1.2,.64,1);}
+.score-pop{position:absolute;right:clamp(36px,5vw,80px);font-family:'Black Ops One',sans-serif;font-size:clamp(32px,7vw,64px);pointer-events:none;animation:scorePop .8s ease-out forwards;}
+
+/* Waiting */
+.waiting{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;}
+.waiting-code{font-family:'Black Ops One',sans-serif;font-size:clamp(48px,12vw,96px);letter-spacing:16px;color:var(--gold);text-shadow:0 0 30px rgba(245,158,11,.4);}
+.waiting-label{font-size:clamp(12px,2.5vw,16px);color:#444;letter-spacing:3px;text-transform:uppercase;}
+
+/* ── ANIMATIONS ── */
+@keyframes scorePop{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.3);}}
+@keyframes lbShift{0%{transform:translateY(20px);opacity:.7;}100%{transform:translateY(0);opacity:1;}}
+@keyframes confFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@keyframes winFlash{0%,100%{opacity:1;}50%{opacity:.6;}}
+</style>
+</head>
+<body>
+
+<!-- ── ELECTRON ── -->
+
+<div id="app"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// LICENSE GATE — registration key required (SB or MST prefix keys)
+// ══════════════════════════════════════════════════════════════════════════════
+const LICENSE_HASHES = {
+  SB: [
+    "7098870a54fd20e4069585cfe8e75685c4e01a7887d7ba19cbf8c36e31a814f2",
+    "f1c2cfd741e56d589efc983c2678d2bdb9aa4ac21a6ce696eecb6d8ab2b2f98d",
+    "374f21f1337b5fd4c203fd6c02fa3e3a0706ed175b82005bc527aebda02126f3",
+    "dee1f620975c05f3f868cc9bae66da5471766fc0b05f8a288b8e8c6e08fc38bc",
+    "555761f508f78e0e78671e81f17498c4665a0ea757e6f133b3bce5c41c0e3864",
+    "5bd3be592b1e653b42ffca47835417b17f7e96290b6c8a740b428d444b11bb57",
+    "3485ecebf3175b3da72c9bf33622d693cc84d6aac8c880ed81a8fdde59627fa6",
+    "1af984a152e88b4e81cad2cc8b0f4c383d66c98c13afd9d383c097e9705bd2f7",
+    "21a61c879adb1e0fa4a3877e8ebe9e65528ff86da8215a7bd72892a44b89ee6a",
+    "6f658fddef94a8a007321466f5486bb19b3808973ca191f1eed44740bbdd19aa",
+    "107885e5d065833f4c543196083f4361cae3afbd795fd5255a3f693a3833ff1c",
+    "53bf3a7f13f7e9377c521b0d44a7c20c832d5cf2e33a59ee971dafd2d463d38e",
+    "0a094a06aed15ed3057ca9d2410a70918cb18e217cfe1f10a0e5b99959e31e91",
+    "4f14c0c79b0780e6be8d1204da0dec11acf21ff149adc0027b7a0a4a7adac0c6",
+    "2bf023a4875987c05ed88751064343bc4119b095b736a51da137324e7253a43a",
+    "da70b65cf38243b35634f66a63cbb526687551d0ece3a29d26f700e80f2c05d4",
+    "83e0a39bcf2e057f013eaef7f4ae6831158f6f57e4e6f08941c30e7d275c21ca",
+    "06bd15e3a6d8071fc99bae4c013820cc146b071cff700c218280fdf1df174893",
+    "da4ccbed4518053638d428d33a934dd8f4e2f64825907c7a29ca944b00b9a1c4",
+    "439750c98c697617917c3c975094621417ff56d43258d63025ac984ed7b5e107",
+    "a05a2a596ab8f9f4b67ccbb05591e001f753cc6d225df830f4100eb3c7637480",
+    "630cbd1afbd4522b990692e61aa424cd262b5229b131fd24eb090f5aa9cde287",
+    "7776469584a62f5abf1c8df120b59d8f4df2db109c45cb9d2251179a94ac4bd8",
+    "276f27f7b67fd2bd8e1519664f41bc1bcb7cf30cf408e853130945c7f0f822fa",
+    "085e5f990ef1c53e3780a670df8bd347675f700fb3ed32e7c48d0ca4f1040220",
+    "b77a62d50d80b61bbdb61d4f8df2791a0159ebc6d2117e5bcfaa5640c982e434",
+    "b132cd5268bdbc6c24de88d69048b5af9286a60b34f43c30fe85f94f81ec9845",
+    "8e4e679dd85ff9067f49047549fcb6be81fd3d5484959bc86e9223f4928c6957",
+    "163457c6804eea3fe9a080cb474d765c45ec765df2b60b3eef4bced3bc7bb272",
+    "aa7a812127df8a47e24a8a26cf8b047386676cd328cee64cfe7d82ad6486c120",
+    "9874f07122a1f54c89a17b043378b112a1580ab9483b4f6436d49c21ec14d00e",
+    "62999886eb671efecbbd16b16d9d3b32252b0b0995504df8b37ec56d384cc89d",
+    "feed9db20e261234f091cb1b7464ca5e60a30188670ea48a1cd53b533fef9a86",
+    "14293ac9224822af2ad1820b6882e872ba88e787446a75d4fee7a5a6416fea25",
+    "547efc66ea6fce8a1a1d23c96a39fca6c39f02a2ad1783012c87dcc19d9fd8e7",
+    "077e0ef6768c1a74ed4cdb7fff6927f76dd3668af68e67c1558cd53aeed45913",
+    "6e1a14162d6deb12a9c372e6ce9e55dbf84fe30341cfdcdf64d770b722210556",
+    "272c34a5739a2c7e5592b968e6767343bbcaac5678afa5803d15d667e44d4d9a",
+    "c1bb2778ea1c177964daf9f5a9c8db9555a2a4f441ad00f739b781b687730c3f",
+    "acacf2f1abcd7a0a1e6995ef3f4ddaf20002dc5982747fe0f5f565a4b7cafe50",
+    "e0e3c26c1ca4f8c414e63c4a2931393c072d1f72e97342018e80e629a946acb9",
+    "0130cbdda9b83aea9f76c4ceb9314347f0582e9e2c1daa2a00111a5530d7b91d",
+    "4fa09090aa204ccf07e1faa83952239e33ed8d84b6bfc60be438be5d5c1452c7",
+    "73a002532f97b4d71edeb578144760e72560c1f370466ef159fe4656bde9069d",
+    "30b4f3cc56e37e329dc4979143addc325475ef59d2d58a31a37c7e9a8eca364d",
+    "9d989d9c2bb6a9df06c6dc3a4677d98e845ac7b6b2297c29b45f09d3aacf1260",
+    "c83d7e0442928f509d6aeaadc0574566751e02aa6b09a6352f427b529dd65d17",
+    "e3815f3e257c2b36ac4334a03c9656e3eb6946bd24d957e336ac9b29d8f4abed",
+    "6f86dc4699a1670d5ea8b9b8a8c716eb5c21fe1cbc1e78189b54f3773e3129d9",
+    "44da8420eeead7aa4c8c5bb0e50fad8f6253ff88c58b43e79a5fe80cb96de429",
+    "6823260d7daa626bfdfb0ed77c1eb71b02f85424389ff5d5c0aa9af02c13983f",
+    "546628ae6e1fc36868ce7d6e41b73ab0e5527ae8ae944f458cb02f0e4aa89477",
+    "e8a7c0a1a3c204c2d9d4879445bd8bc594788d4bd0c91e40951755599b50e5c4",
+    "03ed8880a4b333937304503434d9bdceefa9f0571d672df32b7ad486bc1eb373",
+    "0d7e6f1531c531d85a15982186b893271621dca63faf65337f5237f9212b815c",
+    "eb05b96bdc0f6eacdbcfacfdeacde15647fede2f747ef05ae7ea2ff9ce7fa388",
+    "7d109c75140b33f9112bb576971740014fb47fbba27e53fdfcaa040c877736d3",
+    "3f14d93b1fda23a9270ab1bffdd618e78b2f2c61c1de3d61a2708ad19d3ae806",
+    "7ad926d8232d6f707af98f7da7c6d953c351fd1c3f11f1a29026713fe6ba3838",
+    "af24750754f07b6a2fc699c909e2fa9681bb1206b37645858d5723b79fcaed3f",
+    "cb0addf91751ea7f9ee7f9849762b15194369b14ab17d489bacb7fc3786b31ec",
+    "f10869c06ccc9e6f46e4fddb6639410ded708b5e0b131f26924e02d58448c706",
+    "fa0ed74b413602e05f9f88da39c301e6c17ff730cebc69bfd4b285d0e681d970",
+    "a021cc1223a48eea2296662d3a2643b6458794801ad92ae62a73aa76ac9bc25f",
+    "ce363f8ed5afe47b40cdd4dff7d61d2ead4fa4b1ad42531bdd9d8a404f371c9c",
+    "9cc6ee06f92925f56edf3928a1230743fa44736a7e8acdc6bba019630737b23f",
+    "5eb6d0b28777924afbd3544ce95874267e259d9bf17a663c9f0e5d5805b2fffa",
+    "9ef10ef4f17c6b5ecbe3a294030914efbec09bdbc01a8c380424b92d3224be38",
+    "8589aaf32fd1bbd830c9c7406d103ba422c103a4b0b7138210e96afbf42a1d40",
+    "34cd3a98d041dee02794b4c8230dbf7daf807f6e9f6e69871b0da5d905cd8214",
+    "ecb991acc17c2d9844310a8ca000086c6152e7207703b8309558b314861d4a03",
+    "2f986c10d6918fbbbc2ab0bf7bc0e014ae70e4d9f2cbb0e660132e3754efe434",
+    "550a83fb10be18cdd2099a5b3eb2bdf12d20e6c690fc89fbed627122c464e880",
+    "e3ff9fa0f2c62730acbf76d395bfaa07185eca934e04c7dc460fc51d64158671",
+    "3f716c0c76af93c6a4efe79fd92def3ba09e5b9e33a6b6bdd11b5b3c89494234",
+    "f6700f5197cad8684ab169311fe8e51b19c378745f48be4c389fffa34837f823",
+    "cd297cd247060b8d902b952ddcf76d1f4f5f5a61f845e733b34b2b85722c3595",
+    "96005e564cf4c9c43ac500c8eda54915e23c8f8645030e06157b79d51c68d0ae",
+    "13aff210537b472b785531c9295463b84c913384c84b8eaba2c966e92cab8ed4",
+    "20beef60f61cc89e29b9d1db34ea3517d4515adfed2a61507dcc88befc795ccf",
+    "71eeb1cd10551610982ededf0bea8e632e70877afb76099bc5b0cbf3bd863881",
+    "ff3a92360b8aa1ea2fdc77a1178fbc8740f1719da74c13ecd54593b17f01aa80",
+    "ae93705e70801bcc567dafb6900d4fe7a8139faffeb8b57d5b6bc076d6e3b77d",
+    "61ef11596087b3aac4e5676339afb1a9cb014f5bb7bb59a67b682b2049c4e006",
+    "c0c28285a59bd5a570e6b963db80703e3485afd3ceb0da958f498da625daf701",
+    "9b8ec04a0e4fef97e81e9eb52e6cd9b6a670b99860d687f33931fab04c85672f",
+    "fb6e918df84f17b4e0562cba984b83287a35d7e1010c3a9664e82f8bd4bdd30c",
+    "fd00bbf07b8be475c86fd7e229f3b5cdbb26f3e8bcec183cd0f1c8a5cb78b0f5",
+    "9ee44f6d415319d469c1dbba580c7c9c55986e47d3cdf969b0efb9558494e144",
+    "1678a230704e6880587c63938f72a9eae630a7bb284ebd40a2d278ea7b4e5301",
+    "ceb6f5e0d597a4d110edcf98854747be3c1538c2e93e215031a372e02a0497f0",
+    "945ea41bbffc03a042d37d4eb188bef679c75cc436964228a95d036270d5a41c",
+    "862efee5b149d8217250f1b0bcbe5088808673536d1e721e31ad8a9323c4d212",
+    "bbf449c62b60e1eb07786e798aec96d54f4c6d4c92aa7b7cb23bdb17d982e3ba",
+    "7816306c35199468654b624227216be5486d7c021b417402a62201bfd2e95e42",
+    "40ab8615a7a3e0ce9048f531b56db28abb1c100187e228729a0569c1cd469c67",
+    "840cee25fa012c4934647c1a32bdbbfcc2fc1415ecb7d5cc2ac82da194edc9a7",
+    "b2e05224e688915b5b9cfb23ba1fde63bcb563a4b1453b533ef11745ba4795f2",
+    "3c04a7d0e2d1e76a12ee3c421f7b9e0e6b3003bb1963348fadda7f4655d67bc4",
+    "f42d67d0570775a9672653cbec256ef63f9d486ad5f520466eb9b34eff20441d",
+    "79caba1946163d19fb803dcdebb59f77fd51a9639c0218491b786ba42b61493f",
+    "5d30e2612c9b840d0866f2619a8cc282d5960ed8f6aa4c6522f5a589c6a9d686",
+    "7d04067efb6673065331b4d3ba14d2f43b4ea8ed756746740932d62ab22b3ec1",
+    "69e7f04b64270f96ba785ecb11377644f383bdd827fd8b7817583839733bfd74",
+    "1a199133d5d0462af7c253ec81261daf405552745b085a127685b37616972c42",
+    "7a03a01c5ec802829c1f4c5ff4565c5c759ae46627a9b9519afb3d75dc1c4662",
+    "94617c9543f9d1032d448c826e6bd78f0fbd3ec366432ec799c19bd0e7ca6241",
+    "9ee57f09e6a2e2cfa548cb36632e3d647f477ff2d129eefb546047208d045472",
+    "a228c99f091af2f900bbc262dd089c1902e3ada6b7930ed4785cebffe6aa2db4",
+    "f4c1743a390b52df03c935ac32a35206c13a0c589b80c1841ca79caad5dfc44a",
+    "dc81b78dd9063fcfbf9538f5523aa88515a73fe901cf01773592035176dfcba4",
+    "ef885d78303f9517b2e5b6695fc982616452e4190c00d2c12a33cbe2246f3bf8",
+    "61fe7f711dc35399757f8b191420f102b1dd5fec493091c1805016e05f88fc86",
+    "c1ba4597eddbf5bc79403e7c2d4307f32308833ac2b8e77db29841bb34ddf814",
+    "1d81268805667deb7f546ac3671f9bbed3249f3e8fd13d115a0f7eec900a1725",
+    "85373be6c146842c256c74b06170e43a9d373cafd0b5c50555ad4b55d34751b4",
+    "3b16cf1f42f5306e6f63949768738f5c468826127b0a51df63fe30ac20e30932",
+    "1bad3bcedb5c5e62126a000d69cffae4a5b0737e7a2e7b7c213fb36dfb1b5551",
+    "c5e8c2f3bdad80a84c96a79af54ab039c50e895bbd0c750a7319a9b158c417d2",
+    "58e0fad42bccac7daa21fcdeabc4adf49a574f741c78ae22c73b8288d457aa05",
+    "c15cb61e08b11a93a90efe3f01c5bc51db9a2097bc4e9664444a4bcdcd00f70b",
+    "75acf716687453b6be566c61b9f4c82642951951c1942b061afcf4fa83fed3d6",
+    "55ee178ba2de2c6dcbd30bb334f8e3c0e63e2c6db7ec6e56dd8eb595276f1464",
+    "eed228ba3cf9ca893dffe303dfe5afc4a4f6f28d0a71e0737fbb4aab60f96abb",
+    "227d053486f7d21031021e0fe78a1ff28138cd681ed28f71c3e1e2f28d595e00",
+    "b26c95b5db31676f50ef3735917fee8480c98414b7830f38f1fe321569ce7ca6",
+    "0f978d933c454c74b89b57f6d257df596deaac71c35bdc69442270b600e4296a",
+    "2efa97b1ff408469b8a554142a6204a94bba9d770c64272b335d42fd8b59d071",
+    "57f981eb1e2a32062ae23915e7e91e53ef70f202c9a429dd5067d981f46fb6a9",
+    "292e0d22f3f5bc3dcf76b951bf27f0fb4b6a5854d8505bfa1c32677e28f14b4f",
+    "f3ca6a10ae5296e73c39c63238ea3cb09b297e30eda64f24e79870931e709ce7",
+    "e60fa16c52cd8e0d8ab6ec6f04be8eca07453e3f2cd1d6ed7250053262602796",
+    "9786e29264b6b926468c7e69b0c516d4dd1cdc6275248f37a60e6f98b810f417",
+    "a4898d78d1c151899fdc4ddf2921987027934a851e32bd1fea8baf6e6075072d",
+    "8f35c8e77f28cf6ee8deee77521ce403abfe16e0202de110acdcb21e0b265372",
+    "54485157692059595dff00e3782c8b3616de54c187df684fe5b87086549d570d",
+    "96f680a7ed3e8e8767dbea980efc0c841fa024e07ba5272a9c074c11827a4378",
+    "47b8cd994cecdf111d8db73d797a41b0da481c7aac0f18ab837055660045f07f",
+    "e7f3c9d75a6918b428686575dc3ea376f7d8d1824accd09a22600b0dad43712e",
+    "a25b35a69bd72cf4b587228e36a0404b5b2b8416cef7f66b4d1c3f6f5da79226",
+    "d812b2e7eb39e6a8ff5bf93b619aa6b264f4b4578535c7f3e539ba829527937f",
+    "c72860e36c26c0430bee36570a74cbe608678e281f60d184227ed93701019e99",
+    "16e59b3d63cef6807cbbd756f4dd5d0bffef6216b451aac01ea97977e7a6f219",
+    "2be03f5f176f1793ad0006a171b44ac3ce74a0e424afd9f9fbd45a7157990d15",
+    "606d5346b720f966401ec9066334e69389865004cf8f28144cebb826460458ab",
+    "04e575de012d8e7bd210b4a677d1a6eea8a6c8654ecde254f37cb9af428af092",
+    "b7b147bb666c83a0166bb32f78174673efe9ed5da48dcd18312bee6b3aeb9894",
+    "c069fd9dcb5efb1e94283fd740c22e134d8b0a2b64125c889a6f0facc30b2609",
+    "aa2ccaa94da88f37eb26898a2889c27b50b2dba24d8817760e58fc3723f6163d",
+    "e8bc6eb9292e869a30720c8c0758fa59baa59b333a95e434370333073e05ddd7",
+    "7c1751db2f8acfcc4270408f47a06f975e15a82f51deef4552c8fdca478ff782",
+    "3ccecc399030c25827c48f576233f89e89ac7e95b8353305fecb6e08e5ce0a6c",
+    "8a7d7d53f56adee2a07053220b5252d9c05a4adedf00c2d84298d053399b046d",
+    "d6852ef46f6dbd05884280571ea08853951ec34d5e3c56a0be1e885c86067b8b",
+    "b954d21ed64a5149fb724babd9767916933aaab3005832a9f12e019612ea724e",
+    "bc1cb94e6fe4c62459138fdb0bc99d253a786d727412ab03e84f940fb173670f",
+    "6c232ea39a420d95f3e08af849f6010decb640c05a46b6614463d6e96fc2281e",
+    "d747be770deaa1d9304acf57cdac3797958e91ebd92bd661032e8482543f8ec1",
+    "25617e8743f0f8c45661d3707194aed505379afabaf360ea8ff9780d7d4471b4",
+    "fe28c4f4c07118b631d3396fac6611c74143d401947f8329b0f770cdf605cb40",
+    "b89ac65ad704432b1640bcc3ef59e911b423b5b811ac0fcec92c917bca2e1920",
+    "bd2e761434c25462feb9e3279e582c5b097bde6a6883db8b7214f6a601b959fe",
+    "250724706a026e57edda4d0ffc8a6a4773e3c3c13bbf2b17a175cd443bfce28a",
+    "baa46ebd8a0191ee1ee943705d77a936dddbe4f1d22c5c28e1e18080d70fdb51",
+    "6eac7c2ba323569bc355a751a97de7ad31baa2e25b597029387b95f4fb79f355",
+    "b5757c731ba66cf19fe343fc54bd5284abe38f3359ddc4aa302c2d23747023a1",
+    "3f1cdecdf7fdc452711170f795060dd31ef7c2fab8d5ff245e8fd011c02b1d76",
+    "158ec559260e50e782b2fe7163cadfa483ef50ad0591259d0f7867c37cd5b957",
+    "a9e0d992abce48472d4ebdbd0651b1dbbfba7a2a0d46d9f5e9c52187c949ac41",
+    "51d9ffceb92c28607ed6b20d6fdc4c1c18b63ad5e27dcd89784480ea7f4e9dda",
+    "343127826c187fe95b6ae6cf09a1928852dad1ea2250b802f84eb3fe61583a91",
+    "904bfb23604aa67ec0eb8942574f4f3819cf305c30e6539457dfe1e3a311b0be",
+    "eff99071ab7c83569e4dac0c8e023a7075ccca52e26ce201baf25c9a538309dc",
+    "06a94b769cab8de08eb7386f8ff3d139e567fe65bfc14fa812fe5c1e016021a1",
+    "815347b159c08319b3d9e60341bd6aa84a06103b2c7cbaa7e71e25259b37679b",
+    "92e2218f213f756f69f35300296c4895a09db6c309bd5d8030f08b87aa06f042",
+    "efe4170404ba887933e82401849b3bdb6562106ccaaddaf2ce102036b3b9d914",
+    "c94cbee9809a2d59f6b92b7278e1e6c811223f5f20638961fb6fdf7b7997bd87",
+    "df4fdd5032b3a52cdb1e094aaf579734c1abe731fc2f46f9e4d729ae748211ec",
+    "01c21a2980414e3f6423bbba5d0bd86c387035110b59baba537ef64b79c84e5e",
+    "ab8af3b25c8f0e66dcd2bcfb585199c8eb257a1f5e686e6e787ceba740ec0d4e",
+    "16c1bc6ee9826a75a63af3af3be22d399b816f5829b7170a0f9ec1affbfead31",
+    "2ae40536612512cb3e20b61d0febd413812e02e87737735f2b60bbdd60eac259",
+    "a014e04b54ff4bf8a1c299e226c8bf43fe6b1a4d606ca0bcaecf5b6bc136ef5c",
+    "2ca024890498bff58faa2829d694c25f0c1d698b64594a5c69d779e139652fa3",
+    "155f3685ace65538e94a9b8c2a1a35187b633121b3d879ce62d2d1248049e761",
+    "0c99ac81c9a3e27e4fc04a57b40007a118cd8127c6f3fbd1b7e39af64d6df2d1",
+    "6b0a3df80671f29e53b06f0e2c5c04bbe54aaaaeb05f2c0022ee649fd08732a5",
+    "e7cca11db5259f82011760b53e2e75e8f821e6af51bbd9b04d817f65420db9e5",
+    "f5992709ad9f49e3d1b1828c51d6afc17b023b8152fa16646906d2022c417ca2",
+    "052dc955ccff42334ec9c9531fbc2b08334a4fd57b6b8c0e661ff61356e65b1e",
+    "02af5c6c2e3526446dd76c44a9876e2d65b00f6ffe32acb610d4fbde7ae3a1a9",
+    "f70fa23ae8354a8e01097186d86e640ccae7476bc955d4c34e442e9529dab7e6",
+    "2ebf0cc85bf912f9c04b0d650df7535d02fcd032ecabd673946cf67026de6c1c",
+    "7e7935215b518bf0595ed8530305b8a29426083587dd0b3bf5a93e1256770f44",
+    "a0cf328d155a2d95d888953a05e917b49d69ef2d46498682c0b47ac08f7dbeb5",
+    "c787a93b1b80038d7e354476322a652d9f09df3174e7c70aff0203518b60fbe7",
+    "3c51516840993bdcd9bc7b362dc511156a2fc546699b3bb1afcf7ff9ce1cf7ea",
+    "9f2f3174769846a6c6d3e8cf0cacb0e2fb9d5453ce5fa23bbd253501745036d0",
+    "f3e32f942d7ade12fa540ffa8a5392d2821c653e1e557259ed4c390270a5f1c7",
+  ],
+  MST: [
+    "7c7b95722a5cb194863897bf16720919cd823cf8b619544264648d8de11b6a81",
+    "1b46bb78e13a8fcb94fc5cd82cfa45877e4ae1b0596c9cf67ee467e4e588e953",
+    "c3267cbd7151067fa61758c4e9fdfdac3c49a1b4ba97adc1b992d1ac716bbe38",
+    "075cbf1d4e3ae49e4dbe506b3f83198fe9f1128af3cda9e13ac44b4c4750cb67",
+    "bff286fa92c1490b29cb789142f5af98b2985a5a54d23f48cf4a9558cdf87a3f",
+    "112240e78228ef90249bb94a0da83eb7c33a892ca6273236f26692442971ea8a",
+    "b2f23f043ef097b2d2ffd4741f4a8d0681322b7063750de9eb6bec6203aed925",
+    "ec23d3739490101c9fa5bbf4da300ab297266a648fd7e828bcff55e28d44430f",
+    "f310b83ab5d14521ead3b36c23098dbc6671a0832e2ea5e89cb41b2d05f262f5",
+    "06ee4baaf21162897dd91cede8aaab5bb7eecc20fc2634aa23777cf846546943",
+    "494a7e69cfb29511881403f11a92fe7ad2548de22cd7f37b388d5c32f3c104a5",
+    "f518663431a73c1f77d7682bbf153d99353fe1c4ef698f31274c477a41868a45",
+    "5e3a581e4a2762c074ae8153801e142977c5d57e573d8c460681236ed11363a3",
+    "8d26ff60a0a339cb1163b03bb4e59d96b7437b7158d5c478ec0270c7ca6cc992",
+    "076389a229868d7d59dd768773be98484015f16326a386fee59198fc70c94483",
+    "86b78133fa608579996acf52b7e195f969e46d7d41da63d0c22d83a4d48b7e9f",
+    "30c573566079969dbd852c7e1cdc07a9ad3c21c92a3402c75fa57a8fab6d9c6d",
+    "926359e026924e261c242421f0ed951a25313cf5d1b98049c67e640c4c96634a",
+    "56766f7e6ce9246fc38b0330f4640a2fd1c0c28c55e04a3cdc22e4352b1f6183",
+    "62fc3b90c87888c11ebc92c93c294636d760248396fd6da051f0620c4ce3ee11",
+    "d434210e93881d3279ad479bb70f4f1a777075c8c6b0531862c30c4f88f749ee",
+    "7d7fbe5c6c7ae1afc63c51f96eb4cd9f46683ed86fe5d59b8355a04a09b44de3",
+    "313695701d4b6ebc56847b47bb449c8f8479d36ea5de492b7d4fa1aac62fa709",
+    "747b17338361dd93648f149d40eab32d012bf43c8f32917a06f16a49cbc8bac9",
+    "e5c999b7e7f0c28d387cb658cf87fd16666f8c25800e8be827f1ebc6b334f0b6",
+    "bbc57875f4729bd8b9a78ae045a8bb48f192a7aef204b6b41f112c080d21d9f0",
+    "eada05c46c3e8b0160a1e2b686f621e25d9d748fdc4005630ae0789b55ec1550",
+    "15933e77f3b6b55e386ce2f2f471956d94ed0added4b12935a03e2af28d62073",
+    "e5e6490c4fedc57b09f8814a151cfa6d3cae6d809ed883e7d5a545cc1b36bd6d",
+    "8895d9156a27be9f0f57d31859496c7c46fa9c6baef5ef6ee5ea28a04b4c9c6a",
+    "c3d817d3a69916af78256eefd99242acbcf6307108bbe09f6c3b160022b9a432",
+    "a13866de5cb9a8de0de8ad94d72d33a18519db46ebbbc28679e44c450e4c391b",
+    "8c425061c9a145f471bdf93e955877859dd56871857f36aed8aa2feccb1ae961",
+    "a8f5bec658126c894771c4a7f0ccfd3c078301e4bff4b360ba1b64017f24a34a",
+    "8aad08ac550907c355321a2f82898c79db7e7d2f533a74e711db56dd2b051656",
+    "aa3554f9bb2213f1f41c17e2dc54c50fcfe31452c170d2aa4cc7551f53297737",
+    "55579f59e869f1054fdf2d606d546445e04089db992a6576e52dda1dc56d572c",
+    "f37415f34052f63cadba253b00f4c29cca2fa378b28840c36801f7360542fb3e",
+    "049459d5a6e829a337496399a3cb49483a95654bcc8f6f7b73dbe116635ef7b3",
+    "c00c99e4c8ace950c941ff058313312358669787c4ee5d45054a80db55dc7587",
+    "1ed6365dbd6e485dfd93d40539aefac3bd3c733dc4e631f9f4d274949202be6c",
+    "4417e2c6442d49db5352229d05cc9c4323028a7e3eb095662e9b4bc7f5f0b23e",
+    "edbe1e529768454d3506ed97e78eabae17d9a5a2e85387cf1fe6024f34c7c8d6",
+    "292ce38c2c64221bbb1c070c9ab3258c3ae45b785b08fdfa7d4ea575c2bd22fa",
+    "7d3a2cbdb5a6663b538291edb2169926cffa14cd6639b998014ced4c78d58d0a",
+    "57f5c78b2ebe1778cef58055094c8555de9910d2891994b0c00d450f9af04ee0",
+    "c64482cbb4aac9a865be4b16a0cb7cca7ecab22257bcd8767fbc7500cefc30f3",
+    "6088402f2def3b7e71927aa94a10ea4a9a3d3accd7bb88a706bad66b7964505f",
+    "969854bab59501423efba3aac8df5b2e024a411ab7fe0372ca7a80cf395907f9",
+    "393d6b60992f6fe8d065782df975b45c292ffc1ded45afa3426805feb7767ce2",
+    "44978b72eb8a6123b37115413e35aaf5fee8cc125cb02f4be0925c207ee50e7c",
+    "bce8d33ce452614f730884c6befa36d8f3fbc980b7de01fc24ca0183d894570b",
+    "749f725d0e3799a3197241b8e423c927dac18b117d510b182cdd6aec161ed083",
+    "208792ff0fd4a9601a065ac479af968936bcbf0f8949319d6519735ea1ba340c",
+    "d26703db71ac3349e371a0b5f2bfce5d1e5a2314767334a102f78502a9610076",
+    "308d308109601a540dc85b4790943b48fd7c37f6571c0870e34bac2c4629f8dd",
+    "786185ee093a451bddc1614548444bfd0ebbedfba1f5e07104322ac0dc71c68d",
+    "b505593c0a9666ea76da81f0fb423b3d7de66c1e340b07ee01cda499953437f7",
+    "57a26d5cfc0330d27dd5348459d9ff51e648a13f6a574665c59e2e3531e6f682",
+    "b42b0404fcf9aafd914ec3a179353f4bd2c8d1f26a008e27218901428e1a2b69",
+    "8d032b1a9deed712cdf0a86416f7d8235d632e0d9b0cef898ba8d4dd5cd7a87a",
+    "fa66765b3b798197cfeb8c7ef6da0caf6e4511309e5a91311607370c7df612ec",
+    "c087017201d4dc474c100485e265a9adb3e16dac0d79c9166041f13adafc4564",
+    "438028c5581475cc95e2e1fa8885494115496f49d04ae128ba089c5a006b574c",
+    "2127bc255766d4bfa9248be94cd83d3c3cac6ac1fc9176bb575d10ebf9117dc8",
+    "0b0f12f0fc9de77d20663d9a0ec5acf86e954b02752df549e45735800aaf73ea",
+    "9b7272a3aed7dbdcb8be45430b991aa8d488e24d53e3d6bb1318085650f7e5c8",
+    "aae89c48bff5424da1285dea7a072906a4825d2a49ec00513325d35e5a45a3f5",
+    "908b3441a0fea596624df39e887fda9a3307d9cdd2b657f73816ece2d84c4f42",
+    "58d9b2fbed4c9349a0c1a0e041a1785cbd371809444849aed9457414b15585a3",
+    "fcc8dd9ab1edf7624ef59a6e51ee06fd76b5dec6b691ed65e1942cfda3bc45ca",
+    "b891fdac0a8bdf246ec2e7b65786c67e8737cfdc4505c40eefcb180f1faa386a",
+    "1c21f8d4e17dae26bfd63d2dca9bce9dfb817a036d45e7628454e7aa0196a98c",
+    "c8641ac7df203027438346ac728d518b573d4a30b2be39cc535fd0c83920be3f",
+    "9aa8cd8827ac1a22cdfc86658e0c4e290398d868b50b48335d962c1a2a0085d6",
+    "f99c0733b1518a93d007d797365f48ab69864de748acdf8be9ea88fb83a2b2e2",
+    "ccc51ac69dfddf4fb0905915359cacfb7739e3cdacdb583b0a9203bd04f21439",
+    "3bf5a5d882ca4aa4d82a57ebcaaf341b4129f18b1b96539248be35e2073c1cbf",
+    "f024f251ec50c096528bb9be8d55d16ab0e2b68a1a5792574a932a78008fb04c",
+    "133742f80a4da7b9f17f5af2ec85833e4cf841c3e3b7423b0f6bb242ba344815",
+    "b2f667a0be7357e227f98cdc4071c83a4384029f103f1cdd543894cff15e6601",
+    "ae1da87552ca79816a233846426b74a0808e96b31855057b07001f8863d2c2ff",
+    "c56d57e79248b563df13566d1aa78a5f890dd719ba513b47d3cbe0416e278baa",
+    "ff7443e9b6f43421357481c1266774ed7140042ed429ab7ea58e1dcf8b26dcf4",
+    "02b6c9e236153b1c7e04fb0b3817ee714bc6db600368eca5631ad89b67102fe0",
+    "a53afdea5626a5036d35670fb78dcb8ad9fc29dea6f7133c695576fedae5d3c4",
+    "f476d375b1ba542b3ce4f1ae24f588167b7991d2c4013cea91529138729c2b13",
+    "699da1cba4f2734a7acf01b13b5a6089053042206765e94335353dc0e0342736",
+    "795062a53e7bf69244ab623b668310744ac8307b1ec476a8c0e434a425e0e160",
+    "5483f809a4509980455a3bd6fb2fd018bd97881010c09456a339cdc849c0e252",
+    "994f3f641a5bdf7c97b4cd42459c31aec69c1e84b970fcc049a366177eb19daa",
+    "dc6390c0ef84cd785b8d16463890600e95c45e0faee41b67c3911075375a2ce4",
+    "f67123bcaf26f989162eb06dce782ba8128f79226338a969dc0ede90e19bd0cf",
+    "f7d85fdba4c434914857b772534153d559a2d70027a841652442190115e27773",
+    "f303fd5091d5bffda68473e524522a8e22a731698baa2abf3aca2707af7fb62c",
+    "ee48f472a031f6be69b88fd8f833de796b2115d64f3cda9428bbbb7aa3784c1c",
+    "98b81140942700002fcd29c9b4d8d79faf9bf536c33433f737060632be911f14",
+    "545c831ac43f1b9b208c59e2730900f64f24881c54d64e39ec4370a36b564014",
+    "f7a6afb47968dc0064955a0bf3af2342473319443b2ba9b8317998f2f5333183",
+    "82591b9f1427c788b7b877b451dc80fbcb5e7110309cef500aab5a37f3afa16f",
+    "5a5cd93e2636867058f02ca8125669092015bc64092a751a197ac477ddcefc49",
+    "8ef9d10f215103965e60805a0ace741faa78fee49df7d1377a6dd680c3ef449c",
+    "2a78407645cc0f3e76b4679815fb4e096e2a217ad9d93c97620fbe98b0001923",
+    "a8ad0752583835153f1979ab23e7e0853d65d23e314faa9673c5f0f25e42c2f5",
+    "6e95b8a409675c14d1e73fcfa96f2091a43e01c708e5d4416363fc4b978002c8",
+    "d908616475fb828975c8727217198d7f22c65cbce57ca5db7eb9bbc9969a998b",
+    "bb52f8b543b3ee3747d944704960876601b9a3de97b7c4f75a1e9a8c35d7c26a",
+    "b74a473ed9c043fb8314cfe646e203486c462181dcf0a4bd9e73d0d5fa6c6643",
+    "db36492284714d261c13e59f1199ad39d1a1605c6aac2a1aec21dd56cc74a9fb",
+    "c9972eab0051c50200a767f3ee5cf718d285bc74b6197bdca46c816a3622d7a3",
+    "8301bf512d9a941c242877394de20e992fcebfe5749189cb53b26c5eaf3e841f",
+    "13ad9e48876775cce4cd052f567e352d1dd234a243c10c3c353758c5698f96be",
+    "bdc34dd1465ff6c38b484f0f44eea04cb3188b2f5740c528a766e31a94c08fbe",
+    "e03b25d5a34f3683f1bc4246607bd69b5c9a61efac6b291672674c87ced2cf32",
+    "26299dab373d2756b75145d95eb7e10fbf43886b52421a3ddb17720e4d36ff53",
+    "c8358c3d3640e759a34712823f28da2a47b6fe3b3b214607b3be2ecbd990a8ae",
+    "1265f8789ba002e6d3bccec6675ebc18246f50a723662ae3b1d2e0962d56a006",
+    "1f29e9930acbe59210cf9013400d8d2cd14155eeb640577e11c44589fbd113e9",
+    "0336a09826aecad4ebb6d5ac0b923c6b3684238c10fe8a750890f2ae507d54c2",
+    "531ee93d40f3b40e2b148168e8f5b1fc092a486f8c76b615b91f33f192a96c3e",
+    "980989de3f815438021cb1c662bbefb73fd7b091285105010223aeab816a895a",
+    "c0fdfaee97e2964ac816e9c44397d3952d912f6016e839baecf13977155e5ee7",
+    "cd5a7d87d1e14c50d29601a36b1d1869a9abdb5b1f2270c6a065328d4ae3058f",
+    "431d2412cb261c6f6d23f4b133497a57d87ae314b1397db0969ffc3c89e82896",
+    "cda65fad87c638cff020eadc76a5c486b851d289bc81be26a77ab8c1cd749813",
+    "740b0fa962909b79f751317c44ed416ffc9465a7fe2b87d0e12fccf0d5991a90",
+    "dd235e45443fb6b5b2caa3a35d572903085a349eddea2ab8211828fe70b47407",
+    "7d1a8b00e07db9f41ce6c194ace0d3b84c8c9d40c73749abcc86e75a8f9fd8b2",
+    "a7e61b6af7fbf4ba8dd66285cd50e4d6583e6eeb374fb0dc3850b268ae482cf3",
+    "ba6f28c383c7cdb69b711f65aed2a6df3886799c67a88a60ec1ea3317fb544bf",
+    "b47618c348e0241784208c18c9e187f9e94a27eba2ec0faed24f5f156d671478",
+    "5c8c1b871c19fe454db99ccf2a453089028a68d8b27a373e0226cf9886cccf21",
+    "aeec54eeed1c01f23320ebade92a2532d480253762ad6579237efae885d9456a",
+    "e7c35f7e07bcb04f15be322039508105d6101f4046c8b200a7eecbf3456f8b41",
+    "342e50e55788d601e2a6988262662603cbbac16c96b920b7b72e1641d05b9db6",
+    "0869d8c409d9fdc643d9ff7c918ec8c780367979be4dc2133c54c373c7011afc",
+    "35ee38adb1739b9a78a32b0586dc8b7fb3221761743000d50be408fc337b53ea",
+    "9ede603a4130b4ab4c416ad2e7320c9ca9f7a73fe899bdf83bb611448f83399c",
+    "d4de5d155fed7305ba8915562b2bea8140cc68bc7d19b93b41091d91dbd76a90",
+    "39e54bf54949de9b0ceb8e295b753fa9dd877dff6ee68eb68e51e829e6c8917f",
+    "b0d9c72ef21cc8a46f8a27726cdb2c5252354b466778d3b98ba2e4bfc493232e",
+    "63d04939eeefba9072b3aa622c602779a338382b2599f9ef84d4527d6f55684b",
+    "0736caa4ee42eb01f223e5325d829cc92eac46c18d7169d42aaafe7e04aae9e2",
+    "8b7584bcf185b327b65f69e8677a63f30ed40bdf17dc175c2f60baadfbe3d178",
+    "9ac4e986f7d2617ddd10bcc862aafaf8f8b1c2c5d1eb75bbafe95faf689ee399",
+    "50ec1388f4d20cc27bc060897e8c1f22d7d4e9c511d6aecadcd09032856d8b4f",
+    "69bc6b525cd3bf01e72b5aafc25d30a9a8e32e5920ecc5318fa49c09db0135be",
+    "fd3019b58e19755a1fbb7a3c7b95842cd9173f709396ef87e09bf3a083cd782e",
+    "4f09af117e4f5b2f3e83d38a0632ac1e01e039a3b8e7d7f1e277d480f34c920e",
+    "4145527c2f7f218f7b6eac314e42aec8f212f8921f18cb560a47510817d523c0",
+    "822c9ae410c5a61fd723e55ca0e789d305d4929881930821b1fab22368793067",
+    "6fcc4bc3449690f9557c1273c537a5e5993fadeaec96105518a3de1b90d8640b",
+    "1083f02663fa09bdecd059f6c18dfbe4bbc152e9c1e0c3ff780a5097a3145a8d",
+    "090f4eaa006953dfcc803ca6a3e97ba1ecc4d0fe78146c79b610b5ea4e9b05b5",
+    "5e043be3d2c1971e7904fd36d0e7334df1fd6a561f2319d1fc53e5f68c05601b",
+    "1363e7131b3b6683a66caa682aadc93d6ccb4abb44f8d5a69ee52b1e757fa94e",
+    "39ea0a51a80be2649eb5a14ca8fcd0967349c99954b256be533b60fb9627c6af",
+    "1d8cfc8e000dff73899ddaac2f4c553e381d56698b2cf6822c6ff1882e63de42",
+    "6ab139163fbecc9f949f962fe42a62e7547b1a6d621dd863218f25419034da47",
+    "657fa2b0e11173fb3f7e2af13b1a57d457b70e2aa5452a80540310159e6094c7",
+    "849c0858bbe78302ce655315676adba9ae6bda0a1e82e8704f1322db66e6033d",
+    "7fb34f6d9049f37b30db95377a02c8c18382201d445c208259d5d66d27507523",
+    "4593321d3292912431e061bbda77f7008f0f32230bdd46d64e482ab18cf768ce",
+    "76df80c53e8df2e55ffbd9d0ba48466d4a4b4e0c7fbea38caac0a0ee972ed9fc",
+    "32ccefedfb329d17a1ac0ea6932a63f16fa63ad06f937355f3ff3c949ddba0e6",
+    "50e0ec72b4b2ddda78e5a12feaee3847a7b560d5e869c5c7ead0746e2861dc8e",
+    "623b5a7475f84d65750a7aab99826b1b6843a3ae0978a7c027fdb9d3146f438f",
+    "e63b27a6f91e97ce003e6ea6048cbde5da31497a450f52de7ae00ae70da698a1",
+    "a68d8ba63a9671fdd0d6b873937c461364a8e08b2d2f6e86b0ba814570ea0146",
+    "e28aee22ecf73cfa24531694b011570d2160f40dd1dd18122730b62fd18f013b",
+    "c5a3be4428d952f5080cac8075d1de2940645b8668a76efdad110daa3bc57bf0",
+    "218f093bdb38e29323ce9f029715b98e891fc71106b3f1dfccf2d13992aab1ec",
+    "f6638eb9596560471f20d62182128d2a867e939bcf2c18f7e0e1140e338248ed",
+    "72c6571d514f79ce19bb97877241dc5d3d22401be18f0ce253850fb093552bfd",
+    "3f2f79362540ec614da4d14505d1d6706bb1e3a3bd93b35aa4be7bbaa91b7432",
+    "4fe4fff36fe5a9bd647908bd9642b9305bd846def433be97076fd22c9b9b9812",
+    "1ea76ac0b5f256f83ebc85c38161f60ee0fc0f0a86f72414dc8c02d0729574cb",
+    "83e0886f54815336999c30565d42ca6d22eb78a8edc16581f2fee98c7c923286",
+    "a43d2a00ea87175bf02ad89b1a4a6b989326cf2f638fa32fdb964862d5f23276",
+    "9c2b83a834d826a4f2d0365a747f1bbbf5054bcef92d62a34c7a70881d5ee13d",
+    "7d5e6d8cb103b9a1a46116b0163355cfe7a1915243104a336a7262f52e0775bf",
+    "6895604a781b25fde0069405450baf5321814bee2e9d97f84166f335985a7230",
+    "d14a59d4df80acd0c6ed534453bc7a85eb5cb140c64e10b4cb786e6a651408d6",
+    "d5db4e0c5fcfd2b4a3302de156db57ea187c045a471d53141f286bb10d9ec482",
+    "374b31dc142bff0431ca9a5d10ed051bdc7286c54447b711115550e025875e61",
+    "f421a0c9780f683fec7ec6f8acd9fa99323da8ab7ceb041fb6e8ddc239ec8bb4",
+    "92c88a34686f64bd85109095484038a61879c28274cd17891195807746d80276",
+    "12d1029eab4fb714124394ced04aeb965ff61603de3bca8ef3ae1dd8fadd07e7",
+    "35f2193865776dd24ed2a28c0b9eca93aab1043a67637b6937dc653f20b5ec3d",
+    "10c91d8053b3a7b9b88cd13877c1e8c3fd99be4374b715731c4a10f97927753f",
+    "8d07a6753bbe13327baa767ad9778888f02459ceccc861de32e4786083a01f8b",
+    "220ea2b59a475af614389240bcd986f1989d8d00f3c33fffe4a32b4bd0e18fed",
+    "154e8650d68bfe3fddc459e523e044204ffbf22e27f2d24f0ce81487a40dd366",
+    "acdff514076ff6ab00bf9646ce4d7500df6b73c81789657b7004ad01174ac59d",
+    "bbc2f375d5bb4e168020fa2ebfa13788394ba45c4650496ccd7b292e7010f0a5",
+    "4fc90587e5df740d3e484fa5eb65ff83ea67024625225bcbdab7a98f7968db32",
+    "1e9a4d9500bffc81ac8c2a0527534299c84d5bb14406843113444d094ac212c6",
+    "780b7f6df242c92d73249b5a8dc8e552b6c693435361122f3a163f6d2b56b2f0",
+    "b60bb6992ec336b7b49f4f5eee1406ef455134bd71f29f767fb07807a028b250",
+    "587012afe48536322b1592fcb62ca1c25f5fc532922bd4aae9063a6457b92cdb",
+  ],
+};
+
+const _lfs = typeof require!=='undefined' ? require('fs') : null;
+const _lpath = typeof require!=='undefined' ? require('path') : null;
+const _los = typeof require!=='undefined' ? require('os') : null;
+function _licenseDir(){
+  if(!_lfs||!_lpath||!_los) return null;
+  const d = _lpath.join(_los.homedir(),'Library','Application Support','Scoreboard');
+  try{ _lfs.mkdirSync(d,{recursive:true}); }catch(e){}
+  return d;
+}
+function _sha256(s){
+  try{ const crypto=require('crypto'); return crypto.createHash('sha256').update(s).digest('hex'); }catch(e){ return ''; }
+}
+function _loadLicense(){
+  const dir = _licenseDir(); if(!dir) return {activated:[]};
+  try{ return JSON.parse(_lfs.readFileSync(_lpath.join(dir,'license.json'),'utf8')); }catch(e){ return {activated:[]}; }
+}
+function _saveLicense(lic){
+  const dir = _licenseDir(); if(!dir) return;
+  try{ _lfs.writeFileSync(_lpath.join(dir,'license.json'),JSON.stringify(lic)); }catch(e){}
+}
+let LICENSE = _loadLicense();
+function isUnlocked(){
+  if(!LICENSE.activated||!LICENSE.activated.length) return false;
+  return LICENSE.activated.some(h =>
+    (LICENSE_HASHES.SB && LICENSE_HASHES.SB.includes(h)) ||
+    (LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(h))
+  );
+}
+function activateLicenseKey(input){
+  const k = (input||'').trim().toUpperCase();
+  if(!k) return {ok:false, msg:'Enter a key'};
+  const h = _sha256(k);
+  let matched = false;
+  for(const pfx of Object.keys(LICENSE_HASHES)){
+    if(LICENSE_HASHES[pfx].includes(h)){ matched = true; break; }
+  }
+  if(!matched) return {ok:false, msg:'Invalid key — check for typos'};
+  if(!LICENSE.activated) LICENSE.activated = [];
+  if(LICENSE.activated.includes(h)) return {ok:false, msg:'This key is already activated'};
+  LICENSE.activated.push(h);
+  LICENSE.date = Date.now();
+  _saveLicense(LICENSE);
+  return {ok:true};
+}
+function renderLockScreen(){
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = '';
+  // Remove any operator/audience div left over
+  document.querySelectorAll('#operator,#audience,#lobby').forEach(n=>n.remove());
+  const wrap = document.createElement('div');
+  Object.assign(wrap.style,{position:'fixed',inset:'0',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at 50% 0%,#1a0e00 0%,#030304 60%)',gap:'18px',padding:'40px',zIndex:'9999'});
+  const icon = document.createElement('div'); icon.textContent = '🔒'; icon.style.cssText='font-size:60px;opacity:.6;'; wrap.appendChild(icon);
+  const title = document.createElement('div'); title.textContent='SCOREBOARD';
+  title.style.cssText = "font-family:'Black Ops One',sans-serif;font-size:clamp(28px,6vw,52px);letter-spacing:5px;color:#fbbf24;text-shadow:0 0 40px rgba(245,158,11,.5);";
+  wrap.appendChild(title);
+  const sub = document.createElement('div'); sub.textContent='Enter your registration key to unlock';
+  sub.style.cssText='font-size:13px;color:#666;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;text-align:center;';
+  wrap.appendChild(sub);
+  const card = document.createElement('div');
+  card.style.cssText='background:#0a0a0c;border:1px solid #1a1a1e;border-radius:16px;padding:28px;width:min(420px,95vw);display:flex;flex-direction:column;gap:14px;';
+  const inp = document.createElement('input'); inp.type='text';
+  inp.placeholder='SB-XXXX-XXXX-XXXX';
+  inp.autofocus=true;
+  inp.style.cssText='width:100%;padding:14px 16px;background:#060608;border:1px solid #222;border-radius:10px;color:#fbbf24;font-size:16px;font-family:"Barlow Condensed",sans-serif;letter-spacing:3px;text-align:center;text-transform:uppercase;outline:none;';
+  card.appendChild(inp);
+  const err = document.createElement('div'); err.style.cssText='font-size:13px;color:#ef4444;text-align:center;min-height:18px;letter-spacing:1px;font-family:"Barlow Condensed",sans-serif;font-weight:700;'; card.appendChild(err);
+  const btn = document.createElement('button'); btn.textContent='🔓 UNLOCK';
+  btn.style.cssText='padding:14px;background:linear-gradient(135deg,#fbbf24,#d97706);color:#000;font-family:"Black Ops One",sans-serif;font-size:14px;letter-spacing:3px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,.3);';
+  function tryAct(){
+    const r = activateLicenseKey(inp.value);
+    if(r.ok){ LICENSE = _loadLicense(); wrap.remove(); render(); }
+    else { err.textContent = r.msg; }
+  }
+  btn.addEventListener('click', tryAct);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') tryAct(); });
+  card.appendChild(btn);
+  const help = document.createElement('div'); help.innerHTML='Don\'t have a key? Purchase at <span style="color:#888;">livefrenzy.com</span>';
+  help.style.cssText='font-size:11px;color:#444;letter-spacing:1px;text-align:center;margin-top:8px;font-family:"Barlow Condensed",sans-serif;';
+  card.appendChild(help);
+  wrap.appendChild(card);
+  document.body.appendChild(wrap);
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCOREBOARD
+// ══════════════════════════════════════════════════════════════════════════════
+const TEAM_COLORS=['#22d3ee','#f59e0b','#a855f7','#4ade80'];
+const SB_KEY='sb_teams';
+const INCREMENTS=[10,25,50,100,200,500];
+
+// ── HELPERS ──
+function el(tag,props,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(props||{})){if(k==='style'&&typeof v==='object')Object.assign(e.style,v);else if(k==='onClick')e.addEventListener('click',v);else if(k==='onInput')e.addEventListener('input',v);else if(k==='onKeydown')e.addEventListener('keydown',v);else if(k==='className')e.className=v;else if(k==='disabled')e.disabled=!!v;else if(k==='placeholder')e.placeholder=v;else if(k==='value'&&tag==='input')e.value=v;else if(k==='type')e.type=v;}kids.flat().forEach(k=>{if(k!=null&&k!==false)e.appendChild(typeof k==='string'?document.createTextNode(k):k);});return e;}
+function mk(s){const d=document.createElement('div');Object.assign(d.style,s);return d;}
+function copy(x){return JSON.parse(JSON.stringify(x));}
+function rgba(h,a){h=h.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;}
+
+// ── STORAGE ──
+const _fs=typeof require!=='undefined'?require('fs'):null;const _path=typeof require!=='undefined'?require('path'):null;
+const _dataDir=(function(){if(!_fs||!_path)return null;const d=_path.join(require('os').homedir(),'Library','Application Support','Scoreboard');try{_fs.mkdirSync(d,{recursive:true});}catch(e){}return d;})();
+function loadTeams(){if(_fs&&_dataDir){try{return JSON.parse(_fs.readFileSync(_path.join(_dataDir,'teams.json'),'utf8'));}catch(e){}}try{const s=localStorage.getItem(SB_KEY);if(s)return JSON.parse(s);}catch(e){}return null;}
+function saveTeams(d){if(_fs&&_dataDir){try{_fs.writeFileSync(_path.join(_dataDir,'teams.json'),JSON.stringify(d));}catch(e){}}try{localStorage.setItem(SB_KEY,JSON.stringify(d));}catch(e){}}
+
+// ── ELECTRON IPC ──
+const ipc=(typeof require!=='undefined')?require('electron').ipcRenderer:null;
+
+// ── SOUNDS ──
+let _ctx=null;
+function ac(){if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();if(_ctx.state==='suspended')_ctx.resume();return _ctx;}
+function tone(c,type,freq,t0,t1,pk,fd){const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(freq,t0);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(pk,t0+.015);g.gain.setValueAtTime(pk,fd||t0+.015);g.gain.exponentialRampToValueAtTime(.001,t1);o.start(t0);o.stop(t1+.01);}
+function soundAdd(){try{const c=ac(),n=c.currentTime;tone(c,'sine',880,n,n+.1,.15,n+.03);tone(c,'sine',1100,n+.06,n+.15,.12,n+.08);}catch(e){}}
+function soundBigAdd(){try{const c=ac(),n=c.currentTime;[[659,0],[784,.08],[1047,.18]].forEach(([f,t])=>{tone(c,'square',f,n+t,n+t+.2,.1,n+t+.04);tone(c,'sine',f,n+t,n+t+.25,.15,n+t+.06);});}catch(e){}}
+function soundSub(){try{const c=ac(),n=c.currentTime;tone(c,'sine',440,n,n+.1,.1,n+.03);tone(c,'sine',330,n+.06,n+.12,.08,n+.08);}catch(e){}}
+
+// ── STATE ──
+let ROLE=(window.location.hash||'').replace('#','').trim()||null;
+let ROOM='LOCAL';
+let STATE={
+  screen:'setup',
+  teams:[{name:'TEAM 1',score:0,color:TEAM_COLORS[0]},{name:'TEAM 2',score:0,color:TEAM_COLORS[1]}],
+  increment:100,
+  lastChange:null, // {teamIdx, delta, timestamp} for pop animation
+};
+let editTeams=copy(loadTeams()||STATE.teams);
+let dbUnsubscribe=null;
+
+function setState(patch){STATE=Object.assign({},STATE,patch);pushState();render();}
+
+// ── IPC SYNC ──
+function pushState(){if(ipc)ipc.send('sb-state',STATE);}
+function subscribeRoom(){
+  if(!ipc)return;
+  ipc.on('sb-state',(event,s)=>{if(s)handleRemoteState(s);});
+  ipc.on('sb-request',()=>{if(ROLE==='operator')pushState();});
+  if(ROLE==='audience')ipc.send('sb-request');
+}
+
+let _prevScores=null;
+function handleRemoteState(s){
+  if(!s)return;
+  const ps=_prevScores;
+  _prevScores=s.teams?s.teams.map(t=>t.score):null;
+  STATE=s;
+  if(ROLE==='audience'&&ps&&s.teams){
+    for(let i=0;i<s.teams.length;i++){
+      if(ps[i]!==undefined&&s.teams[i].score>ps[i])soundBigAdd();
+      else if(ps[i]!==undefined&&s.teams[i].score<ps[i])soundSub();
+    }
+  }
+  render();
+}
+
+// ── RENDER ──
+function render(){
+  if(ROLE==='operator' && !isUnlocked()){ renderLockScreen(); return; }
+
+  const app=document.getElementById('app');app.innerHTML='';
+  if(ROLE==='operator')app.appendChild(buildOperator());
+  else if(ROLE==='audience')app.appendChild(buildAudience());
+  else app.appendChild(buildOperator());
+}
+
+// ── LOBBY ──
+function buildLobby(){
+  const wrap=mk({});wrap.id='lobby';
+  const title=mk({});title.className='lobby-title';title.textContent='SCOREBOARD';
+  const sub=mk({});sub.className='lobby-sub';sub.textContent='Team Score Tracker';
+  wrap.appendChild(title);wrap.appendChild(sub);
+  const card=mk({});card.className='lobby-card';
+  const cl=mk({});cl.className='lobby-label';cl.textContent='Start as Operator';
+  const cb=el('button',{className:'btn-primary',onClick:async()=>{ac();ROOM=makeCode();ROLE='operator';await pushState();subscribeRoom();render();}});cb.textContent='▶ CREATE ROOM';
+  card.appendChild(cl);card.appendChild(cb);
+  const div=mk({});div.className='lobby-divider';div.textContent='OR';card.appendChild(div);
+  const jl=mk({});jl.className='lobby-label';jl.textContent='Join as Audience Screen';
+  let joinCode='';
+  const ji=el('input',{className:'lobby-input',placeholder:'ENTER ROOM CODE',type:'text',onInput:e=>{joinCode=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);ji.value=joinCode;},onKeydown:e=>{if(e.key==='Enter')doJoin();}});
+  const jb=el('button',{className:'btn-secondary',onClick:doJoin});jb.textContent='JOIN AUDIENCE';
+  function doJoin(){if(joinCode.length<4)return;ac();ROOM=joinCode;ROLE='audience';subscribeRoom();render();}
+  card.appendChild(jl);card.appendChild(ji);card.appendChild(jb);
+  wrap.appendChild(card);return wrap;
+}
+
+// ── OPERATOR ──
+function buildOperator(){
+  const wrap=mk({});wrap.id='operator';
+
+  // Top bar
+  const topbar=mk({});topbar.className='op-topbar';
+  const left=mk({display:'flex',flexDirection:'column'});
+  const titleEl=mk({});titleEl.className='op-title';titleEl.textContent='SCOREBOARD';
+  const roomEl=mk({});roomEl.className='op-room';roomEl.textContent='v1.0.0';
+  left.appendChild(titleEl);left.appendChild(roomEl);
+  const topBtns=mk({});topBtns.className='op-topbtns';
+  const gb=el('button',{className:'op-btn',style:{color:'var(--green)',borderColor:'rgba(74,222,128,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',true);}});gb.textContent='🟢';topBtns.appendChild(gb);
+  const rb=el('button',{className:'op-btn',style:{color:'var(--red)',borderColor:'rgba(239,68,68,.3)',fontSize:'14px'},onClick:()=>{if(ipc)ipc.send('toggle-audience',false);}});rb.textContent='🔴';topBtns.appendChild(rb);
+  topbar.appendChild(left);topbar.appendChild(topBtns);wrap.appendChild(topbar);
+
+  if(STATE.screen==='setup'){
+    const scroll=mk({});scroll.className='op-scroll';
+    const lab=mk({});lab.className='section-label';lab.textContent='Teams';scroll.appendChild(lab);
+
+    editTeams.forEach((t,i)=>{
+      const row=mk({});row.className='setup-team';
+      const colorDot=mk({width:'12px',height:'36px',borderRadius:'6px',background:TEAM_COLORS[i%TEAM_COLORS.length],flexShrink:'0'});
+      const inp=el('input',{style:{color:TEAM_COLORS[i%TEAM_COLORS.length]},placeholder:`Team ${i+1} name`,type:'text',value:t.name,onInput:e=>{editTeams[i].name=e.target.value.toUpperCase();}});
+      const del=el('button',{className:'del-btn',disabled:editTeams.length<=2,onClick:()=>{if(editTeams.length<=2)return;editTeams.splice(i,1);render();}});del.textContent='✕';
+      row.appendChild(colorDot);row.appendChild(inp);row.appendChild(del);scroll.appendChild(row);
+    });
+
+    if(editTeams.length<4){
+      const addBtn=el('button',{className:'add-btn',onClick:()=>{editTeams.push({name:'TEAM '+(editTeams.length+1),score:0,color:TEAM_COLORS[editTeams.length%TEAM_COLORS.length]});render();}});
+      addBtn.textContent='+ Add Team';scroll.appendChild(addBtn);
+    }
+
+    const sb=el('button',{className:'start-btn',onClick:()=>{
+      const teams=editTeams.map((t,i)=>({name:t.name.trim()||'TEAM '+(i+1),score:0,color:TEAM_COLORS[i%TEAM_COLORS.length]}));
+      saveTeams(editTeams);
+      setState({screen:'game',teams,increment:100,lastChange:null});
+    }});
+    sb.textContent='▶ START';scroll.appendChild(sb);
+    wrap.appendChild(scroll);return wrap;
+  }
+
+  // ── GAME SCREEN ──
+  const scroll=mk({});scroll.className='op-scroll';
+
+  // Point increment selector
+  const incLabel=mk({});incLabel.className='section-label';incLabel.textContent='Point Increment';scroll.appendChild(incLabel);
+  const incBar=mk({});incBar.className='inc-bar';
+  INCREMENTS.forEach(inc=>{
+    const btn=el('button',{className:'inc-btn'+(STATE.increment===inc?' active':''),onClick:()=>setState({increment:inc})});
+    btn.textContent='+'+inc;incBar.appendChild(btn);
+  });
+  scroll.appendChild(incBar);
+
+  // Team cards
+  const cards=mk({});cards.className='team-cards';
+  STATE.teams.forEach((team,i)=>{
+    const card=mk({});card.className='team-card';card.style.borderColor=rgba(team.color,.3);
+
+    const colorBar=mk({});colorBar.className='team-color';colorBar.style.background=team.color;
+    const nameEl=mk({});nameEl.className='team-name-display';nameEl.style.color=team.color;nameEl.textContent=team.name;
+    const scoreEl=mk({});scoreEl.className='team-score-display';scoreEl.style.color=team.color;scoreEl.textContent=team.score;
+
+    const btns=mk({});btns.className='team-btns';
+    const subBtn=el('button',{className:'pts-btn sub',onClick:()=>{
+      const newTeams=copy(STATE.teams);newTeams[i].score=Math.max(0,newTeams[i].score-STATE.increment);
+      soundSub();setState({teams:newTeams,lastChange:{teamIdx:i,delta:-STATE.increment,ts:Date.now()}});
+    }});subBtn.textContent='−';
+    const addBtn=el('button',{className:'pts-btn add',onClick:()=>{
+      const newTeams=copy(STATE.teams);newTeams[i].score+=STATE.increment;
+      soundAdd();setState({teams:newTeams,lastChange:{teamIdx:i,delta:STATE.increment,ts:Date.now()}});
+    }});addBtn.textContent='+';
+    btns.appendChild(subBtn);btns.appendChild(addBtn);
+
+    card.appendChild(colorBar);card.appendChild(nameEl);card.appendChild(scoreEl);card.appendChild(btns);
+    cards.appendChild(card);
+  });
+  scroll.appendChild(cards);
+
+  // Reset button
+  const resetBtn=el('button',{className:'op-btn',style:{marginTop:'16px',padding:'10px 20px'},onClick:()=>{
+    const newTeams=STATE.teams.map(t=>({...t,score:0}));
+    setState({teams:newTeams,lastChange:null});
+  }});resetBtn.textContent='↺ Reset Scores';scroll.appendChild(resetBtn);
+
+  const setupBtn=el('button',{className:'op-btn',style:{marginTop:'8px',padding:'10px 20px'},onClick:()=>setState({screen:'setup'})});
+  setupBtn.textContent='⚙ Setup';scroll.appendChild(setupBtn);
+
+  wrap.appendChild(scroll);return wrap;
+}
+
+// ── AUDIENCE ──
+function buildAudience(){
+  const wrap=mk({});wrap.id='audience';
+  const glow=mk({});glow.className='aud-glow';wrap.appendChild(glow);
+
+  if(STATE.screen==='setup'||!STATE.teams||!STATE.teams.length){
+    const w=mk({});w.className='waiting';
+    const label=mk({});label.className='waiting-label';label.textContent='SCOREBOARD';
+    const code=mk({});code.className='waiting-code';code.textContent='🏆';code.style.fontSize='clamp(48px,12vw,96px)';
+    const sub=mk({});sub.className='waiting-label';sub.textContent='Waiting for game to start...';
+    w.appendChild(label);w.appendChild(code);w.appendChild(sub);
+    wrap.appendChild(w);return wrap;
+  }
+
+  // Title
+  const title=mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(28px,5vw,56px)',letterSpacing:'8px',color:'var(--gold)',textAlign:'center',marginBottom:'clamp(20px,3vw,40px)',textShadow:'0 0 40px rgba(245,158,11,.5)'});
+  title.textContent='SCOREBOARD';
+  wrap.appendChild(title);
+
+  // Sort teams by score (descending) for leaderboard
+  const sorted=[...STATE.teams.map((t,i)=>({...t,origIdx:i}))].sort((a,b)=>b.score-a.score);
+  const maxScore=Math.max(...sorted.map(t=>t.score),1);
+
+  const lb=mk({});lb.className='leaderboard';
+
+  sorted.forEach((team,rank)=>{
+    const row=mk({});row.className='lb-row';
+    row.style.borderLeft=`4px solid ${team.color}`;
+    row.style.boxShadow=`inset 0 0 30px ${rgba(team.color,.05)}`;
+
+    // Rank
+    const rankEl=mk({});rankEl.className='lb-rank'+(rank===0?' first':'');
+    rankEl.textContent=rank===0?'👑':String(rank+1);
+
+    // Color bar
+    const colorEl=mk({});colorEl.className='lb-color';colorEl.style.background=team.color;
+
+    // Name
+    const infoEl=mk({});infoEl.className='lb-info';
+    const nameEl=mk({});nameEl.className='lb-name';nameEl.style.color=team.color;nameEl.textContent=team.name;
+    infoEl.appendChild(nameEl);
+
+    // Score
+    const scoreEl=mk({});scoreEl.className='lb-score';scoreEl.style.color=team.color;
+    scoreEl.style.textShadow=`0 0 20px ${rgba(team.color,.4)}`;
+    scoreEl.textContent=team.score;
+
+    // Bottom progress bar
+    const bar=mk({});bar.className='lb-bar';bar.style.background=team.color;
+    bar.style.width=Math.round((team.score/maxScore)*100)+'%';
+    bar.style.boxShadow=`0 0 10px ${rgba(team.color,.5)}`;
+
+    // Score pop animation
+    if(STATE.lastChange&&STATE.lastChange.teamIdx===team.origIdx&&Date.now()-STATE.lastChange.ts<1500){
+      const pop=mk({});pop.className='score-pop';
+      pop.style.color=STATE.lastChange.delta>0?'var(--green)':'var(--red)';
+      pop.textContent=(STATE.lastChange.delta>0?'+':'')+STATE.lastChange.delta;
+      row.appendChild(pop);
+    }
+
+    row.appendChild(rankEl);row.appendChild(colorEl);row.appendChild(infoEl);row.appendChild(scoreEl);row.appendChild(bar);
+    lb.appendChild(row);
+  });
+
+  wrap.appendChild(lb);
+  return wrap;
+}
+
+// ── INIT ──
+function init(){subscribeRoom();render();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>

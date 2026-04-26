@@ -1,0 +1,72 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "Trivia-powered Tic Tac Toe for kids ministry",
+  "main": "main.js",
+  "author": "The Pointe Church",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.thepointe.tictactoe",
+    "productName": "Tic Tac Toe",
+    "files": [
+      "main.js",
+      "index.html",
+      "build/icon.png",
+      "build/icon.icns",
+      "build/icon.ico"
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "Install Tic Tac Toe",
+      "backgroundColor": "#030304",
+      "window": {
+        "width": 540,
+        "height": 360
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 165,
+          "type": "file"
+        },
+        {
+          "x": 390,
+          "y": 165,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "iconSize": 120
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tic Tac Toe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
