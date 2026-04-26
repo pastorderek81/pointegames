@@ -3223,9 +3223,11 @@ function isGameUnlocked(gameId){
   const prefix = GAME_PREFIX[gameId];
   // Beta keys ALSO unlock beta games directly
   if(BETA_GAMES.includes(gameId) && isBetaModeActive()) return true;
+  const mstLapsed = isSubscriptionLapsed();
   // Check if any master key OR this game's specific key is activated
   return LICENSE.activated.some(hash => {
-    if(LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(hash)) return true;
+    // Master keys are ignored if the subscription has lapsed past grace
+    if(LICENSE_HASHES.MST && LICENSE_HASHES.MST.includes(hash)) return !mstLapsed;
     if(prefix && LICENSE_HASHES[prefix] && LICENSE_HASHES[prefix].includes(hash)) return true;
     return false;
   });
@@ -3245,15 +3247,82 @@ function activateKey(keyInput, gameId){
   if(LICENSE.activated.includes(hash)) return {ok:false, msg:'This key is already activated'};
   LICENSE.activated.push(hash);
   LICENSE.date = Date.now();
+  // Store raw MST key so we can re-verify subscription status with the server
+  if(key.startsWith('MST-')){
+    LICENSE.mstKey = key;
+    LICENSE.subStatus = { status:'active', lastCheck: Date.now(), reason:'just-activated' };
+  }
   saveLicense(LICENSE);
+  // Kick off a background verification (don't block the UI)
+  if(key.startsWith('MST-')) verifySubscription();
   return {ok:true, msg:'Unlocked!'};
+}
+
+// ── Subscription verification (Game Hub MST keys only) ─────────────────────
+// Calls livefrenzy.com to check whether this MST key's Stripe subscription is
+// still active. Caches result; allows 14-day offline grace; marks the license
+// as "lapsed" if Stripe says canceled/unpaid.
+const VERIFY_URL = 'https://livefrenzy.com/.netlify/functions/verify-license';
+const VERIFY_INTERVAL_MS = 24 * 60 * 60 * 1000;   // re-check daily
+const OFFLINE_GRACE_MS   = 14 * 24 * 60 * 60 * 1000; // 14-day offline grace
+let _verifyInFlight = false;
+
+async function verifySubscription(){
+  if(_verifyInFlight) return;
+  if(!LICENSE.mstKey) return;
+  _verifyInFlight = true;
+  try{
+    const r = await fetch(VERIFY_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ key: LICENSE.mstKey })
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    LICENSE.subStatus = {
+      status: data.status || 'unknown',
+      stripeStatus: data.stripeStatus || null,
+      reason: data.reason || null,
+      lastCheck: Date.now(),
+      lastSuccessfulCheck: (data.status==='active') ? Date.now() : (LICENSE.subStatus?.lastSuccessfulCheck || null)
+    };
+    saveLicense(LICENSE);
+    if(typeof render==='function' && (data.status==='lapsed')) render();
+  }catch(e){
+    // Network failure — keep last known status, but bump lastCheck attempt
+    if(LICENSE.subStatus){ LICENSE.subStatus.lastCheck = Date.now(); saveLicense(LICENSE); }
+  }finally{
+    _verifyInFlight = false;
+  }
+}
+
+// Returns true if the user's MST subscription has lapsed AND the offline
+// grace period is exhausted. Used by isGameUnlocked() to gate access.
+function isSubscriptionLapsed(){
+  if(!LICENSE.mstKey) return false;            // not a subscriber
+  if(!LICENSE.subStatus) return false;          // never checked yet — fail open
+  if(LICENSE.subStatus.status === 'active') return false;
+  if(LICENSE.subStatus.status === 'lapsed') return true;  // confirmed lapsed
+  // status is 'unknown' (network errors) — apply offline grace
+  const last = LICENSE.subStatus.lastSuccessfulCheck || LICENSE.date || Date.now();
+  return (Date.now() - last) > OFFLINE_GRACE_MS;
+}
+
+// Run a check on launch (operator role only) and then every 24h
+if(typeof ROLE === 'undefined' || ROLE !== 'audience'){
+  if(LICENSE.mstKey) setTimeout(verifySubscription, 1500);
+  setInterval(()=>{ if(LICENSE.mstKey) verifySubscription(); }, VERIFY_INTERVAL_MS);
 }
 
 function buildLockScreen(gameId, gameName, color){
   const wrap = mk({flex:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'40px',gap:'20px',overflow:'auto'});
-  const icon = mk({fontSize:'clamp(48px,10vw,96px)',opacity:'.5'});icon.textContent='🔒';
-  const title = mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(24px,4vw,48px)',letterSpacing:'4px',color:color||'#888'});title.textContent=gameName;
-  const sub = mk({fontSize:'14px',color:'#555',letterSpacing:'2px',fontFamily:'"Barlow Condensed",sans-serif',textAlign:'center',maxWidth:'500px'});sub.textContent='This game is locked. Enter your registration key to unlock it forever.';
+  const lapsed = isSubscriptionLapsed();
+  const icon = mk({fontSize:'clamp(48px,10vw,96px)',opacity:'.5'});icon.textContent = lapsed ? '⏸' : '🔒';
+  const title = mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(24px,4vw,48px)',letterSpacing:'4px',color:color||'#888'});title.textContent = lapsed ? 'SUBSCRIPTION LAPSED' : gameName;
+  const sub = mk({fontSize:'14px',color:'#555',letterSpacing:'2px',fontFamily:'"Barlow Condensed",sans-serif',textAlign:'center',maxWidth:'500px',lineHeight:'1.5'});
+  sub.textContent = lapsed
+    ? 'Your Game Hub subscription is no longer active. Renew at livefrenzy.com or contact info@livefrenzy.com if this is wrong.'
+    : 'This game is locked. Enter your registration key to unlock it forever.';
   const form = mk({display:'flex',flexDirection:'column',gap:'12px',width:'min(400px,90%)',marginTop:'12px'});
   let _keyInput = '';
   let _errorMsg = '';
