@@ -1,7 +1,7 @@
 {
   "name": "game-hub",
-  "version": "1.0.15",
-  "description": "Kids Ministry Game Hub — Phrase Frenzy, Word Drop, Tic Tac Toe",
+  "version": "1.0.16",
+  "description": "Kids Ministry Game Hub \u2014 Phrase Frenzy, Word Drop, Tic Tac Toe",
   "main": "main.js",
   "author": "The Pointe Church",
   "scripts": {
@@ -14,22 +14,52 @@
   "build": {
     "appId": "com.thepointe.gamehub",
     "productName": "Game Hub",
-    "files": ["main.js","index.html","build/icon.png","build/icon.ico","build/icon.icns"],
+    "files": [
+      "main.js",
+      "index.html",
+      "build/icon.png",
+      "build/icon.ico",
+      "build/icon.icns"
+    ],
     "mac": {
       "category": "public.app-category.entertainment",
       "icon": "build/icon.icns",
-      "target": [{"target":"dmg","arch":["arm64"]}],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": {"teamId":"D3HNM5YDJ5"}
+      "notarize": {
+        "teamId": "D3HNM5YDJ5"
+      }
     },
     "dmg": {
       "title": "Install Game Hub",
       "backgroundColor": "#030304",
-      "window": {"width":540,"height":360},
-      "contents": [{"x":150,"y":165,"type":"file"},{"x":390,"y":165,"type":"link","path":"/Applications"}],
+      "window": {
+        "width": 540,
+        "height": 360
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 165,
+          "type": "file"
+        },
+        {
+          "x": 390,
+          "y": 165,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
       "iconSize": 120
     },
     "win": {

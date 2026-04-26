@@ -14,13 +14,15 @@ input,textarea{outline:none;font-family:inherit;}
 ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
 
 /* ── TAB BAR ── */
-.hub-tabs{display:flex;align-items:center;background:#050506;border-bottom:1px solid #111;padding:0;flex-shrink:0;}
-.hub-tab{padding:12px 20px;font-family:'Black Ops One',sans-serif;font-size:13px;letter-spacing:2px;color:#333;background:transparent;border:none;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;}
+.hub-tabs{display:flex;align-items:center;background:#050506;border-bottom:1px solid #111;padding:0;flex-shrink:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;}
+.hub-tabs::-webkit-scrollbar{height:4px;}
+.hub-tabs::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+.hub-tab{padding:12px 20px;font-family:'Black Ops One',sans-serif;font-size:13px;letter-spacing:2px;color:#333;background:transparent;border:none;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .hub-tab:hover{color:#555;}
 .hub-tab.active-pf{color:var(--gold);border-bottom-color:var(--gold);}
 .hub-tab.active-wd{color:var(--cyan);border-bottom-color:var(--cyan);}
 .hub-tab.active-ttt{color:var(--purple);border-bottom-color:var(--purple);}
-.hub-right{margin-left:auto;display:flex;gap:6px;padding:0 12px;align-items:center;}
+.hub-right{margin-left:auto;display:flex;gap:6px;padding:0 12px;align-items:center;position:sticky;right:0;background:#050506;flex-shrink:0;z-index:5;box-shadow:-8px 0 12px #050506;}
 .hub-btn{padding:4px 10px;background:#0e0e10;border:1px solid #111;border-radius:6px;font-size:13px;cursor:pointer;}
 
 /* ── SHARED OPERATOR ── */

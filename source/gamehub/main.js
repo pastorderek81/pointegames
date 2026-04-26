@@ -152,7 +152,7 @@ function createWindows() {
   const prefs = { nodeIntegration: true, contextIsolation: false };
 
   opWin = new BrowserWindow({
-    width: 1020, height: 800, minWidth: 800, minHeight: 600,
+    width: 1020, height: 800, minWidth: 480, minHeight: 420,
     title: 'Game Hub — Operator',
     backgroundColor: '#030304',
     webPreferences: prefs,
