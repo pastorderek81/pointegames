@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.17",
-    "notes": "Subscription verification (your active subscription is now checked daily — keys keep working forever for one-time purchases). Smaller minimum window size. Audience controls (🟢🔴) now stay pinned to the right edge when tabs scroll.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.17/Game.Hub-1.0.17-arm64.dmg",
-    "date": "2026-04-26"
+    "version": "1.0.18",
+    "notes": "Fix update loop — auto-update now properly detects the running version (no more spurious update prompts after installing).",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.18/Game.Hub-1.0.18-arm64.dmg",
+    "date": "2026-04-27"
   }
 }
