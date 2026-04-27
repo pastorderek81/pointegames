@@ -34,6 +34,12 @@ ipcMain.on('audience-visible', (event) => {
   event.returnValue = audWin && !audWin.isDestroyed() && audWin.isVisible();
 });
 
+// Renderer asks for the real app version so the auto-updater compares against
+// reality (not a hardcoded constant that drifts every release).
+ipcMain.on('get-app-version', (event) => {
+  event.returnValue = app.getVersion();
+});
+
 // ── AUTO-UPDATE ─────────────────────────────────────────────────────────────
 ipcMain.on('do-auto-update', (event, downloadUrl) => {
   if (!downloadUrl) return;
