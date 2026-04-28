@@ -3321,7 +3321,7 @@ function buildLockScreen(gameId, gameName, color){
   const title = mk({fontFamily:'"Black Ops One",sans-serif',fontSize:'clamp(24px,4vw,48px)',letterSpacing:'4px',color:color||'#888'});title.textContent = lapsed ? 'SUBSCRIPTION LAPSED' : gameName;
   const sub = mk({fontSize:'14px',color:'#555',letterSpacing:'2px',fontFamily:'"Barlow Condensed",sans-serif',textAlign:'center',maxWidth:'500px',lineHeight:'1.5'});
   sub.textContent = lapsed
-    ? 'Your Game Hub subscription is no longer active. Renew at livefrenzy.com or contact info@livefrenzy.com if this is wrong.'
+    ? 'Your Game Hub subscription is no longer active. Manage or renew at livefrenzy.com/manage.html, or contact info@livefrenzy.com if this is wrong.'
     : 'This game is locked. Enter your registration key to unlock it forever.';
   const form = mk({display:'flex',flexDirection:'column',gap:'12px',width:'min(400px,90%)',marginTop:'12px'});
   let _keyInput = '';
