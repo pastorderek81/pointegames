@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.19",
-    "notes": "No Whammies is now available to all Game Hub subscribers (previously beta-only). Press-your-luck game with whammies — perfect for kids ministry events.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.19/Game.Hub-1.0.19-arm64.dmg",
+    "version": "1.0.20",
+    "notes": "Lapsed-subscription screen now links to the new self-serve billing portal at livefrenzy.com/manage.html — update payment, cancel, or download invoices without contacting support.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.20/Game.Hub-1.0.20-arm64.dmg",
     "date": "2026-04-28"
   }
 }
