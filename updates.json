@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.20",
-    "notes": "Lapsed-subscription screen now links to the new self-serve billing portal at livefrenzy.com/manage.html — update payment, cancel, or download invoices without contacting support.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.20/Game.Hub-1.0.20-arm64.dmg",
-    "date": "2026-04-28"
+    "version": "1.0.21",
+    "notes": "BETA keys now unlock every game in Game Hub — full tester access including beta-only games. MST subscriber keys behavior unchanged.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.21/Game.Hub-1.0.21-arm64.dmg",
+    "date": "2026-04-29"
   }
 }
