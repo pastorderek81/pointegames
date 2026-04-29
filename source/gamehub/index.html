@@ -3220,9 +3220,10 @@ function isGameVisible(gameId){
 function isGameUnlocked(gameId){
   if(FREE_GAMES.includes(gameId)) return true;
   if(!LICENSE.activated || !LICENSE.activated.length) return false;
+  // BETA keys unlock everything — full tester access, no subscription gating.
+  // Issued manually to testers; not tied to any Stripe subscription.
+  if(isBetaModeActive()) return true;
   const prefix = GAME_PREFIX[gameId];
-  // Beta keys ALSO unlock beta games directly
-  if(BETA_GAMES.includes(gameId) && isBetaModeActive()) return true;
   const mstLapsed = isSubscriptionLapsed();
   // Check if any master key OR this game's specific key is activated
   return LICENSE.activated.some(hash => {
