@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.22",
-    "notes": "🎡 Prize Wheel (beta) — new editable spinner for prizes and points. Set up custom wedges with points or prize names, weighted odds, then spin live for your audience. Beta testers only.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.22/Game.Hub-1.0.22-arm64.dmg",
+    "version": "1.0.23",
+    "notes": "🎡 Prize Wheel polish — labels are now horizontal and upright on every wedge, smaller font with cleaner wrapping. Beta testers only.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.23/Game.Hub-1.0.23-arm64.dmg",
     "date": "2026-05-18"
   }
 }
