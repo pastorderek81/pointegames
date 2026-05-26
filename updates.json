@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.23",
-    "notes": "🎡 Prize Wheel polish — labels are now horizontal and upright on every wedge, smaller font with cleaner wrapping. Beta testers only.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.23/Game.Hub-1.0.23-arm64.dmg",
-    "date": "2026-05-18"
+    "version": "1.0.24",
+    "notes": "📋 Saved Lists — Save phrases, verses, and questions to named files you can find in Documents/Game Hub. Includes Export/Import for sharing or backing up.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.24/Game.Hub-1.0.24-arm64.dmg",
+    "date": "2026-05-26"
   }
 }
