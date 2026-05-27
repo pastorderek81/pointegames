@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.25",
-    "notes": "📦 Content Packs — multi-game curriculum bundles. First pack live: Like Jesus by The Pointe Church (6 lessons). Plus refined Saved Lists in visible Documents/Game Hub folder.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.25/Game.Hub-1.0.25-arm64.dmg",
+    "version": "1.0.26",
+    "notes": "🧪 New content pack: Science 101 — 6th Grade by Live Frenzy. 6 lessons across PF, WD, TTT, and The Grid — ~246 review items for middle school science. Activation prefix SCI6.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.26/Game.Hub-1.0.26-arm64.dmg",
     "date": "2026-05-26"
   }
 }
