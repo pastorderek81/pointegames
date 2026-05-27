@@ -1,0 +1,196 @@
+{
+  "id": "like-jesus",
+  "name": "Like Jesus",
+  "publisher": "The Pointe Church",
+  "type": "content",
+  "games": ["pf", "wd", "ttt"],
+  "lessons": [
+    {
+      "id": "love",
+      "name": "Lesson 1: Love",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST LOVE OTHERS LIKE JESUS DID", "hint": "Lesson 1: Love"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "AND YOU MUST LOVE THE LORD YOUR GOD WITH ALL YOUR HEART ALL YOUR SOUL ALL YOUR MIND AND ALL YOUR STRENGTH THE SECOND IS EQUALLY IMPORTANT LOVE YOUR NEIGHBOR AS YOURSELF", "ref": "Mark 12:30-31"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "In the Bible story from Luke 10:25-37, what was the name of the man who helped the hurt traveler? A) The Busy Businessman, B) The Good Samaritan, C) The Helpful Neighbor", "a": "B) The Good Samaritan"},
+            {"q": "True or False: The Good Samaritan was the first person to stop and help the hurt man.", "a": "False — two others walked by first"},
+            {"q": "Fill in the blank: We should love because God first ___ us.", "a": "Loved"},
+            {"q": "When the candy bar and the broccoli were shown, which one represented people who are easy to love?", "a": "The candy bar"},
+            {"q": "True or False: Jesus said we should only love people who are kind to us.", "a": "False — Jesus said to love everybody"},
+            {"q": "What does love look like when it turns into action? A) Saying nice words only, B) Helping someone in need, C) Ignoring others", "a": "B) Helping someone in need"},
+            {"q": "Who is your neighbor, according to Jesus? A) Only your friends, B) People who live next door, C) Everyone you meet", "a": "C) Everyone you meet"},
+            {"q": "Fill in the blank: Even when people are hard to love, Jesus helps us love the ___ people.", "a": "Broccoli"},
+            {"q": "True or False: The Good Samaritan showed love by helping the hurt man, cleaning his wounds, and paying for his care.", "a": "True"},
+            {"q": "When we ask God to help us love others, what happens? A) Nothing changes, B) We start to see people the way Jesus does, C) We only love candy bar people", "a": "B) We start to see people the way Jesus does"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "forgive",
+      "name": "Lesson 2: Forgive",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST FORGIVE OTHERS LIKE JESUS DID", "hint": "Lesson 2: Forgive"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "AND WHEN YOU STAND PRAYING IF YOU HOLD ANYTHING AGAINST ANYONE FORGIVE THEM SO THAT YOUR FATHER IN HEAVEN MAY FORGIVE YOU YOUR SINS", "ref": "Mark 11:25"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What was the main Bible verse we learned from today's lesson? A) John 3:16, B) Mark 11:25, C) Psalm 23:1", "a": "B) Mark 11:25"},
+            {"q": "Fill in the blank: Jesus is the greatest example of how to ___ others.", "a": "Forgive"},
+            {"q": "True or False: When we hold onto anger, it's like carrying a heavy rock that weighs us down.", "a": "True"},
+            {"q": "What did Jesus say when He was on the cross? A) Father, punish them, B) Father, forgive them, C) Father, forget them", "a": "B) Father, forgive them"},
+            {"q": "Who did Jesus forgive while He was on the cross? A) The people who hurt Him, B) His disciples only, C) Nobody", "a": "A) The people who hurt Him"},
+            {"q": "Fill in the blank: When we forgive others, God fills our hearts with His ___.", "a": "Love"},
+            {"q": "True or False: Forgiveness means saying what someone did was okay.", "a": "False — It means choosing to let go of the hurt"},
+            {"q": "What happens when we forgive others? A) Our hearts feel heavy, B) We feel free and full of peace, C) We get more rocks", "a": "B) We feel free and full of peace"},
+            {"q": "Why should we forgive others? A) Because Jesus forgave us first, B) Because it's fun to forgive, C) Because we'll get a prize", "a": "A) Because Jesus forgave us first"},
+            {"q": "Fill in the blank: We must forgive others like ___ did.", "a": "Jesus"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "pray",
+      "name": "Lesson 3: Pray",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST PRAY LIKE JESUS DID", "hint": "Lesson 3: Pray"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "BUT WHEN YOU PRAY GO AWAY BY YOURSELF SHUT THE DOOR BEHIND YOU AND PRAY TO YOUR FATHER IN PRIVATE THEN YOUR FATHER WHO SEES EVERYTHING WILL REWARD YOU", "ref": "Matthew 6:6"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "True or False: Prayer is how we talk to God.", "a": "True"},
+            {"q": "Fill in the blank: Jesus said, 'When you pray, go away by yourself, shut the door behind you, and pray to your ___ in private.'", "a": "Father"},
+            {"q": "When did Jesus pray? A) Only before meals, B) Only when He was sad, C) All the time", "a": "C) All the time"},
+            {"q": "True or False: Jesus only prayed when He was with His disciples.", "a": "False — Jesus often prayed alone in quiet places"},
+            {"q": "Fill in the blank: In the Garden of ___, Jesus prayed, 'Not my will, but Yours be done.'", "a": "Gethsemane"},
+            {"q": "What did we compare prayer to in today's lesson? A) A candy bar, B) A walkie-talkie, C) A flashlight", "a": "B) A walkie-talkie"},
+            {"q": "True or False: God only listens to our prayers if we use big fancy words.", "a": "False — God loves honest, simple prayers"},
+            {"q": "Fill in the blank: When we pray like Jesus, we don't just pray for ourselves — we also pray for ___.", "a": "Others"},
+            {"q": "What happens when we talk to God in prayer? A) He ignores us, B) He always hears us, C) He only listens on Sundays", "a": "B) He always hears us"},
+            {"q": "True or False: Jesus prayed for you before you were even born.", "a": "True — In John 17, Jesus prayed for everyone who would believe in Him"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "serve",
+      "name": "Lesson 4: Serve",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST SERVE OTHERS LIKE JESUS DID", "hint": "Lesson 4: Serve"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "ANYONE WHO WANTS TO BE FIRST MUST BE THE VERY LAST AND THE SERVANT OF ALL", "ref": "Mark 9:35"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "Fill in the blank: Jesus said, 'Anyone who wants to be first must be the very last, and the ___ of all.'", "a": "Servant"},
+            {"q": "True or False: Jesus came to Earth so everyone would serve Him.", "a": "False — He came to serve others"},
+            {"q": "What did Jesus use to wash the disciples' feet? A) A towel and water, B) Soap and a sponge, C) A broom and dustpan", "a": "A) A towel and water"},
+            {"q": "Fill in the blank: In God's kingdom, being 'great' means having a ___ heart.", "a": "Servant's"},
+            {"q": "True or False: Jesus only served His friends and people who were nice to Him.", "a": "False — He served everyone, even those who hurt Him"},
+            {"q": "In our lesson, what did the crown represent? A) Being a servant, B) Being first or the greatest, C) Being tired", "a": "B) Being first or the greatest"},
+            {"q": "Fill in the blank: When we serve others, we show them ___ love.", "a": "God's"},
+            {"q": "True or False: Jesus washed His disciples' feet to show them what real serving looks like.", "a": "True"},
+            {"q": "What can YOU do this week to serve like Jesus? A) Help clean up without being asked, B) Be kind to someone who's sad, C) Let someone go first, D) All of the above", "a": "D) All of the above"},
+            {"q": "Fill in the blank: We must ___ others like Jesus did.", "a": "Serve"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "live",
+      "name": "Lesson 5: Live",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST LIVE OUR LIVES THE WAY JESUS DID", "hint": "Lesson 5: Live"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "TO THIS YOU WERE CALLED BECAUSE CHRIST SUFFERED FOR YOU LEAVING YOU AN EXAMPLE THAT YOU SHOULD FOLLOW IN HIS STEPS", "ref": "1 Peter 2:21"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "Fill in the blank: Jesus left us an ___ so we could follow in His steps.", "a": "Example"},
+            {"q": "True or False: Jesus only obeyed God when it was easy.", "a": "False — He obeyed even when it was hard"},
+            {"q": "What did the big shoes represent in the lesson? A) Running fast, B) Following in Jesus' steps, C) Buying new shoes", "a": "B) Following in Jesus' steps"},
+            {"q": "Fill in the blank: Jesus prayed, 'Not my will, but ___ be done.'", "a": "Yours"},
+            {"q": "True or False: Jesus loved people that others did not want to be around.", "a": "True"},
+            {"q": "What did the mirror represent in the sermon? A) Looking cool, B) Seeing ourselves only, C) Showing Jesus through our lives", "a": "C) Showing Jesus through our lives"},
+            {"q": "Fill in the blank: When we love, obey, and serve others, people can see ___ living in us.", "a": "Jesus"},
+            {"q": "True or False: WWJD stands for 'Who Wants Jelly Donuts?'", "a": "False — It means 'What Would Jesus Do?'"},
+            {"q": "Which of these is a way to live like Jesus? A) Telling the truth, B) Helping others, C) Being kind, D) All of the above", "a": "D) All of the above"},
+            {"q": "Fill in the blank: We must live our lives the way ___ did.", "a": "Jesus"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "preach",
+      "name": "Lesson 6: Preach",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WE MUST PREACH THE GOSPEL LIKE JESUS DID", "hint": "Lesson 6: Preach"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "AS THE FATHER HAS SENT ME I AM SENDING YOU", "ref": "John 20:21"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "Fill in the blank: Jesus said, 'As the Father has sent me, I am ___ you.'", "a": "Sending"},
+            {"q": "True or False: Jesus kept the good news about God's love all to Himself.", "a": "False — He shared it everywhere He went"},
+            {"q": "What did the megaphone represent in the lesson? A) Being loud, B) Telling others about Jesus, C) Singing songs", "a": "B) Telling others about Jesus"},
+            {"q": "Fill in the blank: Jesus preached messages of hope, forgiveness, and ___.", "a": "Love"},
+            {"q": "True or False: Jesus preached with kindness, compassion, and truth.", "a": "True"},
+            {"q": "What did the flashlight represent in the sermon? A) God's light shining in dark places, B) Looking for lost things, C) Reading books at night", "a": "A) God's light shining in dark places"},
+            {"q": "Fill in the blank: Jesus said, 'You are the light of the ___.'", "a": "World"},
+            {"q": "True or False: People can see Jesus through the way we live and treat others.", "a": "True"},
+            {"q": "Which of these is a way we can preach like Jesus? A) Showing kindness, B) Sharing God's truth, C) Helping others, D) All of the above", "a": "D) All of the above"},
+            {"q": "Fill in the blank: We must ___ the Gospel like Jesus did.", "a": "Preach"}
+          ]
+        }
+      }
+    }
+  ],
+  "colors": {
+    "primary":   "#f59e0b",
+    "secondary": "#d97706",
+    "accent":    "#fbbf24",
+    "textLight": "#ffffff",
+    "textDark":  "#1a1108"
+  }
+}
