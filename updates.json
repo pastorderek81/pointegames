@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.24",
-    "notes": "📋 Saved Lists — Save phrases, verses, and questions to named files you can find in Documents/Game Hub. Includes Export/Import for sharing or backing up.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.24/Game.Hub-1.0.24-arm64.dmg",
+    "version": "1.0.25",
+    "notes": "📦 Content Packs — multi-game curriculum bundles. First pack live: Like Jesus by The Pointe Church (6 lessons). Plus refined Saved Lists in visible Documents/Game Hub folder.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.25/Game.Hub-1.0.25-arm64.dmg",
     "date": "2026-05-26"
   }
 }
