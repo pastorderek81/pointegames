@@ -1,0 +1,460 @@
+{
+  "id": "science-101-6th-grade",
+  "name": "Science 101 — 6th Grade",
+  "publisher": "Live Frenzy",
+  "type": "content",
+  "games": ["pf", "wd", "ttt", "grid"],
+  "lessons": [
+    {
+      "id": "solar-system",
+      "name": "Lesson 1: The Solar System",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "THE SUN IS A STAR", "hint": "Lesson 1: Solar System"},
+            {"phrase": "EIGHT PLANETS ORBIT THE SUN", "hint": "Lesson 1: Solar System"},
+            {"phrase": "THE MOON ORBITS THE EARTH", "hint": "Lesson 1: Solar System"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "OUR SOLAR SYSTEM HAS EIGHT PLANETS ORBITING THE SUN", "ref": "The Solar System"},
+            {"verse": "A YEAR IS THE TIME IT TAKES A PLANET TO ORBIT THE SUN ONCE", "ref": "Orbits and Years"},
+            {"verse": "THE FOUR INNER PLANETS ARE ROCKY AND THE FOUR OUTER PLANETS ARE GAS GIANTS", "ref": "Planet Types"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What is at the center of our solar system? A) The Moon, B) The Sun, C) Earth", "a": "B) The Sun"},
+            {"q": "How many planets are in our solar system?", "a": "8 (Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune)"},
+            {"q": "True or False: The Sun is a planet.", "a": "False — The Sun is a star"},
+            {"q": "Which planet is closest to the Sun? A) Venus, B) Mercury, C) Earth", "a": "B) Mercury"},
+            {"q": "Fill in the blank: A ___ is the time it takes a planet to orbit the Sun once.", "a": "Year"},
+            {"q": "Which planet is known as the Red Planet? A) Mars, B) Jupiter, C) Venus", "a": "A) Mars"},
+            {"q": "True or False: The Moon is bigger than Earth.", "a": "False — Earth is about 4 times wider than the Moon"},
+            {"q": "What galaxy is our solar system in? A) The Milky Way, B) Andromeda, C) The Sombrero", "a": "A) The Milky Way"},
+            {"q": "Fill in the blank: A ___ is the time it takes Earth to spin once on its axis.", "a": "Day (24 hours)"},
+            {"q": "Which planet is the largest in our solar system? A) Saturn, B) Earth, C) Jupiter", "a": "C) Jupiter"}
+          ]
+        },
+        "grid": {
+          "cats": ["THE SUN", "THE PLANETS", "EARTH & MOON", "STARS & GALAXIES", "SPACE EXPLORATION"],
+          "qs": [
+            [
+              {"q": "What is the Sun made of mostly?", "a": "Hydrogen and helium"},
+              {"q": "About how old is the Sun?", "a": "About 4.6 billion years"},
+              {"q": "What is the surface temperature of the Sun?", "a": "About 10,000°F (5,500°C)"},
+              {"q": "How long does light from the Sun take to reach Earth?", "a": "About 8 minutes"},
+              {"q": "True or False: The Sun produces energy by burning fuel like a campfire.", "a": "False — by nuclear fusion"}
+            ],
+            [
+              {"q": "Which is the smallest planet?", "a": "Mercury"},
+              {"q": "Which planet has the most moons?", "a": "Saturn (or Jupiter — both have many)"},
+              {"q": "Which planet has prominent rings made of ice and rock?", "a": "Saturn"},
+              {"q": "Which planet rotates on its side?", "a": "Uranus"},
+              {"q": "Which planet was reclassified as a dwarf planet in 2006?", "a": "Pluto"}
+            ],
+            [
+              {"q": "How long does it take the Moon to orbit Earth?", "a": "About 27 days"},
+              {"q": "What causes ocean tides?", "a": "The Moon's gravity (and the Sun's)"},
+              {"q": "Why does the Moon have phases?", "a": "We see different amounts of its sunlit side as it orbits Earth"},
+              {"q": "True or False: The Moon makes its own light.", "a": "False — it reflects light from the Sun"},
+              {"q": "What is the tilt of Earth's axis responsible for?", "a": "The seasons"}
+            ],
+            [
+              {"q": "What is a galaxy?", "a": "A huge collection of stars, gas, and dust held together by gravity"},
+              {"q": "What is our galaxy called?", "a": "The Milky Way"},
+              {"q": "What's the closest star to Earth (besides the Sun)?", "a": "Proxima Centauri"},
+              {"q": "What unit measures distance in space?", "a": "Light-year"},
+              {"q": "What happens to a massive star at the end of its life?", "a": "It can explode as a supernova"}
+            ],
+            [
+              {"q": "Who was the first person on the Moon?", "a": "Neil Armstrong (1969)"},
+              {"q": "What rover landed on Mars in 2021?", "a": "Perseverance"},
+              {"q": "What does NASA stand for?", "a": "National Aeronautics and Space Administration"},
+              {"q": "What space telescope launched in 2021?", "a": "James Webb Space Telescope"},
+              {"q": "Which planet has rovers exploring it right now?", "a": "Mars"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "cells",
+      "name": "Lesson 2: Cells",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "ALL LIVING THINGS ARE MADE OF CELLS", "hint": "Lesson 2: Cells"},
+            {"phrase": "PLANT CELLS HAVE CHLOROPLASTS", "hint": "Lesson 2: Cells"},
+            {"phrase": "DNA IS THE BLUEPRINT OF LIFE", "hint": "Lesson 2: Cells"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "A CELL IS THE SMALLEST UNIT OF LIFE THAT CAN PERFORM ALL LIFE FUNCTIONS", "ref": "What Is a Cell"},
+            {"verse": "PLANT CELLS HAVE A CELL WALL AND CHLOROPLASTS BUT ANIMAL CELLS DO NOT", "ref": "Plant vs Animal Cells"},
+            {"verse": "THE NUCLEUS IS THE CONTROL CENTER OF THE CELL", "ref": "Cell Parts"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What is the basic unit of life? A) Atom, B) Cell, C) Molecule", "a": "B) Cell"},
+            {"q": "True or False: Plants are made of cells but animals are not.", "a": "False — both are made of cells"},
+            {"q": "Fill in the blank: The ___ is the control center of the cell.", "a": "Nucleus"},
+            {"q": "Which structure is found in plant cells but NOT animal cells? A) Nucleus, B) Cell wall, C) Cytoplasm", "a": "B) Cell wall"},
+            {"q": "What do chloroplasts do in plant cells?", "a": "They use sunlight to make food (photosynthesis)"},
+            {"q": "True or False: All cells have the same shape and size.", "a": "False — cells have many shapes and sizes"},
+            {"q": "Fill in the blank: ___ is the molecule that carries genetic information.", "a": "DNA"},
+            {"q": "What's the jelly-like substance that fills a cell? A) Cytoplasm, B) Nucleus, C) Mitochondria", "a": "A) Cytoplasm"},
+            {"q": "Which organelle is known as the powerhouse of the cell?", "a": "Mitochondria"},
+            {"q": "True or False: Most cells can only be seen with a microscope.", "a": "True"}
+          ]
+        },
+        "grid": {
+          "cats": ["CELL PARTS", "PLANT vs ANIMAL", "DNA & GENES", "CELL FUNCTIONS", "WHO DISCOVERED"],
+          "qs": [
+            [
+              {"q": "What's the membrane that surrounds the cell?", "a": "Cell membrane"},
+              {"q": "What organelle makes proteins?", "a": "Ribosomes"},
+              {"q": "What organelle stores water and nutrients in plants?", "a": "Vacuole"},
+              {"q": "What's the green pigment in chloroplasts?", "a": "Chlorophyll"},
+              {"q": "What organelle breaks down waste in the cell?", "a": "Lysosome"}
+            ],
+            [
+              {"q": "Name a structure only plant cells have.", "a": "Cell wall (or chloroplasts, or large vacuole)"},
+              {"q": "True or False: Animal cells have a nucleus.", "a": "True"},
+              {"q": "Why do plants need chloroplasts but animals don't?", "a": "Plants make their own food from sunlight; animals eat food"},
+              {"q": "What gives plant cells their rigid shape?", "a": "The cell wall"},
+              {"q": "True or False: Bacteria are made of cells.", "a": "True — they are single-celled organisms"}
+            ],
+            [
+              {"q": "What does DNA stand for?", "a": "Deoxyribonucleic acid"},
+              {"q": "Where is most of a cell's DNA stored?", "a": "In the nucleus"},
+              {"q": "What shape is the DNA molecule?", "a": "A double helix"},
+              {"q": "What are the units of inheritance called?", "a": "Genes"},
+              {"q": "How many chromosomes do humans have?", "a": "46 (23 pairs)"}
+            ],
+            [
+              {"q": "What's the process where one cell becomes two?", "a": "Cell division (mitosis)"},
+              {"q": "What do cells need to live?", "a": "Food, water, oxygen, and a way to get rid of waste"},
+              {"q": "Where does respiration happen in a cell?", "a": "Mitochondria"},
+              {"q": "What's the process plants use to make food?", "a": "Photosynthesis"},
+              {"q": "True or False: All your body's cells are exactly the same.", "a": "False — different cells do different jobs"}
+            ],
+            [
+              {"q": "Who first observed cells using a microscope?", "a": "Robert Hooke (1665)"},
+              {"q": "What was Hooke looking at when he saw cells?", "a": "Cork (bark of a cork oak tree)"},
+              {"q": "Who helped discover the structure of DNA?", "a": "Watson, Crick, and Franklin"},
+              {"q": "What invention let scientists first see cells?", "a": "The microscope"},
+              {"q": "Fill in the blank: The ___ theory states all living things are made of cells.", "a": "Cell theory"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "forces-motion",
+      "name": "Lesson 3: Forces & Motion",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "A FORCE IS A PUSH OR A PULL", "hint": "Lesson 3: Forces & Motion"},
+            {"phrase": "GRAVITY PULLS OBJECTS TOWARD EARTH", "hint": "Lesson 3: Forces & Motion"},
+            {"phrase": "FRICTION SLOWS THINGS DOWN", "hint": "Lesson 3: Forces & Motion"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "A FORCE IS ANY PUSH OR PULL ON AN OBJECT", "ref": "What Is a Force"},
+            {"verse": "AN OBJECT IN MOTION STAYS IN MOTION UNLESS A FORCE ACTS ON IT", "ref": "Newton's First Law"},
+            {"verse": "GRAVITY IS THE FORCE THAT PULLS OBJECTS TOWARD EACH OTHER", "ref": "Gravity"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What is a force? A) A type of energy, B) A push or pull, C) A measurement of speed", "a": "B) A push or pull"},
+            {"q": "True or False: Gravity only exists on Earth.", "a": "False — gravity exists everywhere in the universe"},
+            {"q": "Fill in the blank: ___ is the force that slows things down when they rub together.", "a": "Friction"},
+            {"q": "Who developed the three laws of motion? A) Albert Einstein, B) Isaac Newton, C) Galileo Galilei", "a": "B) Isaac Newton"},
+            {"q": "What unit measures force?", "a": "Newton (N)"},
+            {"q": "True or False: A heavy object always falls faster than a light object.", "a": "False — without air resistance, they fall at the same rate"},
+            {"q": "Fill in the blank: An object in motion stays in motion unless acted on by a ___.", "a": "Force"},
+            {"q": "What does mass measure? A) How fast something moves, B) How much matter is in an object, C) How big it is", "a": "B) How much matter is in an object"},
+            {"q": "True or False: Speed and velocity are the same thing.", "a": "False — velocity also includes direction"},
+            {"q": "What makes a ball thrown in the air come back down?", "a": "Gravity"}
+          ]
+        },
+        "grid": {
+          "cats": ["TYPES OF FORCES", "NEWTON'S LAWS", "MOTION", "GRAVITY", "SIMPLE MACHINES"],
+          "qs": [
+            [
+              {"q": "Force that pulls objects toward Earth?", "a": "Gravity"},
+              {"q": "Force that resists motion when surfaces rub?", "a": "Friction"},
+              {"q": "Force that pushes back when you push on a surface?", "a": "Normal force"},
+              {"q": "Force from stretched or compressed objects?", "a": "Elastic force (or tension)"},
+              {"q": "What invisible force pulls iron to a magnet?", "a": "Magnetic force"}
+            ],
+            [
+              {"q": "Newton's First Law is also called the law of...?", "a": "Inertia"},
+              {"q": "Newton's Second Law: Force equals mass times what?", "a": "Acceleration (F = ma)"},
+              {"q": "Newton's Third Law: For every action there is an equal and opposite...?", "a": "Reaction"},
+              {"q": "What law explains why a rocket can launch?", "a": "Newton's Third Law"},
+              {"q": "What law explains why heavier carts need more force to push?", "a": "Newton's Second Law"}
+            ],
+            [
+              {"q": "What is speed?", "a": "How fast something moves (distance ÷ time)"},
+              {"q": "What is velocity?", "a": "Speed in a specific direction"},
+              {"q": "What is acceleration?", "a": "How quickly velocity changes"},
+              {"q": "What unit is speed often measured in?", "a": "Meters per second (m/s) or miles per hour (mph)"},
+              {"q": "What's the difference between motion and rest?", "a": "Motion = changing position; rest = not moving"}
+            ],
+            [
+              {"q": "Who explained how gravity works?", "a": "Isaac Newton"},
+              {"q": "Why don't we float off Earth?", "a": "Gravity pulls us toward the center of Earth"},
+              {"q": "Which has more gravity: the Sun or Earth?", "a": "The Sun (much stronger)"},
+              {"q": "Why do astronauts appear to float in space?", "a": "They're in free fall around Earth — appearing weightless"},
+              {"q": "True or False: The Moon has gravity too.", "a": "True — about 1/6 of Earth's"}
+            ],
+            [
+              {"q": "A ramp is which simple machine?", "a": "Inclined plane"},
+              {"q": "Two inclined planes joined back-to-back?", "a": "Wedge"},
+              {"q": "Wheel with a rope used to lift things?", "a": "Pulley"},
+              {"q": "A rigid bar that turns around a fixed point?", "a": "Lever"},
+              {"q": "Inclined plane wrapped around a cylinder?", "a": "Screw"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "water-weather",
+      "name": "Lesson 4: Water Cycle & Weather",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "WATER MOVES IN A CYCLE", "hint": "Lesson 4: Water & Weather"},
+            {"phrase": "WEATHER CHANGES EVERY DAY", "hint": "Lesson 4: Water & Weather"},
+            {"phrase": "CLOUDS ARE MADE OF TINY WATER DROPS", "hint": "Lesson 4: Water & Weather"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "THE WATER CYCLE IS HOW WATER MOVES BETWEEN EARTH AND THE ATMOSPHERE", "ref": "Water Cycle"},
+            {"verse": "WATER CHANGES FROM LIQUID TO GAS WHEN IT EVAPORATES", "ref": "States of Water"},
+            {"verse": "CLIMATE IS THE AVERAGE WEATHER OVER A LONG TIME", "ref": "Weather vs Climate"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What process turns liquid water into water vapor? A) Condensation, B) Evaporation, C) Precipitation", "a": "B) Evaporation"},
+            {"q": "True or False: Weather and climate are the same thing.", "a": "False — weather changes daily; climate is a long-term average"},
+            {"q": "Fill in the blank: ___ is when water vapor turns back into liquid water.", "a": "Condensation"},
+            {"q": "Which is NOT a form of precipitation? A) Rain, B) Snow, C) Wind", "a": "C) Wind"},
+            {"q": "What instrument measures temperature?", "a": "Thermometer"},
+            {"q": "True or False: The atmosphere is the layer of gases around Earth.", "a": "True"},
+            {"q": "Fill in the blank: Clouds form when water vapor ___ in the cool air.", "a": "Condenses"},
+            {"q": "Which is the most common gas in Earth's atmosphere? A) Oxygen, B) Carbon dioxide, C) Nitrogen", "a": "C) Nitrogen (about 78%)"},
+            {"q": "What causes wind?", "a": "Differences in air pressure (and temperature)"},
+            {"q": "True or False: A hurricane and a tornado are the same thing.", "a": "False — hurricanes form over oceans and are huge; tornadoes form over land and are smaller"}
+          ]
+        },
+        "grid": {
+          "cats": ["WATER CYCLE", "CLOUDS", "WEATHER TOOLS", "SEVERE WEATHER", "CLIMATE"],
+          "qs": [
+            [
+              {"q": "Water turning into vapor and rising into the air?", "a": "Evaporation"},
+              {"q": "Water vapor cooling and forming clouds?", "a": "Condensation"},
+              {"q": "Water falling from clouds as rain, snow, or hail?", "a": "Precipitation"},
+              {"q": "Water soaking into the ground?", "a": "Infiltration"},
+              {"q": "Water flowing over the land toward rivers and oceans?", "a": "Runoff"}
+            ],
+            [
+              {"q": "Wispy, high clouds made of ice crystals?", "a": "Cirrus"},
+              {"q": "Fluffy, cotton-ball clouds often seen on sunny days?", "a": "Cumulus"},
+              {"q": "Flat, gray layered clouds that often bring drizzle?", "a": "Stratus"},
+              {"q": "Tall storm clouds that bring thunderstorms?", "a": "Cumulonimbus"},
+              {"q": "What are clouds made of?", "a": "Tiny water droplets or ice crystals"}
+            ],
+            [
+              {"q": "Measures temperature?", "a": "Thermometer"},
+              {"q": "Measures air pressure?", "a": "Barometer"},
+              {"q": "Measures wind speed?", "a": "Anemometer"},
+              {"q": "Measures rainfall amount?", "a": "Rain gauge"},
+              {"q": "Shows wind direction?", "a": "Wind vane (or weather vane)"}
+            ],
+            [
+              {"q": "Powerful spinning storm over the ocean?", "a": "Hurricane"},
+              {"q": "Spinning column of air touching the ground?", "a": "Tornado"},
+              {"q": "Long period with little or no rain?", "a": "Drought"},
+              {"q": "Burst of electricity in a storm cloud?", "a": "Lightning"},
+              {"q": "Frozen rain that falls as balls of ice?", "a": "Hail"}
+            ],
+            [
+              {"q": "Difference between weather and climate?", "a": "Weather is short-term; climate is long-term average"},
+              {"q": "Hot, wet climate near the equator?", "a": "Tropical"},
+              {"q": "Cold climate near the poles?", "a": "Polar"},
+              {"q": "What greenhouse gas is most associated with warming the planet?", "a": "Carbon dioxide (CO₂)"},
+              {"q": "What's it called when Earth's climate gradually warms up?", "a": "Global warming (or climate change)"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "ecosystems",
+      "name": "Lesson 5: Ecosystems",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "PLANTS ARE PRODUCERS", "hint": "Lesson 5: Ecosystems"},
+            {"phrase": "ANIMALS ARE CONSUMERS", "hint": "Lesson 5: Ecosystems"},
+            {"phrase": "ENERGY FLOWS THROUGH A FOOD CHAIN", "hint": "Lesson 5: Ecosystems"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "AN ECOSYSTEM IS A COMMUNITY OF LIVING THINGS AND THEIR ENVIRONMENT", "ref": "What Is an Ecosystem"},
+            {"verse": "PRODUCERS MAKE THEIR OWN FOOD AND CONSUMERS EAT OTHER ORGANISMS", "ref": "Producers and Consumers"},
+            {"verse": "DECOMPOSERS BREAK DOWN DEAD MATERIAL AND RETURN NUTRIENTS TO THE SOIL", "ref": "Decomposers"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "What is an ecosystem? A) A type of weather, B) A community of living things and their environment, C) A scientific instrument", "a": "B) A community of living things and their environment"},
+            {"q": "True or False: Plants get their energy from the Sun.", "a": "True"},
+            {"q": "Fill in the blank: An animal that eats only plants is called a ___.", "a": "Herbivore"},
+            {"q": "What do you call an animal that eats only meat? A) Carnivore, B) Herbivore, C) Omnivore", "a": "A) Carnivore"},
+            {"q": "What is the main source of energy for nearly every ecosystem on Earth?", "a": "The Sun"},
+            {"q": "True or False: Decomposers help return nutrients to the soil.", "a": "True"},
+            {"q": "Fill in the blank: A ___ is the role an organism plays in its ecosystem.", "a": "Niche"},
+            {"q": "Which of these is a producer? A) Lion, B) Oak tree, C) Fish", "a": "B) Oak tree"},
+            {"q": "What's the difference between a food chain and a food web?", "a": "A food chain is one path of energy; a food web is many connected chains"},
+            {"q": "True or False: Bacteria and fungi can be decomposers.", "a": "True"}
+          ]
+        },
+        "grid": {
+          "cats": ["LIVING vs NONLIVING", "FOOD CHAIN ROLES", "HABITATS", "ADAPTATIONS", "HUMAN IMPACT"],
+          "qs": [
+            [
+              {"q": "Are rocks living or nonliving?", "a": "Nonliving"},
+              {"q": "Name three things all living things need.", "a": "Food, water, air (or shelter, sunlight)"},
+              {"q": "What's the living part of an ecosystem called?", "a": "Biotic"},
+              {"q": "What's the nonliving part of an ecosystem called?", "a": "Abiotic"},
+              {"q": "Why are decomposers part of the biotic world?", "a": "Bacteria and fungi are living organisms"}
+            ],
+            [
+              {"q": "An organism that makes its own food?", "a": "Producer (autotroph)"},
+              {"q": "An organism that eats other organisms?", "a": "Consumer"},
+              {"q": "Animal that eats only plants?", "a": "Herbivore"},
+              {"q": "Animal that eats only animals?", "a": "Carnivore"},
+              {"q": "Animal that eats both plants and animals?", "a": "Omnivore"}
+            ],
+            [
+              {"q": "Habitat with lots of trees and rain?", "a": "Rainforest"},
+              {"q": "Dry, hot habitat with little water?", "a": "Desert"},
+              {"q": "Cold habitat near the poles with little vegetation?", "a": "Tundra"},
+              {"q": "Grassland with scattered trees, usually warm?", "a": "Savanna"},
+              {"q": "Underwater habitat with coral and many fish?", "a": "Coral reef"}
+            ],
+            [
+              {"q": "How do polar bears stay warm?", "a": "Thick fur and a layer of fat (blubber)"},
+              {"q": "Why do chameleons change color?", "a": "Camouflage or communication"},
+              {"q": "Why do many birds migrate?", "a": "To find food and warmer weather"},
+              {"q": "How do cacti survive in deserts?", "a": "Thick stems that store water, no leaves to lose water"},
+              {"q": "What is hibernation?", "a": "Deep sleep through cold months to conserve energy"}
+            ],
+            [
+              {"q": "What's it called when we cut down too many trees?", "a": "Deforestation"},
+              {"q": "Harmful substances in air, water, or land?", "a": "Pollution"},
+              {"q": "Loss of an entire species forever?", "a": "Extinction"},
+              {"q": "Saving and protecting natural resources?", "a": "Conservation"},
+              {"q": "Using materials again instead of throwing them away?", "a": "Recycling (or reusing)"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "human-body",
+      "name": "Lesson 6: Human Body",
+      "games": {
+        "pf": {
+          "phrases": [
+            {"phrase": "YOUR HEART PUMPS BLOOD THROUGH YOUR BODY", "hint": "Lesson 6: Human Body"},
+            {"phrase": "YOUR LUNGS BRING OXYGEN INTO YOUR BODY", "hint": "Lesson 6: Human Body"},
+            {"phrase": "YOUR BRAIN CONTROLS EVERYTHING YOU DO", "hint": "Lesson 6: Human Body"}
+          ]
+        },
+        "wd": {
+          "verses": [
+            {"verse": "THE HUMAN BODY HAS ELEVEN MAIN SYSTEMS THAT WORK TOGETHER", "ref": "Body Systems"},
+            {"verse": "THE CIRCULATORY SYSTEM CARRIES BLOOD OXYGEN AND NUTRIENTS THROUGHOUT YOUR BODY", "ref": "Circulatory System"},
+            {"verse": "THE SKELETAL SYSTEM GIVES YOUR BODY STRUCTURE AND PROTECTS YOUR ORGANS", "ref": "Skeletal System"}
+          ]
+        },
+        "ttt": {
+          "questions": [
+            {"q": "Which system pumps blood through your body? A) Digestive, B) Circulatory, C) Respiratory", "a": "B) Circulatory"},
+            {"q": "True or False: Your heart is a muscle.", "a": "True"},
+            {"q": "Fill in the blank: The ___ system is responsible for breathing.", "a": "Respiratory"},
+            {"q": "How many bones are in the adult human body? A) 100, B) 206, C) 350", "a": "B) 206"},
+            {"q": "What is the largest organ in the human body?", "a": "Skin"},
+            {"q": "True or False: Babies are born with more bones than adults.", "a": "True — babies have about 270 bones; some fuse as they grow"},
+            {"q": "Fill in the blank: The ___ is the control center of your body.", "a": "Brain"},
+            {"q": "Which system breaks down the food you eat? A) Digestive, B) Nervous, C) Excretory", "a": "A) Digestive"},
+            {"q": "What does the heart do?", "a": "Pumps blood through the body"},
+            {"q": "True or False: Bones are dead — they don't grow.", "a": "False — bones are living tissue and they grow and repair"}
+          ]
+        },
+        "grid": {
+          "cats": ["BODY SYSTEMS", "ORGANS", "BONES & MUSCLES", "THE SENSES", "STAYING HEALTHY"],
+          "qs": [
+            [
+              {"q": "System with bones?", "a": "Skeletal"},
+              {"q": "System with muscles?", "a": "Muscular"},
+              {"q": "System with heart and blood vessels?", "a": "Circulatory (cardiovascular)"},
+              {"q": "System with lungs?", "a": "Respiratory"},
+              {"q": "System with stomach and intestines?", "a": "Digestive"}
+            ],
+            [
+              {"q": "Pumps blood?", "a": "Heart"},
+              {"q": "Takes oxygen from the air?", "a": "Lungs"},
+              {"q": "Filters waste from blood?", "a": "Kidneys"},
+              {"q": "Controls everything you think and do?", "a": "Brain"},
+              {"q": "Makes bile and filters toxins?", "a": "Liver"}
+            ],
+            [
+              {"q": "How many bones are in your skull?", "a": "22"},
+              {"q": "Strongest muscle in your body by force?", "a": "Jaw muscle (masseter)"},
+              {"q": "What connects muscles to bones?", "a": "Tendons"},
+              {"q": "What connects bone to bone?", "a": "Ligaments"},
+              {"q": "Longest bone in the human body?", "a": "Femur (thigh bone)"}
+            ],
+            [
+              {"q": "How many traditional senses are there?", "a": "5 (sight, hearing, smell, taste, touch)"},
+              {"q": "Organ for hearing?", "a": "Ears"},
+              {"q": "What lets you taste flavor?", "a": "Taste buds on your tongue"},
+              {"q": "How do you smell?", "a": "Receptors in your nose detect chemicals in the air"},
+              {"q": "What part of the eye senses light?", "a": "Retina"}
+            ],
+            [
+              {"q": "About how many hours of sleep do kids need?", "a": "9-11 hours"},
+              {"q": "Glasses of water per day (general guide)?", "a": "6-8 glasses"},
+              {"q": "What food group gives you quick energy?", "a": "Carbohydrates"},
+              {"q": "What does regular exercise help build?", "a": "Strong muscles, bones, and heart"},
+              {"q": "What body system fights off germs?", "a": "Immune system"}
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "colors": {
+    "primary":   "#22d3ee",
+    "secondary": "#0891b2",
+    "accent":    "#67e8f9",
+    "textLight": "#ffffff",
+    "textDark":  "#082832"
+  }
+}
