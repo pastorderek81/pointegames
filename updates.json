@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.27",
-    "notes": "📦 Import Content Pack — buy a pack file on livefrenzy.com, click 📦 Import Pack… in any game's Saved Lists, and lessons land across every covered game in one click.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.27/Game.Hub-1.0.27-arm64.dmg",
-    "date": "2026-05-26"
+    "version": "1.0.28",
+    "notes": "⚾ New (beta): Grand Slam Trivia — a live baseball quiz game with an operator + widescreen audience screen. Plus minor fixes.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.28/Game.Hub-1.0.28-arm64.dmg",
+    "date": "2026-07-04"
   }
 }
