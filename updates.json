@@ -1,8 +1,8 @@
 {
   "gamehub": {
-    "version": "1.0.28",
-    "notes": "⚾ New (beta): Grand Slam Trivia — a live baseball quiz game with an operator + widescreen audience screen. Plus minor fixes.",
-    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.28/Game.Hub-1.0.28-arm64.dmg",
+    "version": "1.0.29",
+    "notes": "⚾ Grand Slam Trivia audience screen now fills a widescreen (16:9) projector — field is edge-to-edge, scoreboard overlaps the top, questions below. Removed the white border. Plus minor fixes.",
+    "downloadUrl": "https://github.com/pastorderek81/pointegames/releases/download/gamehub-v1.0.29/Game.Hub-1.0.29-arm64.dmg",
     "date": "2026-07-04"
   }
 }
